@@ -13,24 +13,28 @@ import 'package:path/path.dart';
 class CategoryRepositoryImpl implements CategoryRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
-  late final Database db;
+  
   var store = intMapStoreFactory.store('categories');
 
   
 
-  Future<void> initDatabase() async {
-    final dir = await getApplicationDocumentsDirectory();
+  Future<Database> initDatabase() async {
 
-    await dir.create(recursive: true);
+  final dir = await getApplicationDocumentsDirectory();
+  
+  await dir.create(recursive: true);
+  
+  String path = join(dir.path, dbPath);
+  
+  return await dbFactory.openDatabase(path);
 
-    String path = join(dir.path, dbPath);
-
-    db = await dbFactory.openDatabase(path);
   }
 
   @override
   Future<void> addCategory(Category category) async {
-    await initDatabase();
+
+    final db = await initDatabase();
+
       CategoryModel categoryModel = CategoryModel(
         id: category.id,
         name: category.name,
@@ -42,13 +46,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
   @override
   Future<void> deleteCategory(int id) async {
-    await initDatabase();
+    final db = await initDatabase();
     await store.record(id).delete(db);
   }
 
   @override
   Future<List<Category>> getAllCategories() async {
-    await initDatabase();
+    final db = await initDatabase();
     final result = await store.find(db).then((records) {
       return records.map((record) {
         return CategoryModel.fromJson(record.value);
@@ -60,7 +64,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   
   @override
   Future<void> updateCategory(Category category) async {
-    await initDatabase();
+    final db = await initDatabase();
     CategoryModel categoryModel = CategoryModel(
       id: category.id,
       name: category.name,

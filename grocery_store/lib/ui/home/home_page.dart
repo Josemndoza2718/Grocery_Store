@@ -1,7 +1,12 @@
+// ignore_for_file: must_be_immutable
+
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery_store/domain/entities/category.dart';
+import 'package:grocery_store/ui/add_category_page.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -14,10 +19,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
-  int? selectedIndexGrid = 0;
-  int? pressedIndex = 0;
-
-  
 
   List<String> img = [
     "https://www.motortrend.com/uploads/sites/10/2023/08/2023-audi-rs7-sportback-4wd-5door-hatchback-angular-front.png?w=768&width=768&q=75&format=webp",
@@ -29,8 +30,6 @@ class _HomePageState extends State<HomePage> {
     "https://catalogo.gac-sa.cl/assets/vehiculos/matriz/Salazar/1106/image_principal/image_principal.png",
     "https://deluxerentalcars.ch/wp-content/uploads/2023/08/Ferrari-488-spider-e1722751004360.jpg",
   ];
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -84,15 +83,17 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 10),
             //GridViewButtons
-            Consumer<HomeViewModel>(
-              builder: (context, viewModel, _) {
-                return CategoriesWidget(
-                  pressedIndex: pressedIndex,
-                  selectedIndexGrid: selectedIndexGrid,
-                  listCategories: viewModel.listCategories,
-                );
-              }
-            ),
+            Consumer<HomeViewModel>(builder: (context, viewModel, _) {
+              return CategoriesWidget(
+                pressedIndex: viewModel.pressedIndex,
+                selectedIndexGrid: viewModel.selectedIndexGrid,
+                listCategories: viewModel.listCategories,
+                onTap: viewModel.setPressedIndex,
+                onTapUp: viewModel.setSelectedIndexGrid,
+                onClose: () => viewModel.getCategories(),
+                onDeleteCategory: (index) => viewModel.deleteCategory(viewModel.listCategories[index].id),
+              );
+            }),
             ItemListWidget(
               img: img,
             ),
@@ -265,17 +266,26 @@ class ItemListWidget extends StatelessWidget {
 }
 
 class CategoriesWidget extends StatelessWidget {
-  const CategoriesWidget({
+  CategoriesWidget({
     super.key,
+    this.name,
     required this.pressedIndex,
     required this.selectedIndexGrid,
-    this.name, required this.listCategories,
+    required this.listCategories,
+    required this.onClose,
+    required this.onTap,
+    required this.onTapUp,
+    required this.onDeleteCategory,
   });
 
-  final int? pressedIndex;
-  final int? selectedIndexGrid;
+  int? pressedIndex;
+  int? selectedIndexGrid;
   final List<Category>? listCategories;
   final String? name;
+  final Function() onClose;
+  final Function(int) onTap;
+  final Function(int) onTapUp;
+  final Function(int) onDeleteCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +325,14 @@ class CategoriesWidget extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddCategoryPage(),
+                              ),
+                            ).then((_) {
+                              onClose();
+                            });
                           },
                           icon: const Icon(Icons.add_circle, size: 40),
                         ),
@@ -327,17 +345,58 @@ class CategoriesWidget extends StatelessWidget {
                   );
                 }
                 return GestureDetector(
-                  /* onTap: () {
-                    setState(() {
-                      pressedIndex = index; // Marca el botón como presionado
-                    });
+                  onTap: () {
+                    //pressedIndex = index; // Marca el botón como presionado
+                    onTap(index);
                   },
                   onTapUp: (_) {
-                    setState(() {
-                      pressedIndex = null; // Quita el efecto al soltar
-                      selectedIndexGrid = index; // Selecciona el botón
+                    //pressedIndex = null; // Quita el efecto al soltar
+                    //selectedIndexGrid = index;
+                    onTapUp(index);
+                  },
+                  onDoubleTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddCategoryPage(
+                          category: listCategories![index],
+                        ),
+                      ),
+                    ).then((_) {
+                      onClose();
                     });
-                  }, */
+                  },
+                  onLongPress: () {
+                    HapticFeedback.mediumImpact();
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Delete Category'),
+                          content: const Text(
+                              'Are you sure you want to delete this category?'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                onDeleteCategory(index);
+
+                                /* viewModel
+                                    .deleteCategory(listCategories![index].id); */
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                   child: AnimatedScale(
                     scale: pressedIndex == index ? 0.9 : 1.0, // Escala animada
                     duration: const Duration(milliseconds: 200),
@@ -346,9 +405,8 @@ class CategoriesWidget extends StatelessWidget {
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: selectedIndexGrid == index
-                            ? Colors.blue // Color para el seleccionado
-                            : const Color.fromARGB(115, 184, 184,
-                                184), // Color para el no seleccionado
+                            ? Colors.blue
+                            : const Color.fromARGB(115, 184, 184, 184),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
@@ -357,11 +415,13 @@ class CategoriesWidget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: CircleAvatar(
-                              backgroundImage: NetworkImage(listCategories![index].image),
+                              backgroundImage:
+                                  FileImage(File(listCategories![index].image)),
+                              backgroundColor: Colors.white,
                               radius: 30,
                             ),
                           ),
-                          Text(listCategories![index].name ,
+                          Text(listCategories![index].name,
                               style: const TextStyle(
                                 fontSize: 12,
                               )), // Nombre de la categoría
