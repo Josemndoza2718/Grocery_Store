@@ -6,7 +6,7 @@ class ProductModel extends Product {
     required super.name,
     required super.description,
     required super.price,
-    required super.imageUrl,
+    required super.image,
     required super.category,
     required super.stockQuantity,
   });
@@ -17,7 +17,7 @@ class ProductModel extends Product {
       name: json['name'],
       description: json['description'],
       price: json['price'].toDouble(),
-      imageUrl: json['imageUrl'],
+      image: json['imageUrl'],
       category: json['category'],
       stockQuantity: json['stockQuantity'].toDouble(),
     );
@@ -29,7 +29,7 @@ class ProductModel extends Product {
       'name': name,
       'description': description,
       'price': price,
-      'imageUrl': imageUrl,
+      'imageUrl': image,
       'category': category,
       'stockQuantity': stockQuantity,
     };
@@ -41,7 +41,7 @@ class ProductModel extends Product {
       name: name,
       description: description,
       price: price,
-      imageUrl: imageUrl,
+      image: image,
       category: category,
       stockQuantity: stockQuantity,
     );

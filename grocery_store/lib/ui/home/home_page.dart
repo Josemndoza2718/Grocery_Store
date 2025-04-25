@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/domain/entities/category.dart';
+import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/ui/add_category_page.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:provider/provider.dart';
@@ -20,153 +21,81 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
 
-  List<String> img = [
-    "https://www.motortrend.com/uploads/sites/10/2023/08/2023-audi-rs7-sportback-4wd-5door-hatchback-angular-front.png?w=768&width=768&q=75&format=webp",
-    "https://finder.porsche.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FmodelSeries718.af451930.webp&w=3840&q=75",
-    "https://cdn.motor1.com/images/mgl/vxn8lG/s1/the-run-2024-nissan-skyline-r32.jpg",
-    "https://di-honda-enrollment.s3.amazonaws.com/2021/model-pages/Civic_Type_R/trims/Civic+Type+R.jpg",
-    "https://acnews.blob.core.windows.net/imgnews/large/NAZ_7387335f56554b7c9b9891cf2688a25f.jpg",
-    "https://cdn.motor1.com/images/mgl/koEPEx/s1/subaru-wrx-2024---argentina.jpg",
-    "https://catalogo.gac-sa.cl/assets/vehiculos/matriz/Salazar/1106/image_principal/image_principal.png",
-    "https://deluxerentalcars.ch/wp-content/uploads/2023/08/Ferrari-488-spider-e1722751004360.jpg",
-  ];
+  @override
+  void initState() {
+    context.read<HomeViewModel>().initProductsList();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          spacing: 10,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 10),
-            //Bar-search
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SearchAnchor(
-                viewShape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                isFullScreen: false,
-                builder: (context, controller) {
-                  return SearchBar(
-                    controller: controller,
-                    leading: Icon(Icons.search),
-                    hintText: "Search",
-                    shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10))),
-                    /* constraints: BoxConstraints(
+    return SafeArea(
+      child: Column(
+        spacing: 10,
+        children: [
+          const SizedBox(height: 10),
+          //Bar-search
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SearchAnchor(
+              viewShape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              isFullScreen: false,
+              builder: (context, controller) {
+                return SearchBar(
+                  controller: controller,
+                  leading: const Icon(Icons.search),
+                  hintText: "Search",
+                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10))),
+                  /* constraints: BoxConstraints(
                       minHeight: 60,
                       maxWidth: 330,
                     ), */
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (context, controller) {
+                return List<ListTile>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    title: Text(item),
                     onTap: () {
-                      controller.openView();
-                    },
-                    onChanged: (_) {
-                      controller.openView();
+                      setState(() {
+                        controller.closeView(item);
+                      });
                     },
                   );
-                },
-                suggestionsBuilder: (context, controller) {
-                  return List<ListTile>.generate(5, (int index) {
-                    final String item = 'item $index';
-                    return ListTile(
-                      title: Text(item),
-                      onTap: () {
-                        setState(() {
-                          controller.closeView(item);
-                        });
-                      },
-                    );
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 10),
-            //GridViewButtons
-            Consumer<HomeViewModel>(builder: (context, viewModel, _) {
-              return CategoriesWidget(
-                pressedIndex: viewModel.pressedIndex,
-                selectedIndexGrid: viewModel.selectedIndexGrid,
-                listCategories: viewModel.listCategories,
-                onTap: viewModel.setPressedIndex,
-                onTapUp: viewModel.setSelectedIndexGrid,
-                onClose: () => viewModel.getCategories(),
-                onDeleteCategory: (index) => viewModel.deleteCategory(viewModel.listCategories[index].id),
-              );
-            }),
-            ItemListWidget(
-              img: img,
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        height: 80,
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
-        decoration: BoxDecoration(
-            color: Colors.grey, borderRadius: BorderRadius.circular(40)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            AnimatedButton(
-              icon: Icons.menu,
-              label: "Menu",
-              isSelected: selectedIndex == 0,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 0; // Seleccionar el botón de índice 0
                 });
               },
             ),
-            AnimatedButton(
-              icon: Icons.person,
-              label: "Profile",
-              isSelected: selectedIndex == 1,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 1; // Seleccionar el botón de índice 1
-                });
-                /*  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DashBoardPage(),
-                    )); */
-              },
-            ),
-            AnimatedButton(
-              icon: Icons.card_giftcard,
-              label: "Gifts",
-              isSelected: selectedIndex == 2,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 2; // Seleccionar el botón de índice 2
-                });
-                /* Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PagesViewThree(),
-                    )); */
-              },
-            ),
-            AnimatedButton(
-              icon: Icons.car_repair,
-              label: "Car",
-              isSelected: selectedIndex == 3,
-              onTap: () {
-                setState(() {
-                  selectedIndex = 3; // Seleccionar el botón de índice 3
-                });
-                /*  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PagesViewScreen(),
-                    )); */
-              },
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 10),
+          //GridViewButtons
+          Consumer<HomeViewModel>(builder: (context, viewModel, _) {
+            return CategoriesWidget(
+              pressedIndex: viewModel.pressedIndex,
+              selectedIndexGrid: viewModel.selectedIndexGrid,
+              listCategories: viewModel.listCategories,
+              onTap: viewModel.setPressedIndex,
+              onTapUp: viewModel.setSelectedIndexGrid,
+              onClose: () => viewModel.getCategories(),
+              onDeleteCategory: (index) =>
+                  viewModel.deleteCategory(viewModel.listCategories[index].id),
+            );
+          }),
+          Consumer<HomeViewModel>(builder: (context, addProductViewModel, _) {
+            return ItemListWidget(
+              listProducts: (addProductViewModel.listProducts..sort((a, b) => 
+                  a.name.compareTo(b.name))),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -175,16 +104,10 @@ class _HomePageState extends State<HomePage> {
 class ItemListWidget extends StatelessWidget {
   const ItemListWidget({
     super.key,
-    this.name,
-    this.img,
-    this.quantity,
-    this.price,
+    required this.listProducts, 
   });
 
-  final String? name;
-  final String? quantity;
-  final double? price;
-  final List<String>? img;
+  final List<Product>? listProducts;
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +125,7 @@ class ItemListWidget extends StatelessWidget {
           //mainAxisSpacing: 2,
           //childAspectRatio: 1.18,
         ),
-        itemCount: img?.length,
+        itemCount: listProducts?.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             /* onTap: () {
@@ -228,28 +151,32 @@ class ItemListWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Image.network(
-                      img?[index] ?? '',
-                      height: 80,
-                      width: 150,
-                    ),
+                    child: Image.file(File(listProducts![index].image), 
+                        height: 80,
+                        width: 80,
+                        //fit: BoxFit.cover,
+                        ),
                   ),
-                  const Text(
-                    "Car",
-                    style: TextStyle(fontSize: 12),
+                  Text(
+                    listProducts![index].name,
+                    style: const TextStyle(fontSize: 12),
                   ),
-                  const Text(
-                    "Quantity",
-                    style: TextStyle(fontSize: 12),
+                  Text(
+                    listProducts![index].description,
+                    style: const TextStyle(fontSize: 12),
                   ),
-                  const Row(
+                  Text(
+                    listProducts![index].stockQuantity.toString(),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'price',
-                        style: TextStyle(fontSize: 12),
+                        listProducts![index].price.toString(),
+                        style: const TextStyle(fontSize: 12),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.shopping_cart_outlined,
                         color: Colors.white,
                       ),
@@ -465,46 +392,6 @@ class CategoriesWidget extends StatelessWidget {
             ),
           ), */
         ],
-      ),
-    );
-  }
-}
-
-class AnimatedButton extends StatelessWidget {
-  final IconData icon;
-  final String? label;
-  final VoidCallback? onTap;
-  final bool isSelected;
-
-  const AnimatedButton({
-    Key? key,
-    required this.icon,
-    this.label,
-    this.onTap,
-    required this.isSelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        height: 60,
-        width: isSelected && label != null ? 100 : 60,
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blueGrey.shade700 : Colors.blueGrey,
-          borderRadius: BorderRadius.circular(40),
-        ),
-        child: isSelected && label != null
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Icon(icon, color: Colors.white),
-                  Text(label!, style: const TextStyle(color: Colors.white)),
-                ],
-              )
-            : Icon(icon, color: Colors.white),
       ),
     );
   }

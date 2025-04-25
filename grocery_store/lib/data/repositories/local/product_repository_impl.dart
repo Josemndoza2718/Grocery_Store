@@ -32,7 +32,7 @@ class ProductRepositoryImpl implements ProductRepository {
       name: product.name,
       description: product.description,
       price: product.price,
-      imageUrl: product.imageUrl,
+      image: product.image,
       category: product.category,
       stockQuantity: product.stockQuantity,
     );
@@ -70,7 +70,7 @@ class ProductRepositoryImpl implements ProductRepository {
       name: product.name,
       description: product.description,
       price: product.price,
-      imageUrl: product.imageUrl,
+      image: product.image,
       category: product.category,
       stockQuantity: product.stockQuantity,
     );

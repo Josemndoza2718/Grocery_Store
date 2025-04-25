@@ -1,9 +1,8 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/domain/entities/category.dart';
-import 'package:grocery_store/ui/utils/phone_image.dart';
+import 'package:grocery_store/utils/phone_image.dart';
 import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:image_picker/image_picker.dart';
