@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class AddCategoryPage extends StatefulWidget {
-  AddCategoryPage({super.key, this.category});
+  const AddCategoryPage({super.key, this.category});
 
   final Category? category;
 

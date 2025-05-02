@@ -30,7 +30,9 @@ class MyApp extends StatelessWidget {
                   deleteCategoriesUseCases: DeleteCategoriesUseCases(repository: CategoryRepositoryImpl()),
                   updateCategoriesUseCases: UpdateCategoriesUseCases(repository: CategoryRepositoryImpl()),
                   getCategoriesUseCases: GetCategoriesUseCases(repository: CategoryRepositoryImpl(),), 
-                  getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()) )),
+                  createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()),
+                  getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
+                  )),
                   ChangeNotifierProvider(create: (context) => AddCategoryViewModel(createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()))),
           ChangeNotifierProvider(create: (context) => AddProductViewModel(createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()))),
           ChangeNotifierProvider(

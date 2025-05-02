@@ -8,25 +8,28 @@ import 'package:path/path.dart';
 class ProductRepositoryImpl implements ProductRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
-  late final Database db;
+  //late final Database db;
   var store = intMapStoreFactory.store('products');
 
-  ProductRepositoryImpl() {
+  /* ProductRepositoryImpl() {
     initDatabase();
-  }
+  } */
 
-  Future<void> initDatabase() async {
+  Future<Database> initDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
 
     await dir.create(recursive: true);
 
     String path = join(dir.path, dbPath);
 
-    db = await dbFactory.openDatabase(path);
+    return await dbFactory.openDatabase(path);
   }
 
   @override
   Future<void> addProduct(Product product) async {
+
+    final db =await initDatabase(); 
+
     ProductModel productModel = ProductModel(
       id: product.id,
       name: product.name,
@@ -42,11 +45,13 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<void> deleteProduct(int id) async {
+    final db = await initDatabase();
     await store.record(id).delete(db);
   }
 
   @override
   Future<List<Product>> getAllProducts() async {
+    final db = await initDatabase();
     final result = await store.find(db).then((records) {
       return records.map((record) {
         return ProductModel.fromJson(record.value);
@@ -56,7 +61,8 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<Product?> getProductById(int id) {
+  Future<Product?> getProductById(int id) async {
+    final db = await initDatabase();
     return store.record(id).get(db).then((record) {
       if (record == null) return null;
       return ProductModel.fromJson(record).toEntity();
@@ -64,7 +70,8 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
-  Future<void> updateProduct(Product product) {
+  Future<void> updateProduct(Product product) async {
+    final db = await initDatabase();
     ProductModel productModel = ProductModel(
       id: product.id,
       name: product.name,
@@ -75,6 +82,6 @@ class ProductRepositoryImpl implements ProductRepository {
       stockQuantity: product.stockQuantity,
     );
 
-    return store.record(product.id).put(db, (productModel.toJson()));
+    store.record(product.id).put(db, (productModel.toJson()));
   }
 }

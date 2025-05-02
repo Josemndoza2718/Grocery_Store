@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store/ui/add_product_page.dart';
 import 'package:grocery_store/ui/home/home_page.dart';
 import 'package:grocery_store/ui/view_model/bottom_navigation_bar_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
@@ -16,7 +15,7 @@ class BottomNavigationBarPages extends StatelessWidget {
 
   static final List<Widget> _pages = [
     const HomePage(),
-    AddProductPage(),
+    //AddProductPage(),
   ];
 
   @override
@@ -55,6 +54,7 @@ class BottomNavigationBarPages extends StatelessWidget {
                               onTap: () {
                                viewModel.setSelectedIndex = 0;
                                context.read<HomeViewModel>().getProducts();
+                               context.read<HomeViewModel>().getCategories();
                               },
                             ),
                             AnimatedButton(

@@ -5,6 +5,7 @@ import 'package:grocery_store/domain/use_cases/category/create_categories_use_ca
 import 'package:grocery_store/domain/use_cases/category/delete_categories_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/category/update_categories_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/category/get_categories_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_categories_use_cases%20copy.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -14,8 +15,10 @@ class HomeViewModel extends ChangeNotifier {
     required this.updateCategoriesUseCases,
     required this.getCategoriesUseCases,
     required this.getProductsUseCases,
+    required this.createProductsUseCases
   }){
     getCategories();
+    getProducts();
 }
   //Cagories
   final GetCategoriesUseCases getCategoriesUseCases;
@@ -23,7 +26,9 @@ class HomeViewModel extends ChangeNotifier {
   final DeleteCategoriesUseCases deleteCategoriesUseCases;
   final UpdateCategoriesUseCases updateCategoriesUseCases;
 
+  //Products
   final GetProductsUseCases getProductsUseCases;
+  final CreateProductsUseCases createProductsUseCases;
 
   
 
@@ -60,10 +65,10 @@ class HomeViewModel extends ChangeNotifier {
     listProducts = await getProductsUseCases();
     notifyListeners();
   }
-  Future<void> initProductsList() async {
-    listProducts = await getProductsUseCases();
-    
-  }
+
+  /* Future<void> initProductsList() async {
+    listProducts = await getProductsUseCases();  
+  } */
 
   //Categories
   Future<void> getCategories() async {
