@@ -16,6 +16,7 @@ class CategoriesWidget extends StatelessWidget {
     required this.onTap,
     required this.onTapUp,
     required this.onDeleteCategory,
+    required this.onPressed,
   });
 
   final int? pressedIndex;
@@ -24,6 +25,7 @@ class CategoriesWidget extends StatelessWidget {
   final String? name;
   final Function() onClose;
   final Function(int) onTap;
+  final Function(int) onPressed;
   final Function(int) onTapUp;
   final Function(int) onDeleteCategory;
 
@@ -50,9 +52,46 @@ class CategoriesWidget extends StatelessWidget {
                 crossAxisCount: 1,
                 childAspectRatio: 1.18,
               ),
-              itemCount: listCategories!.length + 1,
+              itemCount: (listCategories?.length ?? 0) + 1 + (listCategories!.length > 1 ? 1 : 0),
               itemBuilder: (context, index) {
-                if (index == listCategories?.length) {
+                int adjustedIndex = index - (listCategories!.length > 1 ? 1 : 0);
+                if (listCategories!.length > 1 && index == 0) {
+                  return GestureDetector(
+                    onTap: () => onPressed(adjustedIndex),
+                    onTapUp: (_) => onTapUp(adjustedIndex),
+                    child: AnimatedScale(
+                      scale: pressedIndex == adjustedIndex
+                          ? 0.9
+                          : 1.0, // Escala animada
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: selectedIndexGrid == adjustedIndex
+                          ? Colors.blue //Colors.green.shade200
+                          : const Color.fromARGB(115, 184, 184, 184),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.category, size: 40),
+                            Text(
+                              "All Items",
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                // Recalcular el índice real de la categoría
+                
+                if (adjustedIndex == listCategories?.length) {
                   return Container(
                     margin: const EdgeInsets.all(10),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -85,21 +124,14 @@ class CategoriesWidget extends StatelessWidget {
                   );
                 }
                 return GestureDetector(
-                  onTap: () {
-                    //pressedIndex = index; // Marca el botón como presionado
-                    onTap(index);
-                  },
-                  onTapUp: (_) {
-                    //pressedIndex = null; // Quita el efecto al soltar
-                    //selectedIndexGrid = index;
-                    onTapUp(index);
-                  },
+                  onTap: () => onTap(adjustedIndex),
+                  onTapUp: (_) => onTapUp(adjustedIndex),
                   onDoubleTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => AddCategoryPage(
-                          category: listCategories![index],
+                          category: listCategories![adjustedIndex],
                         ),
                       ),
                     ).then((_) {
@@ -124,7 +156,7 @@ class CategoriesWidget extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () {
-                                onDeleteCategory(index);
+                                onDeleteCategory(adjustedIndex);
 
                                 /* viewModel
                                     .deleteCategory(listCategories![index].id); */
@@ -138,13 +170,15 @@ class CategoriesWidget extends StatelessWidget {
                     );
                   },
                   child: AnimatedScale(
-                    scale: pressedIndex == index ? 0.9 : 1.0, // Escala animada
+                    scale: pressedIndex == adjustedIndex
+                        ? 0.9
+                        : 1.0, // Escala animada
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     child: Container(
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: selectedIndexGrid == index
+                        color: selectedIndexGrid == adjustedIndex
                             ? Colors.blue
                             : const Color.fromARGB(115, 184, 184, 184),
                         borderRadius: BorderRadius.circular(10),
@@ -155,13 +189,13 @@ class CategoriesWidget extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: CircleAvatar(
-                              backgroundImage:
-                                  FileImage(File(listCategories![index].image)),
+                              backgroundImage: FileImage(
+                                  File(listCategories![adjustedIndex].image)),
                               backgroundColor: Colors.white,
                               radius: 30,
                             ),
                           ),
-                          Text(listCategories![index].name,
+                          Text(listCategories![adjustedIndex].name,
                               style: const TextStyle(
                                 fontSize: 12,
                               )), // Nombre de la categoría

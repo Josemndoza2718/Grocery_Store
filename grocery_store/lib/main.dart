@@ -6,7 +6,9 @@ import 'package:grocery_store/domain/use_cases/category/delete_categories_use_ca
 import 'package:grocery_store/domain/use_cases/category/update_categories_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/category/get_categories_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_categories_use_cases%20copy.dart';
+import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/bottom_navigation_bar_view_model.dart';
@@ -32,6 +34,8 @@ class MyApp extends StatelessWidget {
                   getCategoriesUseCases: GetCategoriesUseCases(repository: CategoryRepositoryImpl(),), 
                   createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()),
                   getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
+                  deleteProductsUseCases: DeleteProductsUseCases(repository: ProductRepositoryImpl()),
+                  updateProductsUseCases: UpdateProductsUseCases(repository: ProductRepositoryImpl()),
                   )),
                   ChangeNotifierProvider(create: (context) => AddCategoryViewModel(createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()))),
           ChangeNotifierProvider(create: (context) => AddProductViewModel(createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()))),

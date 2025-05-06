@@ -17,122 +17,133 @@ class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
 
   TextEditingController searchController = TextEditingController();
-  TextEditingController nameController = TextEditingController();
+  TextEditingController moneyconversionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    /* WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomeViewModel>().initProductsList();
-    }); */
-    //context.read<HomeViewModel>().initProductsList();
+    
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
-        spacing: 10,
-        children: [
-          const SizedBox(height: 10),
-          //Bar-search
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SearchAnchor(
-              viewShape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              isFullScreen: false,
-              builder: (context, controller) {
-                return SearchBar(
-                  controller: controller,
-                  leading: const Icon(Icons.search),
-                  hintText: "Search",
-                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10))),
-                  /* constraints: BoxConstraints(
-                      minHeight: 60,
-                      maxWidth: 330,
-                    ), */
-                  onTap: () {
-                    controller.openView();
+      child: Consumer<HomeViewModel>(
+        builder: (context, viewModel, _) {
+          return Column(
+            spacing: 10,
+            children: [
+              const SizedBox(height: 10),
+              //Bar-search
+              /* Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: SearchAnchor(
+                  viewShape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  isFullScreen: false,
+                  builder: (context, controller) {
+                    return SearchBar(
+                      controller: controller,
+                      leading: const Icon(Icons.search),
+                      hintText: "Search",
+                      shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                      /* constraints: BoxConstraints(
+                          minHeight: 60,
+                          maxWidth: 330,
+                        ), */
+                      onTap: () {
+                        controller.openView();
+                      },
+                      onChanged: (_) {
+                        controller.openView();
+                      },
+                    );
                   },
-                  onChanged: (_) {
-                    controller.openView();
+                  suggestionsBuilder: (context, controller) {
+                    return List<ListTile>.generate(5, (int index) {
+                      final String item = 'item $index';
+                      return ListTile(
+                        title: Text(item),
+                        onTap: () {
+                          setState(() {
+                            controller.closeView(item);
+                          });
+                        },
+                      );
+                    });
                   },
-                );
-              },
-              suggestionsBuilder: (context, controller) {
-                return List<ListTile>.generate(5, (int index) {
-                  final String item = 'item $index';
-                  return ListTile(
-                    title: Text(item),
-                    onTap: () {
-                      setState(() {
-                        controller.closeView(item);
-                      });
-                    },
-                  );
-                });
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Flexible(
-                  child: TextFormField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      hintText: "Name",
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(height: 10), */
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: TextFormField(
+                        controller: moneyconversionController,
+                        decoration: InputDecoration(
+                          hintText: "Money Conversion",
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () {
+                        viewModel.setMoneyConversion(double.tryParse(moneyconversionController.value.text) ?? 0);
+                        moneyconversionController.clear();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.blue,
+                        ),
+                        width: 50,
+                        height: 50,
+                        child: const Icon(Icons.send_rounded), ),
+                    )
+                  ],
                 ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    
+              ),
+              const SizedBox(height: 10),
+              //GridViewButtons
+              CategoriesWidget(
+                  pressedIndex: viewModel.pressedIndex,
+                  selectedIndexGrid: viewModel.selectedIndexGrid,
+                  listCategories: viewModel.listCategories,
+                  onTap: (index) {
+                    viewModel.setPressedIndex(index);
+                    viewModel.setSelectedCategory(viewModel.listCategories[index].name);
+                    viewModel.setIsFilterList(true);
+                    viewModel.getProductsByCategory(viewModel.listCategories[index].name);
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.blue,
-                    ),
-                    width: 50,
-                    height: 50,
-                    child: const Icon(Icons.send_rounded), ),
-                )
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          //GridViewButtons
-          Consumer<HomeViewModel>(builder: (context, viewModel, _) {
-            return CategoriesWidget(
-              pressedIndex: viewModel.pressedIndex,
-              selectedIndexGrid: viewModel.selectedIndexGrid,
-              listCategories: viewModel.listCategories,
-              onTap: viewModel.setPressedIndex,
-              onTapUp: viewModel.setSelectedIndexGrid,
-              onClose: () => viewModel.getCategories(),
-              onDeleteCategory: (index) =>
-                  viewModel.deleteCategory(viewModel.listCategories[index].id),
-            );
-          }),
-          Consumer<HomeViewModel>(builder: (context, addProductViewModel, _) {
-            return ProductsListWidget(
-              listProducts: (addProductViewModel.listProducts
-                //..sort((a, b) => a.name.compareTo(b.name))
+                  onPressed: (index) { 
+                    viewModel.setPressedIndex(index);
+                    viewModel.getProducts();
+                    viewModel.setIsFilterList(false);
+                    },
+                  onTapUp: viewModel.setSelectedIndexGrid,
+                  onClose: () => viewModel.getCategories(),
+                  onDeleteCategory: (index) => viewModel.deleteCategory(viewModel.listCategories[index].id),
                 ),
-              onClose: () => addProductViewModel.getProducts(),
-            );
-          }),
-        ],
+              ProductsListWidget(
+                  listProducts: viewModel.listProducts,
+                  listProductsByCategory: viewModel.listProductsByCategory,
+                  onClose: () => viewModel.getProducts(),
+                  moneyConversion: viewModel.moneyConversion,
+                  category: viewModel.selectedCategory,
+                  isFilterList: viewModel.isFilterList,
+                  onDeleteProduct: (index) => viewModel.deleteProduct(viewModel.listProducts[index].id),
+                ),
+                const SizedBox(height: 100),
+            ],
+          );
+        }
       ),
     );
   }

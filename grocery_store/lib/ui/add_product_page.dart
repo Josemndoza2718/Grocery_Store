@@ -1,17 +1,52 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/utils/phone_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-class AddProductPage extends StatelessWidget {
-  AddProductPage({super.key});
+class AddProductPage extends StatefulWidget {
+  AddProductPage({super.key, this.product});
 
+  final Product? product;
+
+  @override
+  State<AddProductPage> createState() => _AddProductPageState();
+}
+
+class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
+
+  late final TextEditingController nameEditController;
+  late final TextEditingController descriptionEditController;
+  late final TextEditingController priceEditController;
+  late final TextEditingController quantityEditController;
+  late String editCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    //var viewModel = context.read<HomeViewModel>();
+    //viewModel.setSelectedCategory("");
+
+    if (widget.product != null) {
+      var viewModel = context.read<AddProductViewModel>();
+      viewModel.initImage(File(widget.product!.image));
+    }
+
+    nameEditController = TextEditingController(text: widget.product?.name);
+    descriptionEditController = TextEditingController(text: widget.product?.description);
+    priceEditController = TextEditingController(text: widget.product?.price.toString());
+    quantityEditController = TextEditingController(text: widget.product?.stockQuantity.toString());
+    editCategory = widget.product?.category ?? "";
+    //viewModel.setSelectedCategory(widget.product?.category ?? "");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,26 +96,34 @@ class AddProductPage extends StatelessWidget {
                       width: 100,
                     ),
               TextFormField(
-                controller: nameController,
+                controller: widget.product == null
+                    ? nameController
+                    : nameEditController,
                 decoration: const InputDecoration(
                   hintText: 'Enter name',
                 ),
               ),
               TextFormField(
-                controller: descriptionController,
+                controller: widget.product == null
+                    ? descriptionController
+                    : descriptionEditController,
                 decoration: const InputDecoration(
                   hintText: 'Enter description',
                 ),
               ),
               TextFormField(
-                controller: priceController,
+                controller: widget.product == null
+                    ? priceController
+                    : priceEditController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   hintText: 'Enter price',
                 ),
               ),
               TextFormField(
-                controller: quantityController,
+                controller: widget.product == null
+                    ? quantityController
+                    : quantityEditController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   hintText: 'Enter quantity',
@@ -88,9 +131,12 @@ class AddProductPage extends StatelessWidget {
               ),
               Consumer<HomeViewModel>(builder: (context, homeViewModel, _) {
                 return DropdownButtonFormField(
-                  value: homeViewModel.selectedCategory.isEmpty
-                      ? null
-                      : homeViewModel.selectedCategory,
+                  value: widget.product == null
+                      ? homeViewModel.selectedCategory.isEmpty
+                          ? null
+                          : homeViewModel.selectedCategory
+                      : editCategory,
+                  //homeViewModel.selectedCategory,
                   decoration: const InputDecoration(
                     hintText: 'Select category',
                   ),
@@ -110,24 +156,40 @@ class AddProductPage extends StatelessWidget {
               Consumer<HomeViewModel>(builder: (context, homeViewModel, _) {
                 return ElevatedButton(
                   onPressed: () async {
-                    if (nameController.text.isEmpty ||
-                        descriptionController.text.isEmpty ||
-                        priceController.text.isEmpty ||
-                        quantityController.text.isEmpty) {
-                      return;
-                    } else {
-                      await viewModel.createProduct(
-                        name: nameController.text,
-                        description: descriptionController.text,
-                        price: double.parse(priceController.text),
-                        stockQuantity: double.parse(quantityController.text),
-                        category: homeViewModel.selectedCategory,
-                      ).then((_) {
+                    if (widget.product != null) {
+                      await homeViewModel.updateProduct(
+                        Product(
+                              id: widget.product!.id,
+                              name: nameEditController.text,
+                              description: descriptionEditController.text,
+                              price: double.parse(priceEditController.text),
+                              image: viewModel.galleryImage?.path ?? widget.product!.image,
+                              category: editCategory,
+                              stockQuantity: double.parse(quantityEditController.text)))
+                          .then((_) {
                         {
-                          //context.read<HomeViewModel>().initProductsList();
                           Navigator.pop(context);
                         }
                       });
+                    } else {
+                      if (nameController.text.isEmpty ||
+                          descriptionController.text.isEmpty ||
+                          priceController.text.isEmpty ||
+                          quantityController.text.isEmpty) {
+                        return;
+                      } else {
+                        await viewModel.createProduct(
+                          name: nameController.text,
+                          description: descriptionController.text,
+                          price: double.parse(priceController.text),
+                          stockQuantity: double.parse(quantityController.text),
+                          category: homeViewModel.selectedCategory,
+                        ).then((_) {
+                          {
+                            Navigator.pop(context);
+                          }
+                        });
+                      }
                     }
 
                     print("category: ${homeViewModel.selectedCategory}");
