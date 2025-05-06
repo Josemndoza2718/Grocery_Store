@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
@@ -18,11 +19,20 @@ class _HomePageState extends State<HomePage> {
 
   TextEditingController searchController = TextEditingController();
   TextEditingController moneyconversionController = TextEditingController();
+  double money = 0;
 
   @override
   void initState() {
     super.initState();
-    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initMoney();
+    });
+
+  }
+
+  void initMoney() async {
+    var viewModel = context.read<HomeViewModel>();
+    viewModel.moneyConversion = await Prefs.getMoneyConversion();
   }
 
   @override
@@ -76,37 +86,46 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 10), */
+              
+              //Money Conversion
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: TextFormField(
-                        controller: moneyconversionController,
-                        decoration: InputDecoration(
-                          hintText: "Money Conversion",
-                          filled: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    Text("Tasa en uso: ${viewModel.moneyConversion}"),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: TextFormField(
+                            controller: moneyconversionController,
+                            decoration: InputDecoration(
+                              hintText: "Money Conversion",
+                              filled: true,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        GestureDetector(
+                          onTap: () {
+                            viewModel.setMoneyConversion(double.tryParse(moneyconversionController.value.text) ?? 0);
+                            Prefs.setMoneyConversion(double.parse(moneyconversionController.text));
+                            moneyconversionController.clear();
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.blue,
+                            ),
+                            width: 50,
+                            height: 50,
+                            child: const Icon(Icons.send_rounded), ),
+                        )
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        viewModel.setMoneyConversion(double.tryParse(moneyconversionController.value.text) ?? 0);
-                        moneyconversionController.clear();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.blue,
-                        ),
-                        width: 50,
-                        height: 50,
-                        child: const Icon(Icons.send_rounded), ),
-                    )
                   ],
                 ),
               ),
