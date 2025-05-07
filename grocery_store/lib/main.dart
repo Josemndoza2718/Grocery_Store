@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store/data/repositories/local/category_repository_impl.dart';
-import 'package:grocery_store/data/repositories/local/product_repository_impl.dart';
-import 'package:grocery_store/domain/use_cases/category/create_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/category/delete_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/category/update_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/category/get_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/get_categories_use_cases%20copy.dart';
-import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/core/data/repositories/local/category_repository_impl.dart';
+import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
+import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/category/get_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
-import 'package:grocery_store/ui/view_model/bottom_navigation_bar_view_model.dart';
+import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
-import 'package:grocery_store/widgets/bottom_navigation_bar.dart';
+import 'package:grocery_store/ui/origin/main_page.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
@@ -40,11 +40,11 @@ class MyApp extends StatelessWidget {
                   ChangeNotifierProvider(create: (context) => AddCategoryViewModel(createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()))),
           ChangeNotifierProvider(create: (context) => AddProductViewModel(createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()))),
           ChangeNotifierProvider(
-              create: (context) => BottomNavigationBarViewModel()),
+              create: (context) => MainPageViewModel()),
         ],
         child: const MaterialApp(
             title: 'Material App',
             debugShowCheckedModeBanner: false,
-            home: BottomNavigationBarPages(selectedIndex: 0,)));
+            home: MainPage(selectedIndex: 0,)));
   }
 }

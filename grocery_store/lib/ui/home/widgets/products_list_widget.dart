@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:grocery_store/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/add_product_page.dart';
 
 class ProductsListWidget extends StatelessWidget {
@@ -31,7 +32,7 @@ class ProductsListWidget extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 10),
         //padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-            color: const Color.fromARGB(59, 184, 184, 184),
+            color: AppColors.lightwhite,
             borderRadius: BorderRadius.circular(10)),
         child: GridView.builder(
           scrollDirection: Axis.vertical,

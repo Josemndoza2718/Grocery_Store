@@ -1,4 +1,4 @@
-import 'package:grocery_store/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/entities/product.dart';
 
 class ProductModel extends Product {
   ProductModel({

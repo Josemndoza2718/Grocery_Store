@@ -1,6 +1,6 @@
 
 
-import 'package:grocery_store/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
 
 abstract class CategoryRepository {
   Future<void> addCategory(Category category);

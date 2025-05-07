@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:grocery_store/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/ui/add_category_page.dart';
 
-class CategoriesWidget extends StatelessWidget {
-  const CategoriesWidget({
+class CategoriesWidget extends StatefulWidget {
+   CategoriesWidget({
     super.key,
     this.name,
     required this.pressedIndex,
@@ -17,17 +17,56 @@ class CategoriesWidget extends StatelessWidget {
     required this.onTapUp,
     required this.onDeleteCategory,
     required this.onPressed,
+    this.selectColor = Colors.blue,
+    this.unSelectColor = Colors.grey,
   });
 
   final int? pressedIndex;
   final int? selectedIndexGrid;
   final List<Category>? listCategories;
   final String? name;
+  final Color? selectColor;
+  final Color? unSelectColor;
   final Function() onClose;
   final Function(int) onTap;
   final Function(int) onPressed;
   final Function(int) onTapUp;
   final Function(int) onDeleteCategory;
+
+  @override
+  State<CategoriesWidget> createState() => _CategoriesWidgetState();
+}
+
+class _CategoriesWidgetState extends State<CategoriesWidget> {
+  Color? dominantColor;
+
+  Brightness? brightness;
+
+  bool isDark = false;
+
+  Future<Color> _generateColorScheme(String path) async {
+    final imageProvider = FileImage(File(path));
+
+    final colorScheme = await ColorScheme.fromImageProvider(
+      provider: imageProvider,
+      brightness: Brightness.light,
+    );
+
+    return dominantColor = colorScheme.primary;
+  }
+
+  Future<Brightness> _getOpacityColor(String path) async {
+    final imageProvider = FileImage(File(path));
+
+    final colorScheme = await ColorScheme.fromImageProvider(
+      provider: imageProvider,
+      brightness: Brightness.light,
+    );
+
+    final Color primary = colorScheme.primary;
+
+    return brightness = ThemeData.estimateBrightnessForColor(primary);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +91,15 @@ class CategoriesWidget extends StatelessWidget {
                 crossAxisCount: 1,
                 childAspectRatio: 1.18,
               ),
-              itemCount: (listCategories?.length ?? 0) + 1 + (listCategories!.length > 1 ? 1 : 0),
+              itemCount: (widget.listCategories?.length ?? 0) + 1 + (widget.listCategories!.length > 1 ? 1 : 0),
               itemBuilder: (context, index) {
-                int adjustedIndex = index - (listCategories!.length > 1 ? 1 : 0);
-                if (listCategories!.length > 1 && index == 0) {
+                int adjustedIndex = index - (widget.listCategories!.length > 1 ? 1 : 0);
+                if (widget.listCategories!.length > 1 && index == 0) {
                   return GestureDetector(
-                    onTap: () => onPressed(adjustedIndex),
-                    onTapUp: (_) => onTapUp(adjustedIndex),
+                    onTap: () => widget.onPressed(adjustedIndex),
+                    onTapUp: (_) => widget.onTapUp(adjustedIndex),
                     child: AnimatedScale(
-                      scale: pressedIndex == adjustedIndex
+                      scale: widget.pressedIndex == adjustedIndex
                           ? 0.9
                           : 1.0, // Escala animada
                       duration: const Duration(milliseconds: 200),
@@ -69,18 +108,22 @@ class CategoriesWidget extends StatelessWidget {
                         margin: const EdgeInsets.all(10),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: selectedIndexGrid == adjustedIndex
-                          ? Colors.blue //Colors.green.shade200
-                          : const Color.fromARGB(115, 184, 184, 184),
+                          color: widget.selectedIndexGrid == adjustedIndex
+                              ? widget.selectColor //Colors.green.shade200
+                              : widget.unSelectColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.category, size: 40),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(Icons.category, size: 40),
+                            ),
                             Text(
                               "All Items",
-                              style: TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w800),
                             ),
                           ],
                         ),
@@ -90,13 +133,13 @@ class CategoriesWidget extends StatelessWidget {
                 }
 
                 // Recalcular el índice real de la categoría
-                
-                if (adjustedIndex == listCategories?.length) {
+
+                if (adjustedIndex == widget.listCategories?.length) {
                   return Container(
                     margin: const EdgeInsets.all(10),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(115, 184, 184, 184),
+                      color: Colors.grey,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -110,32 +153,37 @@ class CategoriesWidget extends StatelessWidget {
                                 builder: (context) => const AddCategoryPage(),
                               ),
                             ).then((_) {
-                              onClose();
+                              widget.onClose();
                             });
                           },
                           icon: const Icon(Icons.add_circle, size: 40),
                         ),
                         const Text(
                           "Add Item",
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w800),
                         ),
                       ],
                     ),
                   );
                 }
                 return GestureDetector(
-                  onTap: () => onTap(adjustedIndex),
-                  onTapUp: (_) => onTapUp(adjustedIndex),
+                  onTap: () {
+                    _generateColorScheme(widget.listCategories![adjustedIndex].image);
+                    _getOpacityColor(widget.listCategories![adjustedIndex ].image);
+                    widget.onTap(adjustedIndex);
+                  },
+                  onTapUp: (_) => widget.onTapUp(adjustedIndex),
                   onDoubleTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => AddCategoryPage(
-                          category: listCategories![adjustedIndex],
+                          category: widget.listCategories![adjustedIndex],
                         ),
                       ),
                     ).then((_) {
-                      onClose();
+                      widget.onClose();
                     });
                   },
                   onLongPress: () {
@@ -156,7 +204,7 @@ class CategoriesWidget extends StatelessWidget {
                             ),
                             TextButton(
                               onPressed: () {
-                                onDeleteCategory(adjustedIndex);
+                                widget.onDeleteCategory(adjustedIndex);
 
                                 /* viewModel
                                     .deleteCategory(listCategories![index].id); */
@@ -170,7 +218,7 @@ class CategoriesWidget extends StatelessWidget {
                     );
                   },
                   child: AnimatedScale(
-                    scale: pressedIndex == adjustedIndex
+                    scale: widget.pressedIndex == adjustedIndex
                         ? 0.9
                         : 1.0, // Escala animada
                     duration: const Duration(milliseconds: 200),
@@ -178,9 +226,9 @@ class CategoriesWidget extends StatelessWidget {
                     child: Container(
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: selectedIndexGrid == adjustedIndex
-                            ? Colors.blue
-                            : const Color.fromARGB(115, 184, 184, 184),
+                        color: widget.selectedIndexGrid == adjustedIndex
+                            ? dominantColor
+                            : widget.unSelectColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
@@ -190,14 +238,17 @@ class CategoriesWidget extends StatelessWidget {
                             padding: const EdgeInsets.all(8.0),
                             child: CircleAvatar(
                               backgroundImage: FileImage(
-                                  File(listCategories![adjustedIndex].image)),
+                                  File(widget.listCategories![adjustedIndex].image)),
                               backgroundColor: Colors.white,
                               radius: 30,
                             ),
                           ),
-                          Text(listCategories![adjustedIndex].name,
-                              style: const TextStyle(
+                          Text(widget.listCategories![adjustedIndex].name,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
                                 fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                //color: Colors.white,
                               )), // Nombre de la categoría
                         ],
                       ),
@@ -207,37 +258,6 @@ class CategoriesWidget extends StatelessWidget {
               },
             ),
           ),
-          /* AnimatedScale(
-            scale: 1.0, // Escala animada
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            child: Container(
-              margin: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(
-                    115, 184, 184, 184), // Color para el no seleccionado
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.add_circle,
-                          size: 40,
-                        )),
-                  ),
-                  const Text('add category',
-                      style: TextStyle(
-                        fontSize: 12,
-                      )),
-                ],
-              ),
-            ),
-          ), */
         ],
       ),
     );

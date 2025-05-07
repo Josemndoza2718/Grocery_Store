@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/domain/entities/category.dart';
-import 'package:grocery_store/domain/use_cases/category/create_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 
 class AddCategoryViewModel extends ChangeNotifier {
   AddCategoryViewModel({

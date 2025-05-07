@@ -3,9 +3,9 @@
 //import 'package:flutter/src/foundation/annotations.dart';
 
 
-import 'package:grocery_store/data/models/category_model.dart';
-import 'package:grocery_store/domain/entities/category.dart';
-import 'package:grocery_store/domain/repositories/local/category_repository.dart';
+import 'package:grocery_store/core/data/models/category_model.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/repositories/local/category_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart';

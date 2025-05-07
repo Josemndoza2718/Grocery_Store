@@ -1,4 +1,4 @@
-import 'package:grocery_store/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
 
 class CategoryModel extends Category {
   CategoryModel({

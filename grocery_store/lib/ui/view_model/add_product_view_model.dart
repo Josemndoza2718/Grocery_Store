@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/domain/entities/product.dart';
-import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 
 class AddProductViewModel extends ChangeNotifier {
   AddProductViewModel({

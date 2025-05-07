@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store/domain/entities/category.dart';
-import 'package:grocery_store/domain/entities/product.dart';
-import 'package:grocery_store/domain/use_cases/category/create_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/category/delete_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/category/update_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/category/get_categories_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/get_categories_use_cases%20copy.dart';
-import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/category/get_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel(

@@ -1,4 +1,4 @@
-import 'package:grocery_store/data/repositories/local/category_repository_impl.dart';
+import 'package:grocery_store/core/data/repositories/local/category_repository_impl.dart';
 
 class DeleteCategoriesUseCases {
   const DeleteCategoriesUseCases({required this.repository});
