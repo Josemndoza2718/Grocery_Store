@@ -2,7 +2,6 @@
 
 //import 'package:flutter/src/foundation/annotations.dart';
 
-
 import 'package:grocery_store/core/data/models/category_model.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/domain/repositories/local/category_repository.dart';
@@ -13,35 +12,30 @@ import 'package:path/path.dart';
 class CategoryRepositoryImpl implements CategoryRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
-  
+
   var store = intMapStoreFactory.store('categories');
 
-  
-
   Future<Database> initDatabase() async {
+    final dir = await getApplicationDocumentsDirectory();
 
-  final dir = await getApplicationDocumentsDirectory();
-  
-  await dir.create(recursive: true);
-  
-  String path = join(dir.path, dbPath);
-  
-  return await dbFactory.openDatabase(path);
+    await dir.create(recursive: true);
 
+    String path = join(dir.path, dbPath);
+
+    return await dbFactory.openDatabase(path);
   }
 
   @override
   Future<void> addCategory(Category category) async {
-
     final db = await initDatabase();
 
-      CategoryModel categoryModel = CategoryModel(
-        id: category.id,
-        name: category.name,
-        image: category.image,
-      );
-  
-      await store.record(category.id).add(db, (categoryModel.toJson()));
+    CategoryModel categoryModel = CategoryModel(
+      id: category.id,
+      name: category.name,
+      image: category.image,
+    );
+
+    await store.record(category.id).add(db, (categoryModel.toJson()));
   }
 
   @override
@@ -58,10 +52,15 @@ class CategoryRepositoryImpl implements CategoryRepository {
         return CategoryModel.fromJson(record.value);
       }).toList();
     });
-    return result.map<Category>((e) => Category(id: e.id, name: e.name, image: e.image)).toList();
-   
+    return result
+        .map<Category>((e) => Category(
+              id: e.id,
+              name: e.name,
+              image: e.image,
+            ))
+        .toList();
   }
-  
+
   @override
   Future<void> updateCategory(Category category) async {
     final db = await initDatabase();
@@ -73,11 +72,4 @@ class CategoryRepositoryImpl implements CategoryRepository {
 
     store.record(category.id).put(db, categoryModel.toJson());
   }
-
-
-  
-  }
-
-
- 
-
+}

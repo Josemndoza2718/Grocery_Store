@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
@@ -11,16 +12,16 @@ import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_c
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  HomeViewModel(
-      {required this.createCategoriesUseCases,
-      required this.deleteCategoriesUseCases,
-      required this.updateCategoriesUseCases,
-      required this.getCategoriesUseCases,
-      required this.getProductsUseCases,
-      required this.createProductsUseCases,
-      required this.deleteProductsUseCases,
-      required this.updateProductsUseCases,
-      }) {
+  HomeViewModel({
+    required this.createCategoriesUseCases,
+    required this.deleteCategoriesUseCases,
+    required this.updateCategoriesUseCases,
+    required this.getCategoriesUseCases,
+    required this.getProductsUseCases,
+    required this.createProductsUseCases,
+    required this.deleteProductsUseCases,
+    required this.updateProductsUseCases,
+  }) {
     getCategories();
     getProducts();
   }
@@ -43,8 +44,12 @@ class HomeViewModel extends ChangeNotifier {
   int _selectedIndexGrid = -1;
   int _pressedIndex = -1;
   double _moneyConversion = 0;
+  //Color _getColorByImage = Colors.transparent;
+  /* Color? _imageColor;
+  bool _isDark = false; */
 
   String _selectedCategory = '';
+  int _selectedCategoryById = 0;
 
   bool _isFilterList = false;
 
@@ -52,12 +57,15 @@ class HomeViewModel extends ChangeNotifier {
   int get pressedIndex => _pressedIndex;
   int get selectedIndexGrid => _selectedIndexGrid;
   String get selectedCategory => _selectedCategory;
+  int get selectedCategoryById => _selectedCategoryById;
   bool get isFilterList => _isFilterList;
 
   set moneyConversion(double value) {
     _moneyConversion = value;
     notifyListeners();
   }
+
+
 
   void setIsFilterList(bool value) {
     _isFilterList = value;
@@ -83,6 +91,12 @@ class HomeViewModel extends ChangeNotifier {
     _selectedCategory = category;
     notifyListeners();
   }
+
+   void setselectedCategoryById(int categoryId) {
+    _selectedCategoryById = categoryId;
+    notifyListeners();
+  }
+
 
   //Products
   Future<void> getProducts() async {
@@ -127,4 +141,25 @@ class HomeViewModel extends ChangeNotifier {
     await updateCategoriesUseCases.updateCategory(category);
     getCategories();
   }
+
+  
+/*   //Categories Widget
+  Future<void> generateColorScheme(String path) async {
+    final imageProvider = FileImage(File(path));
+
+    final colorScheme = await ColorScheme.fromImageProvider(
+      provider: imageProvider,
+      brightness: Brightness.light,
+    );
+
+    final Color primary = colorScheme.primary;
+
+    // Determinar si el color es oscuro
+    _isDark = ThemeData.estimateBrightnessForColor(primary) == Brightness.dark;
+
+    // Si es oscuro, aplicamos opacidad (por ejemplo, 70%)
+    _imageColor = isDark ? primary.withAlpha((0.7 * 255).toInt()) : primary;
+
+    notifyListeners();
+  } */
 }

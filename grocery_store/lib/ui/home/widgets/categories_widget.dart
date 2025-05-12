@@ -6,7 +6,7 @@ import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/ui/add_category_page.dart';
 
 class CategoriesWidget extends StatefulWidget {
-   CategoriesWidget({
+  CategoriesWidget({
     super.key,
     this.name,
     required this.pressedIndex,
@@ -39,9 +39,6 @@ class CategoriesWidget extends StatefulWidget {
 
 class _CategoriesWidgetState extends State<CategoriesWidget> {
   Color? dominantColor;
-
-  Brightness? brightness;
-
   bool isDark = false;
 
   Future<Color> _generateColorScheme(String path) async {
@@ -52,20 +49,13 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
       brightness: Brightness.light,
     );
 
-    return dominantColor = colorScheme.primary;
-  }
-
-  Future<Brightness> _getOpacityColor(String path) async {
-    final imageProvider = FileImage(File(path));
-
-    final colorScheme = await ColorScheme.fromImageProvider(
-      provider: imageProvider,
-      brightness: Brightness.light,
-    );
-
     final Color primary = colorScheme.primary;
 
-    return brightness = ThemeData.estimateBrightnessForColor(primary);
+    // Determinar si el color es oscuro
+    final isDark =
+        ThemeData.estimateBrightnessForColor(primary) == Brightness.dark;
+
+    return isDark ? primary.withAlpha((0.7 * 255).toInt()) : primary;
   }
 
   @override
@@ -91,15 +81,20 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                 crossAxisCount: 1,
                 childAspectRatio: 1.18,
               ),
-              itemCount: (widget.listCategories?.length ?? 0) + 1 + (widget.listCategories!.length > 1 ? 1 : 0),
+              itemCount: (widget.listCategories?.length ?? 0) +
+                  1 +
+                  (widget.listCategories!.length > 1 ? 1 : 0),
               itemBuilder: (context, index) {
-                int adjustedIndex = index - (widget.listCategories!.length > 1 ? 1 : 0);
-                if (widget.listCategories!.length > 1 && index == 0) {
+                bool hasAllItemsButton = widget.listCategories!.length > 1;
+
+                final int realIndex = hasAllItemsButton ? index - 1 : index;
+
+                if (hasAllItemsButton && index == 0) {
                   return GestureDetector(
-                    onTap: () => widget.onPressed(adjustedIndex),
-                    onTapUp: (_) => widget.onTapUp(adjustedIndex),
+                    onTap: () => widget.onPressed(realIndex),
+                    onTapUp: (_) => widget.onTapUp(realIndex),
                     child: AnimatedScale(
-                      scale: widget.pressedIndex == adjustedIndex
+                      scale: widget.pressedIndex == realIndex
                           ? 0.9
                           : 1.0, // Escala animada
                       duration: const Duration(milliseconds: 200),
@@ -108,7 +103,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                         margin: const EdgeInsets.all(10),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: widget.selectedIndexGrid == adjustedIndex
+                          color: widget.selectedIndexGrid == realIndex
                               ? widget.selectColor //Colors.green.shade200
                               : widget.unSelectColor,
                           borderRadius: BorderRadius.circular(10),
@@ -123,18 +118,14 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                             Text(
                               "All Items",
                               style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w800),
+                                  fontSize: 12, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                       ),
                     ),
                   );
-                }
-
-                // Recalcular el índice real de la categoría
-
-                if (adjustedIndex == widget.listCategories?.length) {
+                } else if (realIndex == widget.listCategories!.length) {
                   return Container(
                     margin: const EdgeInsets.all(10),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -166,95 +157,103 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                       ],
                     ),
                   );
-                }
-                return GestureDetector(
-                  onTap: () {
-                    _generateColorScheme(widget.listCategories![adjustedIndex].image);
-                    _getOpacityColor(widget.listCategories![adjustedIndex ].image);
-                    widget.onTap(adjustedIndex);
-                  },
-                  onTapUp: (_) => widget.onTapUp(adjustedIndex),
-                  onDoubleTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddCategoryPage(
-                          category: widget.listCategories![adjustedIndex],
+                } else {
+                  return GestureDetector(
+                    onTap: () async {
+                      if (widget.selectedIndexGrid != realIndex) {
+                        final color = await _generateColorScheme(
+                            widget.listCategories![realIndex].image);
+
+                        setState(() {
+                          dominantColor = color;
+                        });
+                      }
+
+                      widget.onTap(realIndex);
+                    },
+                    onTapUp: (_) => widget.onTapUp(realIndex),
+                    onDoubleTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddCategoryPage(
+                            category: widget.listCategories![realIndex],
+                          ),
+                        ),
+                      ).then((_) {
+                        widget.onClose();
+                      });
+                    },
+                    onLongPress: () {
+                      HapticFeedback.mediumImpact();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Delete Category'),
+                            content: const Text(
+                                'Are you sure you want to delete this category?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  widget.onDeleteCategory(realIndex);
+
+                                  /* viewModel
+                                    .deleteCategory(listCategories![index].id); */
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: AnimatedScale(
+                      scale: widget.pressedIndex == realIndex
+                          ? 0.9
+                          : 1.0, // Escala animada
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: widget.selectedIndexGrid == realIndex
+                              ? dominantColor
+                              : widget.unSelectColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircleAvatar(
+                                backgroundImage: FileImage(File(
+                                    widget.listCategories![realIndex].image)),
+                                backgroundColor: Colors.white,
+                                radius: 30,
+                              ),
+                            ),
+                            Text(widget.listCategories![realIndex].name,
+                                style: const TextStyle(
+                                  color: Colors
+                                      .black, //isDark ? Colors.white : Colors.black,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                          ],
                         ),
                       ),
-                    ).then((_) {
-                      widget.onClose();
-                    });
-                  },
-                  onLongPress: () {
-                    HapticFeedback.mediumImpact();
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Delete Category'),
-                          content: const Text(
-                              'Are you sure you want to delete this category?'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                widget.onDeleteCategory(adjustedIndex);
-
-                                /* viewModel
-                                    .deleteCategory(listCategories![index].id); */
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Delete'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: AnimatedScale(
-                    scale: widget.pressedIndex == adjustedIndex
-                        ? 0.9
-                        : 1.0, // Escala animada
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    child: Container(
-                      margin: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: widget.selectedIndexGrid == adjustedIndex
-                            ? dominantColor
-                            : widget.unSelectColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundImage: FileImage(
-                                  File(widget.listCategories![adjustedIndex].image)),
-                              backgroundColor: Colors.white,
-                              radius: 30,
-                            ),
-                          ),
-                          Text(widget.listCategories![adjustedIndex].name,
-                              style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                //color: Colors.white,
-                              )), // Nombre de la categoría
-                        ],
-                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               },
             ),
           ),

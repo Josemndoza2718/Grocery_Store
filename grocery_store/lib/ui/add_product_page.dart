@@ -13,6 +13,7 @@ class AddProductPage extends StatefulWidget {
 
   final Product? product;
 
+
   @override
   State<AddProductPage> createState() => _AddProductPageState();
 }
@@ -32,8 +33,8 @@ class _AddProductPageState extends State<AddProductPage> {
   @override
   void initState() {
     super.initState();
-    //var viewModel = context.read<HomeViewModel>();
-    //viewModel.setSelectedCategory("");
+    // var viewModel = context.read<HomeViewModel>();
+    // viewModel.setSelectedCategory("");
 
     if (widget.product != null) {
       var viewModel = context.read<AddProductViewModel>();
@@ -132,17 +133,16 @@ class _AddProductPageState extends State<AddProductPage> {
               Consumer<HomeViewModel>(builder: (context, homeViewModel, _) {
                 return DropdownButtonFormField(
                   value: widget.product == null
-                      ? homeViewModel.selectedCategory.isEmpty
-                          ? null
-                          : homeViewModel.selectedCategory
-                      : editCategory,
+                      ? null
+                      : widget.product?.categoryId.toString(),
+                      //homeViewModel.listCategories[].id.toString(),
                   //homeViewModel.selectedCategory,
                   decoration: const InputDecoration(
                     hintText: 'Select category',
                   ),
                   items: homeViewModel.listCategories.map((category) {
                     return DropdownMenuItem<String>(
-                      value: category.name,
+                      value: category.id.toString(),
                       child: Text(category.name),
                     );
                   }).toList(),
@@ -164,6 +164,7 @@ class _AddProductPageState extends State<AddProductPage> {
                               description: descriptionEditController.text,
                               price: double.parse(priceEditController.text),
                               image: viewModel.galleryImage?.path ?? widget.product!.image,
+                              categoryId: widget.product!.categoryId,
                               category: editCategory,
                               stockQuantity: double.parse(quantityEditController.text)))
                           .then((_) {
@@ -187,6 +188,7 @@ class _AddProductPageState extends State<AddProductPage> {
                         ).then((_) {
                           {
                             Navigator.pop(context);
+                            homeViewModel.setSelectedCategory("");
                           }
                         });
                       }

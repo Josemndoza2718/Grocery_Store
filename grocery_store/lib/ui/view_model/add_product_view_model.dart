@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:math';
 
+
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 
@@ -12,8 +14,9 @@ class AddProductViewModel extends ChangeNotifier {
 
   final CreateProductsUseCases createProductsUseCases;
   
-
   
+
+  late int id;
 
   File? galleryImage;
 
@@ -26,6 +29,18 @@ class AddProductViewModel extends ChangeNotifier {
     galleryImage = image;
   }
 
+  Future<void> getCategory(List<Category> listCategories, int index) async{
+
+    for (var element in listCategories) {
+      if(element.id == listCategories[index].id){
+        id = element.id;
+        notifyListeners();
+      }
+    }
+    notifyListeners();
+  }
+  
+
 
   Future<void> createProduct({
     required String name,
@@ -36,6 +51,10 @@ class AddProductViewModel extends ChangeNotifier {
   }) async {
     Random random = Random();
     int randomNumber = random.nextInt(100000000);
+    //int categoryId = 0;
+    
+    
+    
 
     if (galleryImage != null) {
       await createProductsUseCases.call(
@@ -45,6 +64,7 @@ class AddProductViewModel extends ChangeNotifier {
           description: description,
           price: price,
           stockQuantity: stockQuantity,
+          categoryId: id,
           category: category,
           image: galleryImage!.path,
         ),

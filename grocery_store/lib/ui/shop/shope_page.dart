@@ -46,7 +46,7 @@ class _ShopePageState extends State<ShopePage> {
              
               const SizedBox(height: 10),
               //GridViewButtons
-              ProductsListWidget(
+              /* ProductsListWidget(
                   listProducts: viewModel.listProducts,
                   listProductsByCategory: viewModel.listProductsByCategory,
                   onClose: () => viewModel.getProducts(),
@@ -54,7 +54,7 @@ class _ShopePageState extends State<ShopePage> {
                   category: viewModel.selectedCategory,
                   isFilterList: viewModel.isFilterList,
                   onDeleteProduct: (index) => viewModel.deleteProduct(viewModel.listProducts[index].id),
-                ),
+                ), */
                 const SizedBox(height: 100),
             ],
           );

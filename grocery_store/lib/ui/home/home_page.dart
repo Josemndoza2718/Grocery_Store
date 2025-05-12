@@ -6,6 +6,7 @@ import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
+import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -166,11 +167,11 @@ class _HomePageState extends State<HomePage> {
               onTapUp: viewModel.setSelectedIndexGrid,
               onClose: () => viewModel.getCategories(),
               onDeleteCategory: (index) => viewModel.deleteCategory(viewModel.listCategories[index].id),
-             
             ),
             ProductsListWidget(
               listProducts: viewModel.listProducts,
               listProductsByCategory: viewModel.listProductsByCategory,
+              onTap: (index) => context.read<AddProductViewModel>().getCategory(viewModel.listCategories, index),
               onClose: () => viewModel.getProducts(),
               moneyConversion: viewModel.moneyConversion,
               category: viewModel.selectedCategory,
