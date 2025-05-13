@@ -104,9 +104,9 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getProductsByCategory(String category) async {
+  Future<void> getProductsByCategory(int category) async {
     for (var element in listProducts) {
-      if (element.category == category) {
+      if (element.categoryId == category) {
         if (!listProductsByCategory.contains(element)) {
           listProductsByCategory.clear();
           listProductsByCategory.add(element);

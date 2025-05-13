@@ -157,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                 viewModel.setPressedIndex(index);
                 viewModel.setSelectedCategory(viewModel.listCategories[index].name);
                 viewModel.setIsFilterList(true);
-                viewModel.getProductsByCategory(viewModel.listCategories[index].name);
+                viewModel.getProductsByCategory(viewModel.listCategories[index].id);
               },
               onPressed: (index) {
                 viewModel.setPressedIndex(index);
