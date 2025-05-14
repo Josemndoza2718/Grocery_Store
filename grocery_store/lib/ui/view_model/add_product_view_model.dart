@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 
-
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
@@ -13,8 +12,6 @@ class AddProductViewModel extends ChangeNotifier {
   });
 
   final CreateProductsUseCases createProductsUseCases;
-  
-  
 
   late int id;
 
@@ -29,18 +26,28 @@ class AddProductViewModel extends ChangeNotifier {
     galleryImage = image;
   }
 
-  Future<void> getCategory(List<Category> listCategories, int index) async{
+  Future<void> getCategoryId(List<Category> listCategories, int index) async {
+    if (index >= 0 && index < listCategories.length) {
+      for (var element in listCategories) {
+        if (element.id == listCategories[index].id) {
+          id = element.id;
+          notifyListeners();
+          break; // Stop further iterations once a match is found
+        }
+      }
+    }
+  }
+
+  /*  Future<void> getCategoryId(List<Category> listCategories, int index) async{
 
     for (var element in listCategories) {
-      if(element.id == listCategories[index].id){
+      if (index >= 0 && index < listCategories.length && element.id == listCategories[index].id) {
         id = element.id;
         notifyListeners();
       }
     }
     notifyListeners();
-  }
-  
-
+  } */
 
   Future<void> createProduct({
     required String name,
@@ -51,10 +58,6 @@ class AddProductViewModel extends ChangeNotifier {
   }) async {
     Random random = Random();
     int randomNumber = random.nextInt(100000000);
-    //int categoryId = 0;
-    
-    
-    
 
     if (galleryImage != null) {
       await createProductsUseCases.call(

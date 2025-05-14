@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
-import 'package:grocery_store/ui/add_category_page.dart';
+import 'package:grocery_store/ui/add_category/add_category_page.dart';
 
 class CategoriesWidget extends StatefulWidget {
   CategoriesWidget({

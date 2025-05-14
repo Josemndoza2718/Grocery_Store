@@ -9,12 +9,14 @@ class BottomNavigationBarWidget extends StatelessWidget {
     required this.setSelectedIndex,
     required this.getProducts,
     required this.getCategories,
+    required this.getCarProducts,
   });
 
   final int selectedIndex;
   final Function(int) setSelectedIndex;
   final Function() getProducts;
   final Function() getCategories;
+  final Function() getCarProducts;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +54,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               selectTextColor: AppColors.darkgreen,
               onTap: () {
                 setSelectedIndex(1);
+                getCarProducts;
               },
             ),
             AnimatedButton(

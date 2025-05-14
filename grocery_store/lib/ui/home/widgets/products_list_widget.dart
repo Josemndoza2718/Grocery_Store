@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/add_product_page.dart';
+import 'package:grocery_store/ui/add_product/add_product_page.dart';
 
 class ProductsListWidget extends StatelessWidget {
   const ProductsListWidget({
     super.key,
     required this.listProducts,
     required this.onTap,
+    required this.onPressed,
     required this.onClose,
     required this.isFilterList,
     this.moneyConversion,
@@ -22,6 +23,7 @@ class ProductsListWidget extends StatelessWidget {
   final List<Product>? listProducts;
   final List<Product>? listProductsByCategory;
   final Function(int) onTap;
+  final Function(int) onPressed;
   final Function() onClose;
   final Function(int) onDeleteProduct;
   final double? moneyConversion;
@@ -41,7 +43,7 @@ class ProductsListWidget extends StatelessWidget {
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             //mainAxisSpacing: 2,
-            childAspectRatio: 0.8,
+            childAspectRatio: 0.75,
           ),
           itemCount: isFilterList
               ? listProductsByCategory!.length
@@ -85,7 +87,7 @@ class ProductsListWidget extends StatelessWidget {
             }
             return GestureDetector(
                 onTap: () {
-                  //onTap(index);
+                  onTap(index);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -132,7 +134,6 @@ class ProductsListWidget extends StatelessWidget {
                 },
                 child: Container(
                   margin: const EdgeInsets.all(10),
-                  //padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(115, 184, 184, 184),
                     borderRadius: BorderRadius.circular(10),
@@ -191,14 +192,30 @@ class ProductsListWidget extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "${isFilterList ? listProductsByCategory![index].price : listProducts![index].price}\$ / ${(isFilterList ? listProductsByCategory![index].price : listProducts![index].price) * (moneyConversion ?? 0)}bs",
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${isFilterList ? listProductsByCategory![index].price : listProducts![index].price}\$",
+                                  style: const TextStyle(
+                                      fontSize: 14, fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                              "${(isFilterList 
+                              ? listProductsByCategory![index].price 
+                              : (listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
                               style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.bold),
                             ),
-                            const Icon(
-                              Icons.add_box,
-                              color: Colors.black,
+                              ],
+                            ),
+                            GestureDetector(
+                              onTap: () => onPressed(index),
+                              child: const Icon(
+                                (Icons.add_box),
+                                color: Colors.black,
+                                size: 40,
+                              ),
                             ),
                           ],
                         ),

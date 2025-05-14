@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
-import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
+import 'package:grocery_store/ui/shop/widgets/shop_list_widget.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -40,21 +40,17 @@ class _ShopePageState extends State<ShopePage> {
       child: Consumer<HomeViewModel>(
         builder: (context, viewModel, _) {
           return Column(
-            spacing: 10,
+            spacing: 16,
             children: [
               const SizedBox(height: 10),
-             
+             const Icon(Icons.shopping_cart),
               const SizedBox(height: 10),
               //GridViewButtons
-              /* ProductsListWidget(
-                  listProducts: viewModel.listProducts,
-                  listProductsByCategory: viewModel.listProductsByCategory,
-                  onClose: () => viewModel.getProducts(),
+              ShopListWidget(
+                  listProducts: viewModel.listProductsByCar,
                   moneyConversion: viewModel.moneyConversion,
-                  category: viewModel.selectedCategory,
-                  isFilterList: viewModel.isFilterList,
-                  onDeleteProduct: (index) => viewModel.deleteProduct(viewModel.listProducts[index].id),
-                ), */
+                  onDeleteProduct: (index) => viewModel.deletedCarProduct(viewModel.listProductsByCar[index].id),
+                ),
                 const SizedBox(height: 100),
             ],
           );

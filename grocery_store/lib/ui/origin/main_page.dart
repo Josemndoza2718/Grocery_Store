@@ -44,7 +44,9 @@ class MainPage extends StatelessWidget {
                       viewModel.setSelectedIndex = index;
                     },
                     getProducts: () => context.read<HomeViewModel>().getProducts(),
-                    getCategories: () => context.read<HomeViewModel>().getCategories()
+                    getCategories: () => context.read<HomeViewModel>().getCategories(),
+                    getCarProducts: () => context.read<HomeViewModel>().getCarProducts(),
+
                   ),
                 ),
               ],

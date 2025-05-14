@@ -1,7 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
@@ -13,10 +16,17 @@ import 'package:grocery_store/core/domain/use_cases/product/update_products_use_
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
+    //Car_Products
+    required this.getCarProductsUseCases,
+    required this.createCarProductsUseCases,
+    required this.deleteCarProductsUseCases,
+    required this.updateCarProductsUseCases,
+    //Categories
     required this.createCategoriesUseCases,
     required this.deleteCategoriesUseCases,
     required this.updateCategoriesUseCases,
     required this.getCategoriesUseCases,
+    //Products
     required this.getProductsUseCases,
     required this.createProductsUseCases,
     required this.deleteProductsUseCases,
@@ -24,6 +34,7 @@ class HomeViewModel extends ChangeNotifier {
   }) {
     getCategories();
     getProducts();
+    getCarProducts();
   }
   //Cagories
   final GetCategoriesUseCases getCategoriesUseCases;
@@ -37,16 +48,20 @@ class HomeViewModel extends ChangeNotifier {
   final DeleteProductsUseCases deleteProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases;
 
+  //Car_Products
+  final GetCarProductsUseCases getCarProductsUseCases;
+  final CreateCarProductsUseCases createCarProductsUseCases;
+  final DeleteCarProductsUseCases deleteCarProductsUseCases;
+  final UpdateCarProductsUseCases updateCarProductsUseCases;
+
   List<Category> listCategories = [];
   List<Product> listProducts = [];
   List<Product> listProductsByCategory = [];
+  List<Product> listProductsByCar = [];
 
   int _selectedIndexGrid = -1;
   int _pressedIndex = -1;
   double _moneyConversion = 0;
-  //Color _getColorByImage = Colors.transparent;
-  /* Color? _imageColor;
-  bool _isDark = false; */
 
   String _selectedCategory = '';
   int _selectedCategoryById = 0;
@@ -64,8 +79,6 @@ class HomeViewModel extends ChangeNotifier {
     _moneyConversion = value;
     notifyListeners();
   }
-
-
 
   void setIsFilterList(bool value) {
     _isFilterList = value;
@@ -92,11 +105,30 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-   void setselectedCategoryById(int categoryId) {
+  void setselectedCategoryById(int categoryId) {
     _selectedCategoryById = categoryId;
     notifyListeners();
   }
 
+
+  //Car_Products
+  Future<void> addProductByCar(Product product) async {
+    if (product.stockQuantity > 0) {
+      await createCarProductsUseCases.call(product);
+      //listProductsByCar.add(product);
+    }
+  }
+
+  Future<void> getCarProducts() async {
+    listProductsByCar = await getCarProductsUseCases();
+    notifyListeners();
+  }
+  
+  Future<void> deletedCarProduct(int id) async {
+    await deleteCarProductsUseCases.deleteCarProduct(id);
+    //listProductsByCar.remove(id);
+    getCarProducts();
+  }
 
   //Products
   Future<void> getProducts() async {
@@ -141,25 +173,4 @@ class HomeViewModel extends ChangeNotifier {
     await updateCategoriesUseCases.updateCategory(category);
     getCategories();
   }
-
-  
-/*   //Categories Widget
-  Future<void> generateColorScheme(String path) async {
-    final imageProvider = FileImage(File(path));
-
-    final colorScheme = await ColorScheme.fromImageProvider(
-      provider: imageProvider,
-      brightness: Brightness.light,
-    );
-
-    final Color primary = colorScheme.primary;
-
-    // Determinar si el color es oscuro
-    _isDark = ThemeData.estimateBrightnessForColor(primary) == Brightness.dark;
-
-    // Si es oscuro, aplicamos opacidad (por ejemplo, 70%)
-    _imageColor = isDark ? primary.withAlpha((0.7 * 255).toInt()) : primary;
-
-    notifyListeners();
-  } */
 }
