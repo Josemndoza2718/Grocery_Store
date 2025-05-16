@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 
 class ShopListWidget extends StatelessWidget {
   const ShopListWidget({
@@ -86,7 +87,8 @@ class ShopListWidget extends StatelessWidget {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 GestureDetector(
-                                  onTap: () => onDeleteProduct(index),
+                                  onTap: () { onDeleteProduct(index);
+                                  showFloatingMessage(context: context, message: "Product deleted to cart", color: AppColors.red);},
                                   child: const Icon(
                                     Icons.delete_forever,
                                     color: AppColors.red,

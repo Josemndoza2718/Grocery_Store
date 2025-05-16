@@ -211,14 +211,6 @@ class ProductsListWidget extends StatelessWidget {
                             GestureDetector(
                               onTap: () {
                                 onPressed(index);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    behavior: SnackBarBehavior.floating,
-                                    content: Text('Product added successfully'),
-                                    duration: Duration(seconds: 2),
-                                    backgroundColor: AppColors.green,
-                                  ),
-                                );
                               },
                               child: const Icon(
                                 (Icons.add_box),

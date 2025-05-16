@@ -9,6 +9,7 @@ import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/shop_view_model.dart';
+import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -160,6 +161,7 @@ class _HomePageState extends State<HomePage> {
                   var viewModel = context.read<ShopViewModel>();
                   viewModel.addProductByCar(context.read<HomeViewModel>().listProducts[index]);
                   viewModel.getCarProducts();
+                  showFloatingMessage(context: context, message: "Product added to cart", color: AppColors.green);
                 },
                 onClose: () => viewModel.getProducts(),
                 moneyConversion: viewModel.moneyConversion,
