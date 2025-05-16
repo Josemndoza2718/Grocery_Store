@@ -18,10 +18,11 @@ class _ShopePageState extends State<ShopePage> {
 
   bool isActive = false;
   
-
-
+  
+  
   @override
   Widget build(BuildContext context) {
+    
     return SafeArea(
       child: Consumer<ShopViewModel>(builder: (context, viewModel, _) {
         return Column(
@@ -173,7 +174,7 @@ class _ShopePageState extends State<ShopePage> {
               onDeleteProduct: (index) => viewModel
                   .deletedCarProduct(viewModel.listProducts[index].id),
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 80),
           ],
         );
       }),

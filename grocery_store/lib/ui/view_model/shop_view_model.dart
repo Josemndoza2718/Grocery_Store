@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
@@ -14,6 +15,7 @@ class ShopViewModel extends ChangeNotifier {
 
   }) {
     getCarProducts();
+    getMoneyConversion();
   }
 
   final GetCarProductsUseCases getCarProductsUseCases;
@@ -23,17 +25,15 @@ class ShopViewModel extends ChangeNotifier {
 
   List<Product> listProducts = [];
 
-  int _selectedIndexGrid = -1;
+ 
   int _pressedIndex = -1;
   double _moneyConversion = 0;
 
-  String _selectedCategory = '';
+ 
   int _selectedCategoryById = 0;
 
   double get moneyConversion => _moneyConversion;
   int get pressedIndex => _pressedIndex;
-  int get selectedIndexGrid => _selectedIndexGrid;
-  String get selectedCategory => _selectedCategory;
   int get selectedCategoryById => _selectedCategoryById;
 
   set moneyConversion(double value) {
@@ -41,8 +41,9 @@ class ShopViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setMoneyConversion(double value) {
-    _moneyConversion = value;
+  void getMoneyConversion()async {
+    double money = await Prefs.getMoneyConversion();
+    _moneyConversion = money;
     notifyListeners();
   }
 
@@ -51,15 +52,6 @@ class ShopViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedIndexGrid(int index) {
-    _selectedIndexGrid = index;
-    notifyListeners();
-  }
-
-  void setSelectedCategory(String category) {
-    _selectedCategory = category;
-    notifyListeners();
-  }
 
   void setselectedCategoryById(int categoryId) {
     _selectedCategoryById = categoryId;
@@ -70,12 +62,11 @@ class ShopViewModel extends ChangeNotifier {
   Future<void> addProductByCar(Product product) async {
     if (product.stockQuantity > 0) {
       await createCarProductsUseCases.call(product);
-      //listProductsByCar.add(product);
     }
   }
 
   Future<void> getCarProducts() async {
-    listProducts = await getCarProductsUseCases();
+    listProducts = await getCarProductsUseCases.call();
     notifyListeners();
   }
 

@@ -42,14 +42,10 @@ class _AddProductPageState extends State<AddProductPage> {
     }
 
     nameEditController = TextEditingController(text: widget.product?.name);
-    descriptionEditController =
-        TextEditingController(text: widget.product?.description);
-    priceEditController =
-        TextEditingController(text: widget.product?.price.toString());
-    quantityEditController =
-        TextEditingController(text: widget.product?.stockQuantity.toString());
+    descriptionEditController = TextEditingController(text: widget.product?.description);
+    priceEditController = TextEditingController(text: widget.product?.price.toString());
+    quantityEditController = TextEditingController(text: widget.product?.stockQuantity.toString());
     editCategory = widget.product?.category ?? "";
-    //viewModel.setSelectedCategory(widget.product?.category ?? "");
   }
 
   Future<void> _handleProductSubmission(
@@ -64,7 +60,7 @@ class _AddProductPageState extends State<AddProductPage> {
               description: descriptionEditController.text,
               price: double.parse(priceEditController.text),
               image: viewModel.galleryImage?.path ?? widget.product!.image,
-              categoryId: widget.product!.categoryId,
+              categoryId: int.parse(homeViewModel.selectedCategory),
               category: editCategory,
               stockQuantity: double.parse(quantityEditController.text)))
           .then((_) {
@@ -314,12 +310,9 @@ class _AddProductPageState extends State<AddProductPage> {
                           ),
                         ),
                       ),
-                      Consumer<HomeViewModel>(
-                          builder: (context, homeViewModel, _) {
+                      Consumer<HomeViewModel>(builder: (context, homeViewModel, _) {
                         return DropdownButtonFormField(
-                          value: widget.product == null
-                              ? null
-                              : widget.product?.categoryId.toString(),
+                          value: widget.product?.categoryId.toString(),
                           decoration: const InputDecoration(
                             hintText: 'Select category',
                             filled: true,
@@ -356,7 +349,7 @@ class _AddProductPageState extends State<AddProductPage> {
                             if (newValue != null) {
                               var addProductViewModel = context.read<AddProductViewModel>();
                               homeViewModel.setSelectedCategory(newValue);
-
+                              //editCategory = newValue;
                               addProductViewModel.setID = int.parse(homeViewModel.selectedCategory);
                             }
                           },

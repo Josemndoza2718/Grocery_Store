@@ -197,19 +197,29 @@ class ProductsListWidget extends StatelessWidget {
                                 Text(
                                   "${isFilterList ? listProductsByCategory![index].price : listProducts![index].price}\$",
                                   style: const TextStyle(
-                                      fontSize: 14, fontWeight: FontWeight.bold),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                              "${(isFilterList 
-                              ? listProductsByCategory![index].price 
-                              : (listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
-                            ),
+                                  "${(isFilterList ? listProductsByCategory![index].price : (listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
+                                ),
                               ],
                             ),
                             GestureDetector(
-                              onTap: () => onPressed(index),
+                              onTap: () {
+                                onPressed(index);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    content: Text('Product added successfully'),
+                                    duration: Duration(seconds: 2),
+                                    backgroundColor: AppColors.green,
+                                  ),
+                                );
+                              },
                               child: const Icon(
                                 (Icons.add_box),
                                 color: Colors.black,
@@ -221,8 +231,7 @@ class ProductsListWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                )
-                );
+                ));
           },
         ),
       ),

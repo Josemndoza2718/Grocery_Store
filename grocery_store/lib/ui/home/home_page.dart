@@ -135,11 +135,9 @@ class _HomePageState extends State<HomePage> {
                 unSelectColor: AppColors.lightgrey,
                 onTap: (index) {
                   viewModel.setPressedIndex(index);
-                  viewModel.setSelectedCategory(
-                      viewModel.listCategories[index].name);
+                  viewModel.setSelectedCategory(viewModel.listCategories[index].name);
                   viewModel.setIsFilterList(true);
-                  viewModel.getProductsByCategory(
-                      viewModel.listCategories[index].id);
+                  viewModel.getProductsByCategory(viewModel.listCategories[index].id);
                 },
                 onPressed: (index) {
                   viewModel.setPressedIndex(index);
@@ -156,12 +154,11 @@ class _HomePageState extends State<HomePage> {
                 listProductsByCategory: viewModel.listProductsByCategory,
                 onTap: (index) {
                   var addProductViewModel = context.read<AddProductViewModel>();
-
                    addProductViewModel.getCategoryId(viewModel.listProducts, index);
                 },
                 onPressed: (index) {
                   var viewModel = context.read<ShopViewModel>();
-                  viewModel.addProductByCar(viewModel.listProducts[index]);
+                  viewModel.addProductByCar(context.read<HomeViewModel>().listProducts[index]);
                   viewModel.getCarProducts();
                 },
                 onClose: () => viewModel.getProducts(),
@@ -171,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                 onDeleteProduct: (index) =>
                     viewModel.deleteProduct(viewModel.listProducts[index].id),
               ),
-              SizedBox(height: 80),
+              const SizedBox(height: 80),
             ],
           );
         }),

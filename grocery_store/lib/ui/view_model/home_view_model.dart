@@ -50,7 +50,6 @@ class HomeViewModel extends ChangeNotifier {
   double _moneyConversion = 0;
 
   String _selectedCategory = '';
-  //int _selectedCategoryById = 0;
 
   bool _isFilterList = false;
 
@@ -58,7 +57,6 @@ class HomeViewModel extends ChangeNotifier {
   int get pressedIndex => _pressedIndex;
   int get selectedIndexGrid => _selectedIndexGrid;
   String get selectedCategory => _selectedCategory;
-  //int get selectedCategoryById => _selectedCategoryById;
   bool get isFilterList => _isFilterList;
 
   set moneyConversion(double value) {
@@ -91,11 +89,6 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
- /*  void setselectedCategoryById(int categoryId) {
-    _selectedCategoryById = categoryId;
-    notifyListeners();
-  } */
-
 
 
   //Products
@@ -105,10 +98,11 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> getProductsByCategory(int category) async {
+    listProductsByCategory.clear();
     for (var element in listProducts) {
       if (element.categoryId == category) {
         if (!listProductsByCategory.contains(element)) {
-          listProductsByCategory.clear();
+          //listProductsByCategory.clear();
           listProductsByCategory.add(element);
         }
       }
