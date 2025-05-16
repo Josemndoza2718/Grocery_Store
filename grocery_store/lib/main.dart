@@ -19,6 +19,7 @@ import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/origin/main_page.dart';
+import 'package:grocery_store/ui/view_model/shop_view_model.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
@@ -30,33 +31,54 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          
           ChangeNotifierProvider(
               create: (context) => HomeViewModel(
-                  //Categories
-                  createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()),
-                  deleteCategoriesUseCases: DeleteCategoriesUseCases(repository: CategoryRepositoryImpl()),
-                  updateCategoriesUseCases: UpdateCategoriesUseCases(repository: CategoryRepositoryImpl()),
-                  getCategoriesUseCases: GetCategoriesUseCases(repository: CategoryRepositoryImpl(),), 
-                  //Products
-                  createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()),
-                  getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
-                  deleteProductsUseCases: DeleteProductsUseCases(repository: ProductRepositoryImpl()),
-                  updateProductsUseCases: UpdateProductsUseCases(repository: ProductRepositoryImpl()),
-                  //Car_Products
-                  getCarProductsUseCases: GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                  createCarProductsUseCases: CreateCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                  deleteCarProductsUseCases: DeleteCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                  updateCarProductsUseCases: UpdateCarProductsUseCases(repository: CarProductRepositoryImpl()),
+                    //Categories
+                    createCategoriesUseCases: CreateCategoriesUseCases(
+                        repository: CategoryRepositoryImpl()),
+                    deleteCategoriesUseCases: DeleteCategoriesUseCases(
+                        repository: CategoryRepositoryImpl()),
+                    updateCategoriesUseCases: UpdateCategoriesUseCases(
+                        repository: CategoryRepositoryImpl()),
+                    getCategoriesUseCases: GetCategoriesUseCases(
+                      repository: CategoryRepositoryImpl(),
+                    ),
+                    //Products
+                    createProductsUseCases: CreateProductsUseCases(
+                        repository: ProductRepositoryImpl()),
+                    getProductsUseCases: GetProductsUseCases(
+                        repository: ProductRepositoryImpl()),
+                    deleteProductsUseCases: DeleteProductsUseCases(
+                        repository: ProductRepositoryImpl()),
+                    updateProductsUseCases: UpdateProductsUseCases(
+                        repository: ProductRepositoryImpl()),
                   )),
-                  ChangeNotifierProvider(create: (context) => AddCategoryViewModel(createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()))),
-          ChangeNotifierProvider(create: (context) => AddProductViewModel(createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()))),
           ChangeNotifierProvider(
-              create: (context) => MainPageViewModel()),
+              create: (context) => ShopViewModel(
+                    getCarProductsUseCases:
+                        GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
+                    createCarProductsUseCases: CreateCarProductsUseCases(
+                        repository: CarProductRepositoryImpl()),
+                    deleteCarProductsUseCases: DeleteCarProductsUseCases(
+                        repository: CarProductRepositoryImpl()),  
+                    updateCarProductsUseCases: UpdateCarProductsUseCases(
+                        repository: CarProductRepositoryImpl()) ,
+                  )),
+          ChangeNotifierProvider(
+              create: (context) => AddCategoryViewModel(
+                  createCategoriesUseCases: CreateCategoriesUseCases(
+                      repository: CategoryRepositoryImpl()))),
+          ChangeNotifierProvider(
+              create: (context) => AddProductViewModel(
+                  createProductsUseCases: CreateProductsUseCases(
+                      repository: ProductRepositoryImpl()))),
+          ChangeNotifierProvider(create: (context) => MainPageViewModel()),
         ],
         child: const MaterialApp(
             title: 'Material App',
             debugShowCheckedModeBanner: false,
-            home: MainPage(selectedIndex: 0,)));
+            home: MainPage(
+              selectedIndex: 0,
+            )));
   }
 }

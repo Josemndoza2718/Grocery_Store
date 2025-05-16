@@ -8,6 +8,7 @@ import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/shop_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -54,51 +55,9 @@ class _HomePageState extends State<HomePage> {
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, viewModel, _) {
           return Column(
-            spacing: 10,
+            spacing: 16,
             children: [
-              const SizedBox(height: 10),
-              //Bar-search
-              /* Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: SearchAnchor(
-                    viewShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    isFullScreen: false,
-                    builder: (context, controller) {
-                      return SearchBar(
-                        controller: controller,
-                        leading: const Icon(Icons.search),
-                        hintText: "Search",
-                        shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
-                        /* constraints: BoxConstraints(
-                            minHeight: 60,
-                            maxWidth: 330,
-                          ), */
-                        onTap: () {
-                          controller.openView();
-                        },
-                        onChanged: (_) {
-                          controller.openView();
-                        },
-                      );
-                    },
-                    suggestionsBuilder: (context, controller) {
-                      return List<ListTile>.generate(5, (int index) {
-                        final String item = 'item $index';
-                        return ListTile(
-                          title: Text(item),
-                          onTap: () {
-                            setState(() {
-                              controller.closeView(item);
-                            });
-                          },
-                        );
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 10), */
+              const SizedBox(height: 8),
               //Money Conversion
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -167,7 +126,6 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
               //GridViewButtons
               CategoriesWidget(
                 pressedIndex: viewModel.pressedIndex,
@@ -196,10 +154,13 @@ class _HomePageState extends State<HomePage> {
               ProductsListWidget(
                 listProducts: viewModel.listProducts,
                 listProductsByCategory: viewModel.listProductsByCategory,
-                onTap: (index) => context
-                    .read<AddProductViewModel>()
-                    .getCategoryId(viewModel.listCategories, index),
+                onTap: (index) {
+                  var addProductViewModel = context.read<AddProductViewModel>();
+
+                   addProductViewModel.getCategoryId(viewModel.listProducts, index);
+                },
                 onPressed: (index) {
+                  var viewModel = context.read<ShopViewModel>();
                   viewModel.addProductByCar(viewModel.listProducts[index]);
                   viewModel.getCarProducts();
                 },
@@ -210,7 +171,7 @@ class _HomePageState extends State<HomePage> {
                 onDeleteProduct: (index) =>
                     viewModel.deleteProduct(viewModel.listProducts[index].id),
               ),
-              const SizedBox(height: 100),
+              SizedBox(height: 80),
             ],
           );
         }),

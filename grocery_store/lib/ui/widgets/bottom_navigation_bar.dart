@@ -9,25 +9,23 @@ class BottomNavigationBarWidget extends StatelessWidget {
     required this.setSelectedIndex,
     required this.getProducts,
     required this.getCategories,
-    required this.getCarProducts,
   });
 
   final int selectedIndex;
   final Function(int) setSelectedIndex;
   final Function() getProducts;
   final Function() getCategories;
-  final Function() getCarProducts;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 80,
+        height: 60,
         width: double.infinity,
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
         decoration: BoxDecoration(
           color: AppColors.green,
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -39,6 +37,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
               selectTextColor: AppColors.darkgreen,
+              height: 40,
               onTap: () {
                 setSelectedIndex(0);
                 getProducts;
@@ -46,24 +45,25 @@ class BottomNavigationBarWidget extends StatelessWidget {
               },
             ),
             AnimatedButton(
-              icon: Icons.person,
-              label: "Profile",
+              icon: Icons.shopping_cart,
+              label: "Car",
               isSelected: selectedIndex == 1,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
               selectTextColor: AppColors.darkgreen,
+              height: 40,
               onTap: () {
                 setSelectedIndex(1);
-                getCarProducts;
               },
             ),
             AnimatedButton(
-              icon: Icons.card_giftcard,
-              label: "Gifts",
+              icon: Icons.attach_money,
+              label: "Sales",
               isSelected: selectedIndex == 2,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
               selectTextColor: AppColors.darkgreen,
+              height: 40,
               onTap: () {
                 setSelectedIndex(2);
               },
@@ -75,6 +75,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
               selectTextColor: AppColors.darkgreen,
+              height: 40,
               onTap: () {
                 setSelectedIndex(3);
               },

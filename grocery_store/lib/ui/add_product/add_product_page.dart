@@ -101,8 +101,7 @@ class _AddProductPageState extends State<AddProductPage> {
       backgroundColor: AppColors.white,
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context)
-              .unfocus(); // Esto quita el foco de cualquier TextField
+          FocusScope.of(context).unfocus(); // Esto quita el foco de cualquier TextField
         },
         behavior: HitTestBehavior.opaque,
         child: SafeArea(
@@ -189,7 +188,6 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                   ],
                 ),
-                //const SizedBox(height: 8),
                 viewModel.galleryImage == null
                     ? const Column(
                       spacing: 16,
@@ -356,7 +354,10 @@ class _AddProductPageState extends State<AddProductPage> {
                           }).toList(),
                           onChanged: (String? newValue) {
                             if (newValue != null) {
+                              var addProductViewModel = context.read<AddProductViewModel>();
                               homeViewModel.setSelectedCategory(newValue);
+
+                              addProductViewModel.setID = int.parse(homeViewModel.selectedCategory);
                             }
                           },
                         );

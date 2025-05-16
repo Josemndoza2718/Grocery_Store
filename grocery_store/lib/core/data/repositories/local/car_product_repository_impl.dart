@@ -1,6 +1,6 @@
 import 'package:grocery_store/core/data/models/product_model.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/repositories/local/product_repository%20copy.dart';
+import 'package:grocery_store/core/domain/repositories/local/car_product_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart';

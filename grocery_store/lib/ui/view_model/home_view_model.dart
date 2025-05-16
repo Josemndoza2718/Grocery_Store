@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
-import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
@@ -16,11 +12,7 @@ import 'package:grocery_store/core/domain/use_cases/product/update_products_use_
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
-    //Car_Products
-    required this.getCarProductsUseCases,
-    required this.createCarProductsUseCases,
-    required this.deleteCarProductsUseCases,
-    required this.updateCarProductsUseCases,
+    
     //Categories
     required this.createCategoriesUseCases,
     required this.deleteCategoriesUseCases,
@@ -34,7 +26,6 @@ class HomeViewModel extends ChangeNotifier {
   }) {
     getCategories();
     getProducts();
-    getCarProducts();
   }
   //Cagories
   final GetCategoriesUseCases getCategoriesUseCases;
@@ -48,11 +39,6 @@ class HomeViewModel extends ChangeNotifier {
   final DeleteProductsUseCases deleteProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases;
 
-  //Car_Products
-  final GetCarProductsUseCases getCarProductsUseCases;
-  final CreateCarProductsUseCases createCarProductsUseCases;
-  final DeleteCarProductsUseCases deleteCarProductsUseCases;
-  final UpdateCarProductsUseCases updateCarProductsUseCases;
 
   List<Category> listCategories = [];
   List<Product> listProducts = [];
@@ -64,7 +50,7 @@ class HomeViewModel extends ChangeNotifier {
   double _moneyConversion = 0;
 
   String _selectedCategory = '';
-  int _selectedCategoryById = 0;
+  //int _selectedCategoryById = 0;
 
   bool _isFilterList = false;
 
@@ -72,7 +58,7 @@ class HomeViewModel extends ChangeNotifier {
   int get pressedIndex => _pressedIndex;
   int get selectedIndexGrid => _selectedIndexGrid;
   String get selectedCategory => _selectedCategory;
-  int get selectedCategoryById => _selectedCategoryById;
+  //int get selectedCategoryById => _selectedCategoryById;
   bool get isFilterList => _isFilterList;
 
   set moneyConversion(double value) {
@@ -105,30 +91,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setselectedCategoryById(int categoryId) {
+ /*  void setselectedCategoryById(int categoryId) {
     _selectedCategoryById = categoryId;
     notifyListeners();
-  }
+  } */
 
 
-  //Car_Products
-  Future<void> addProductByCar(Product product) async {
-    if (product.stockQuantity > 0) {
-      await createCarProductsUseCases.call(product);
-      //listProductsByCar.add(product);
-    }
-  }
-
-  Future<void> getCarProducts() async {
-    listProductsByCar = await getCarProductsUseCases();
-    notifyListeners();
-  }
-  
-  Future<void> deletedCarProduct(int id) async {
-    await deleteCarProductsUseCases.deleteCarProduct(id);
-    //listProductsByCar.remove(id);
-    getCarProducts();
-  }
 
   //Products
   Future<void> getProducts() async {

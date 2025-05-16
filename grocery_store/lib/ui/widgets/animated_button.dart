@@ -9,6 +9,7 @@ class AnimatedButton extends StatelessWidget {
   final Color unSelectColor;
   final Color? selectTextColor;
   final Color? unSelectTextolor;
+  final double height;
 
   const AnimatedButton({
     Key? key,
@@ -19,6 +20,7 @@ class AnimatedButton extends StatelessWidget {
     this.unSelectColor = Colors.grey,
     this.selectTextColor = Colors.white,
     this.unSelectTextolor = Colors.white,
+    this.height = 60,
     required this.isSelected,
   }) : super(key: key);
 
@@ -28,8 +30,8 @@ class AnimatedButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        height: 60,
-        width: isSelected && label != null ? 100 : 60,
+        height: height,
+        width: isSelected && label != null ? 100 : height,
         decoration: BoxDecoration(
           color: isSelected ? selectColor : unSelectColor,
           borderRadius: BorderRadius.circular(40),

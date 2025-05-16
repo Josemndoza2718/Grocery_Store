@@ -52,7 +52,6 @@ class ProductsListWidget extends StatelessWidget {
             if (index == listProducts?.length) {
               return GestureDetector(
                 onTap: () {
-                  onTap(index);
                   Navigator.push(
                     context,
                     MaterialPageRoute(

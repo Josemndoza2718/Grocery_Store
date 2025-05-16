@@ -74,16 +74,14 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
           ),
           Container(
             color: Colors.transparent,
-            height: 130,
+            height: 110,
             child: GridView.builder(
               scrollDirection: Axis.horizontal,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 1,
                 childAspectRatio: 1.18,
               ),
-              itemCount: (widget.listCategories?.length ?? 0) +
-                  1 +
-                  (widget.listCategories!.length > 1 ? 1 : 0),
+              itemCount: (widget.listCategories?.length ?? 0) + 1 + (widget.listCategories!.length > 1 ? 1 : 0),
               itemBuilder: (context, index) {
                 bool hasAllItemsButton = widget.listCategories!.length > 1;
 
@@ -104,7 +102,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
                           color: widget.selectedIndexGrid == realIndex
-                              ? widget.selectColor //Colors.green.shade200
+                              ? widget.selectColor 
                               : widget.unSelectColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -130,7 +128,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                     margin: const EdgeInsets.all(10),
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: widget.selectedIndexGrid == realIndex
+                              ? widget.selectColor 
+                              : widget.unSelectColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -234,11 +234,11 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: CircleAvatar(
-                                backgroundImage: FileImage(File(
-                                    widget.listCategories![realIndex].image)),
-                                backgroundColor: Colors.white,
-                                radius: 30,
+                              child: Image.file(
+                                File(widget.listCategories![realIndex].image),
+                                height: 45,
+                                width: 45,
+                                fit: BoxFit.cover,
                               ),
                             ),
                             Text(widget.listCategories![realIndex].name,

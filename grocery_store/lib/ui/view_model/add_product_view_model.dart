@@ -13,9 +13,16 @@ class AddProductViewModel extends ChangeNotifier {
 
   final CreateProductsUseCases createProductsUseCases;
 
-  late int id;
+  late int _id;
+
+  int get id => _id;
 
   File? galleryImage;
+
+  set setID(int value) {
+    _id = value;
+    notifyListeners();
+  }
 
   void setGalleryImage(File? image) {
     galleryImage = image;
@@ -26,28 +33,17 @@ class AddProductViewModel extends ChangeNotifier {
     galleryImage = image;
   }
 
-  Future<void> getCategoryId(List<Category> listCategories, int index) async {
-    if (index >= 0 && index < listCategories.length) {
-      for (var element in listCategories) {
-        if (element.id == listCategories[index].id) {
-          id = element.id;
+  Future<void> getCategoryId(List<Product> listProducts, int index) async {
+    if (index >= 0 && index <= listProducts.length) {
+      for (var element in listProducts) {
+        if (element.id == listProducts[index].categoryId) {
+          _id = element.id;
           notifyListeners();
           break; // Stop further iterations once a match is found
         }
       }
     }
   }
-
-  /*  Future<void> getCategoryId(List<Category> listCategories, int index) async{
-
-    for (var element in listCategories) {
-      if (index >= 0 && index < listCategories.length && element.id == listCategories[index].id) {
-        id = element.id;
-        notifyListeners();
-      }
-    }
-    notifyListeners();
-  } */
 
   Future<void> createProduct({
     required String name,
