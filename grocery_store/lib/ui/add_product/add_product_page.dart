@@ -42,9 +42,12 @@ class _AddProductPageState extends State<AddProductPage> {
     }
 
     nameEditController = TextEditingController(text: widget.product?.name);
-    descriptionEditController = TextEditingController(text: widget.product?.description);
-    priceEditController = TextEditingController(text: widget.product?.price.toString());
-    quantityEditController = TextEditingController(text: widget.product?.stockQuantity.toString());
+    descriptionEditController =
+        TextEditingController(text: widget.product?.description);
+    priceEditController =
+        TextEditingController(text: widget.product?.price.toString());
+    quantityEditController =
+        TextEditingController(text: widget.product?.stockQuantity.toString());
     editCategory = widget.product?.category ?? "";
   }
 
@@ -53,8 +56,8 @@ class _AddProductPageState extends State<AddProductPage> {
     HomeViewModel homeViewModel,
   ) async {
     if (widget.product != null) {
-      await homeViewModel.updateProduct(
-        Product(
+      await homeViewModel
+          .updateProduct(Product(
               id: widget.product!.id,
               name: nameEditController.text,
               description: descriptionEditController.text,
@@ -75,13 +78,15 @@ class _AddProductPageState extends State<AddProductPage> {
           quantityController.text.isEmpty) {
         return;
       } else {
-        await viewModel.createProduct(
+        await viewModel
+            .createProduct(
           name: nameController.text,
           description: descriptionController.text,
           price: double.parse(priceController.text),
           stockQuantity: double.parse(quantityController.text),
           category: homeViewModel.selectedCategory,
-        ).then((_) {
+        )
+            .then((_) {
           {
             Navigator.pop(context);
             homeViewModel.setSelectedCategory("");
@@ -97,284 +102,326 @@ class _AddProductPageState extends State<AddProductPage> {
       backgroundColor: AppColors.white,
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context).unfocus(); // Esto quita el foco de cualquier TextField
+          FocusScope.of(context)
+              .unfocus(); // Esto quita el foco de cualquier TextField
         },
         behavior: HitTestBehavior.opaque,
         child: SafeArea(
-            child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child:
-              Consumer<AddProductViewModel>(builder: (context, viewModel, _) {
-            return Column(
+          child: Consumer<AddProductViewModel>(builder: (context, viewModel, _) {
+          return Expanded(
+            child: Column(
               spacing: 16,
               children: [
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () async {
-                        final pickedImageGalery = await PhoneImage()
-                            .pickImageFromGallery(ImageSource.gallery);
-
-                        if (pickedImageGalery != null) {
-                          viewModel.setGalleryImage(pickedImageGalery);
-                        }
-                      },
-                      child: Container(
-                        height: 90,
-                        width: 90,
-                        decoration: BoxDecoration(
-                            color: AppColors.green,
-                            borderRadius: BorderRadius.circular(10),),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.image,
-                              color: AppColors.black,
-                              size: 40,
-                            ),
-                            Text(
-                              "gallery",
-                              style: TextStyle(
-                                  color: AppColors.black,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      "OR",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        final pickedImageCamera = await PhoneImage()
-                            .pickImageFromGallery(ImageSource.camera);
-
-                        if (pickedImageCamera != null) {
-                          viewModel.setGalleryImage(pickedImageCamera);
-                        }
-                      },
-                      child: Container(
-                        height: 90,
-                        width: 90,
-                        decoration: BoxDecoration(
-                            color: AppColors.green,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.camera_alt,
-                              color: AppColors.black,
-                              size: 40,
-                            ),
-                            Text(
-                              "photo",
-                              style: TextStyle(
-                                  color: AppColors.black,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                viewModel.galleryImage == null
-                    ? const Column(
-                      spacing: 16,
-                      children: [
-                        Icon(Icons.image_not_supported, size: 60, color: AppColors.darkgreen,),
-                        Text(
-                          "No image selected",
-                          style: TextStyle(color: AppColors.black),
-                        ),
-                      ],
-                    )
-                    : Image.file(
-                        viewModel.galleryImage!,
-                        height: 100,
-                        width: 100,
-                      ),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  height: 200,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
                   decoration: BoxDecoration(
-                      color: AppColors.green,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    spacing: 16,
+                    color: AppColors.lightgrey,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    spacing: 8,
                     children: [
-                      TextFormField(
-                        controller: widget.product == null
-                            ? nameController
-                            : nameEditController,
-                        decoration: InputDecoration(
-                          hintText: "Enter name",
-                          filled: true,
-                          fillColor: AppColors.lightwhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.green,
-                              width: 4,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: widget.product == null
-                            ? descriptionController
-                            : descriptionEditController,
-                        decoration: InputDecoration(
-                          hintText: "Enter description",
-                          filled: true,
-                          fillColor: AppColors.lightwhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.green,
-                              width: 4,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: widget.product == null
-                            ? priceController
-                            : priceEditController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: "Enter price",
-                          filled: true,
-                          fillColor: AppColors.lightwhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.green,
-                              width: 4,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      TextFormField(
-                        controller: widget.product == null
-                            ? quantityController
-                            : quantityEditController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: "Enter quantity",
-                          filled: true,
-                          fillColor: AppColors.lightwhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.green,
-                              width: 4,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      Consumer<HomeViewModel>(builder: (context, homeViewModel, _) {
-                        return DropdownButtonFormField(
-                          value: widget.product?.categoryId.toString(),
-                          decoration: const InputDecoration(
-                            hintText: 'Select category',
-                            filled: true,
-                            fillColor: AppColors.lightwhite,
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: AppColors.green,
-                                width: 4,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 8,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              final pickedImageGalery = await PhoneImage()
+                                  .pickImageFromGallery(ImageSource.gallery);
+            
+                              if (pickedImageGalery != null) {
+                                viewModel.setGalleryImage(pickedImageGalery);
+                              }
+                            },
+                            child: Container(
+                              height: 90,
+                              width: 90,
+                              decoration: BoxDecoration(
+                                color: AppColors.darkgreen,
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.image,
+                                    color: AppColors.lightwhite,
+                                    size: 40,
+                                  ),
+                                  Text(
+                                    "gallery",
+                                    style: TextStyle(
+                                        color: AppColors.lightwhite,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          items: homeViewModel.listCategories.map((category) {
-                            return DropdownMenuItem<String>(
-                              value: category.id.toString(),
-                              child: Text(category.name),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              var addProductViewModel = context.read<AddProductViewModel>();
-                              homeViewModel.setSelectedCategory(newValue);
-                              //editCategory = newValue;
-                              addProductViewModel.setID = int.parse(homeViewModel.selectedCategory);
-                            }
-                          },
-                        );
-                      }),
+                          GestureDetector(
+                            onTap: () async {
+                              final pickedImageCamera = await PhoneImage()
+                                  .pickImageFromGallery(ImageSource.camera);
+            
+                              if (pickedImageCamera != null) {
+                                viewModel.setGalleryImage(pickedImageCamera);
+                              }
+                            },
+                            child: Container(
+                              height: 90,
+                              width: 90,
+                              decoration: BoxDecoration(
+                                  color: AppColors.darkgreen,
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.camera_alt,
+                                    color: AppColors.lightwhite,
+                                    size: 40,
+                                  ),
+                                  Text(
+                                    "photo",
+                                    style: TextStyle(
+                                        color: AppColors.lightwhite,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.lightwhite,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: viewModel.galleryImage == null
+                              ? const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 16,
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported,
+                                      size: 60,
+                                      color: AppColors.darkgreen,
+                                    ),
+                                    Text(
+                                      "No image selected",
+                                      style:
+                                          TextStyle(color: AppColors.black),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox(
+                                  height: double.infinity,
+                                  child: Image.file(
+                                    viewModel.galleryImage!,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                        ),
+                      )
                     ],
                   ),
                 ),
-                Consumer<HomeViewModel>(builder: (context, homeViewModel, _) {
-                  return ElevatedButton(
-                    onPressed: () async {
-                      _handleProductSubmission(viewModel, homeViewModel);
-                    },
-                    child: const Text(
-                      "save",
-                      style: TextStyle(
-                          color: AppColors.darkgreen,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  );
-                })
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                        color: AppColors.green,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                        )),
+                    child: Consumer<HomeViewModel>(
+                        builder: (context, homeViewModel, _) {
+                      return Expanded(
+                        child: Column(
+                          spacing: 16,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextFormField(
+                              controller: widget.product == null
+                                  ? nameController
+                                  : nameEditController,
+                              decoration: InputDecoration(
+                                hintText: "Enter name",
+                                filled: true,
+                                fillColor: AppColors.lightwhite,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.green,
+                                    width: 4,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            TextFormField(
+                              controller: widget.product == null
+                                  ? descriptionController
+                                  : descriptionEditController,
+                              decoration: InputDecoration(
+                                hintText: "Enter description",
+                                filled: true,
+                                fillColor: AppColors.lightwhite,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.green,
+                                    width: 4,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            TextFormField(
+                              controller: widget.product == null
+                                  ? priceController
+                                  : priceEditController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: "Enter price",
+                                filled: true,
+                                fillColor: AppColors.lightwhite,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.green,
+                                    width: 4,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            TextFormField(
+                              controller: widget.product == null
+                                  ? quantityController
+                                  : quantityEditController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                hintText: "Enter quantity",
+                                filled: true,
+                                fillColor: AppColors.lightwhite,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: AppColors.green,
+                                    width: 4,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            DropdownButtonFormField(
+                              value: widget.product?.categoryId.toString(),
+                              decoration: const InputDecoration(
+                                hintText: 'Select category',
+                                filled: true,
+                                fillColor: AppColors.lightwhite,
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: AppColors.green,
+                                    width: 4,
+                                  ),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(10),
+                                  ),
+                                ),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(10),
+                                  ),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              items: homeViewModel.listCategories
+                                  .map((category) {
+                                return DropdownMenuItem<String>(
+                                  value: category.id.toString(),
+                                  child: Text(category.name),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  var addProductViewModel =
+                                      context.read<AddProductViewModel>();
+                                  homeViewModel
+                                      .setSelectedCategory(newValue);
+                                  //editCategory = newValue;
+                                  addProductViewModel.setID = int.parse(
+                                      homeViewModel.selectedCategory);
+                                }
+                              },
+                            ),
+                            //const SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: () async {
+                                _handleProductSubmission(
+                                    viewModel, homeViewModel);
+                              },
+                              child: const Text(
+                                "save",
+                                style: TextStyle(
+                                    color: AppColors.darkgreen,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ],
-            );
-          }),
-        )),
+            ),
+          );
+        })),
       ),
     );
   }

@@ -18,6 +18,7 @@ class ProductsListWidget extends StatelessWidget {
     this.category,
     this.listProductsByCategory,
     required this.onDeleteProduct,
+    required this.page,
   });
 
   final List<Product>? listProducts;
@@ -29,6 +30,7 @@ class ProductsListWidget extends StatelessWidget {
   final double? moneyConversion;
   final String? category;
   final bool isFilterList;
+  final Widget page;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +57,7 @@ class ProductsListWidget extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AddProductPage(),
+                      builder: (context) => page,
                     ),
                   ).then((_) {
                     onClose();

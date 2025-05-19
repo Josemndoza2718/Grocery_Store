@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/ui/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
@@ -151,6 +152,7 @@ class _HomePageState extends State<HomePage> {
                     .deleteCategory(viewModel.listCategories[index].id),
               ),
               ProductsListWidget(
+                page: AddProductPage(),
                 listProducts: viewModel.listProducts,
                 listProductsByCategory: viewModel.listProductsByCategory,
                 onTap: (index) {
