@@ -38,6 +38,7 @@ class CarProductRepositoryImpl implements CarProductRepository {
       image: product.image,
       categoryId: product.categoryId,
       category: product.category,
+      idStock: product.idStock,
       stockQuantity: product.stockQuantity,
     );
 
@@ -81,6 +82,7 @@ class CarProductRepositoryImpl implements CarProductRepository {
       image: product.image,
       categoryId: product.categoryId,
       category: product.category,
+      idStock: product.idStock,
       stockQuantity: product.stockQuantity,
     );
 

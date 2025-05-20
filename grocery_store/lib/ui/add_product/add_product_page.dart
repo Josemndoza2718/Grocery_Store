@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class AddProductPage extends StatefulWidget {
-  AddProductPage({super.key, this.product});
+  const AddProductPage({super.key, this.product});
 
   final Product? product;
 
@@ -42,12 +42,9 @@ class _AddProductPageState extends State<AddProductPage> {
     }
 
     nameEditController = TextEditingController(text: widget.product?.name);
-    descriptionEditController =
-        TextEditingController(text: widget.product?.description);
-    priceEditController =
-        TextEditingController(text: widget.product?.price.toString());
-    quantityEditController =
-        TextEditingController(text: widget.product?.stockQuantity.toString());
+    descriptionEditController = TextEditingController(text: widget.product?.description);
+    priceEditController = TextEditingController(text: widget.product?.price.toString());
+    quantityEditController = TextEditingController(text: widget.product?.stockQuantity.toString());
     editCategory = widget.product?.category ?? "";
   }
 
@@ -65,6 +62,7 @@ class _AddProductPageState extends State<AddProductPage> {
               image: viewModel.galleryImage?.path ?? widget.product!.image,
               categoryId: int.parse(homeViewModel.selectedCategory),
               category: editCategory,
+              idStock: 0,
               stockQuantity: double.parse(quantityEditController.text)))
           .then((_) {
         {
@@ -102,12 +100,11 @@ class _AddProductPageState extends State<AddProductPage> {
       backgroundColor: AppColors.white,
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context)
-              .unfocus(); // Esto quita el foco de cualquier TextField
+          FocusScope.of(context).unfocus(); // Esto quita el foco de cualquier TextField
         },
         behavior: HitTestBehavior.opaque,
-        child: SafeArea(
-          child: Consumer<AddProductViewModel>(builder: (context, viewModel, _) {
+        child: SafeArea(child:
+            Consumer<AddProductViewModel>(builder: (context, viewModel, _) {
           return Expanded(
             child: Column(
               spacing: 16,
@@ -117,10 +114,10 @@ class _AddProductPageState extends State<AddProductPage> {
                   height: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   margin: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
+                  /* decoration: BoxDecoration(
                     color: AppColors.lightgrey,
                     borderRadius: BorderRadius.circular(10),
-                  ),
+                  ), */
                   child: Row(
                     spacing: 8,
                     children: [
@@ -132,7 +129,6 @@ class _AddProductPageState extends State<AddProductPage> {
                             onTap: () async {
                               final pickedImageGalery = await PhoneImage()
                                   .pickImageFromGallery(ImageSource.gallery);
-            
                               if (pickedImageGalery != null) {
                                 viewModel.setGalleryImage(pickedImageGalery);
                               }
@@ -166,7 +162,7 @@ class _AddProductPageState extends State<AddProductPage> {
                             onTap: () async {
                               final pickedImageCamera = await PhoneImage()
                                   .pickImageFromGallery(ImageSource.camera);
-            
+
                               if (pickedImageCamera != null) {
                                 viewModel.setGalleryImage(pickedImageCamera);
                               }
@@ -217,8 +213,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                     ),
                                     Text(
                                       "No image selected",
-                                      style:
-                                          TextStyle(color: AppColors.black),
+                                      style: TextStyle(color: AppColors.black),
                                     ),
                                   ],
                                 )
@@ -238,181 +233,246 @@ class _AddProductPageState extends State<AddProductPage> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
-                        color: AppColors.green,
+                        color: AppColors.darkgreen,
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
                         )),
                     child: Consumer<HomeViewModel>(
                         builder: (context, homeViewModel, _) {
-                      return Expanded(
-                        child: Column(
-                          spacing: 16,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            TextFormField(
-                              controller: widget.product == null
-                                  ? nameController
-                                  : nameEditController,
-                              decoration: InputDecoration(
-                                hintText: "Enter name",
-                                filled: true,
-                                fillColor: AppColors.lightwhite,
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: AppColors.green,
-                                    width: 4,
+                      return SingleChildScrollView(
+                        child: Expanded(
+                          child: Column(
+                            spacing: 16,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 0),
+                              TextFormField(
+                                controller: widget.product == null
+                                    ? nameController
+                                    : nameEditController,
+                                decoration: InputDecoration(
+                                  hintText: "Enter name",
+                                  filled: true,
+                                  fillColor: AppColors.lightwhite,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: AppColors.green,
+                                      width: 4,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            TextFormField(
-                              controller: widget.product == null
-                                  ? descriptionController
-                                  : descriptionEditController,
-                              decoration: InputDecoration(
-                                hintText: "Enter description",
-                                filled: true,
-                                fillColor: AppColors.lightwhite,
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: AppColors.green,
-                                    width: 4,
+                                  disabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            TextFormField(
-                              controller: widget.product == null
-                                  ? priceController
-                                  : priceEditController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: "Enter price",
-                                filled: true,
-                                fillColor: AppColors.lightwhite,
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: AppColors.green,
-                                    width: 4,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            TextFormField(
-                              controller: widget.product == null
-                                  ? quantityController
-                                  : quantityEditController,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                hintText: "Enter quantity",
-                                filled: true,
-                                fillColor: AppColors.lightwhite,
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: AppColors.green,
-                                    width: 4,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            DropdownButtonFormField(
-                              value: widget.product?.categoryId.toString(),
-                              decoration: const InputDecoration(
-                                hintText: 'Select category',
-                                filled: true,
-                                fillColor: AppColors.lightwhite,
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: AppColors.green,
-                                    width: 4,
-                                  ),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
                               ),
-                              items: homeViewModel.listCategories
-                                  .map((category) {
-                                return DropdownMenuItem<String>(
-                                  value: category.id.toString(),
-                                  child: Text(category.name),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  var addProductViewModel =
-                                      context.read<AddProductViewModel>();
-                                  homeViewModel
-                                      .setSelectedCategory(newValue);
-                                  //editCategory = newValue;
-                                  addProductViewModel.setID = int.parse(
-                                      homeViewModel.selectedCategory);
-                                }
-                              },
-                            ),
-                            //const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: () async {
-                                _handleProductSubmission(
-                                    viewModel, homeViewModel);
-                              },
-                              child: const Text(
-                                "save",
-                                style: TextStyle(
-                                    color: AppColors.darkgreen,
-                                    fontWeight: FontWeight.bold),
+                              TextFormField(
+                                controller: widget.product == null
+                                    ? descriptionController
+                                    : descriptionEditController,
+                                decoration: InputDecoration(
+                                  hintText: "Enter description",
+                                  filled: true,
+                                  fillColor: AppColors.lightwhite,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: AppColors.green,
+                                      width: 4,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  disabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                              TextFormField(
+                                controller: widget.product == null
+                                    ? priceController
+                                    : priceEditController,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  hintText: "Enter price",
+                                  filled: true,
+                                  fillColor: AppColors.lightwhite,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                      color: AppColors.green,
+                                      width: 4,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  disabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Flexible(
+                                    child: TextFormField(
+                                      controller: widget.product == null
+                                          ? quantityController
+                                          : quantityEditController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        hintText: "Enter quantity",
+                                        filled: true,
+                                        fillColor: AppColors.lightwhite,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                            color: AppColors.green,
+                                            width: 4,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        disabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: DropdownButtonFormField<int>(
+                                      value: viewModel.selectedQuantity,
+                                      decoration: const InputDecoration(
+                                        hintText: 'Measurements',
+                                        filled: true,
+                                        fillColor: AppColors.lightwhite,
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(10),
+                                          ),
+                                        ),
+                                      ),
+                                      items: const [
+                                        DropdownMenuItem<int>(
+                                          value: 0,
+                                          child: Text('other'),
+                                        ),
+                                        DropdownMenuItem<int>(
+                                          value: 1,
+                                          child: Text('liters'),
+                                        ),
+                                        DropdownMenuItem<int>(
+                                          value: 2,
+                                          child: Text('count'),
+                                        ),
+                                        DropdownMenuItem<int>(
+                                          value: 3,
+                                          child: Text('kilograms'),
+                                        ),
+                                      ],
+                                      onChanged: (int? newValue) {
+                                        if (newValue != null) {
+                                          viewModel.selectedQuantity = newValue;
+                                          // Handle the selected value
+                                          print("Selected quantity: $newValue");
+                                        }
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
+                              DropdownButtonFormField(
+                                value: widget.product?.categoryId.toString(),
+                                decoration: const InputDecoration(
+                                  hintText: 'Select category',
+                                  filled: true,
+                                  fillColor: AppColors.lightwhite,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: AppColors.green,
+                                      width: 4,
+                                    ),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  disabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                items: homeViewModel.listCategories
+                                    .map((category) {
+                                  return DropdownMenuItem<String>(
+                                    value: category.id.toString(),
+                                    child: Text(category.name),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    var addProductViewModel =
+                                        context.read<AddProductViewModel>();
+                                    homeViewModel.setSelectedCategory(newValue);
+                                    //editCategory = newValue;
+                                    addProductViewModel.setID = int.parse(
+                                        homeViewModel.selectedCategory);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 0),
+                              GestureDetector(
+                                onTap: () async {
+                                  _handleProductSubmission(
+                                      viewModel, homeViewModel);
+                                      viewModel.selectedQuantity = 0;
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: BoxDecoration(
+                                      color: AppColors.white,
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: const Text(
+                                    "Save",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: AppColors.darkgreen,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }),

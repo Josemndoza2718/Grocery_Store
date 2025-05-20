@@ -7,14 +7,16 @@ class BottomNavigationBarWidget extends StatelessWidget {
     super.key,
     required this.selectedIndex,
     required this.setSelectedIndex,
-    required this.getProducts,
-    required this.getCategories,
+     this.getProducts,
+     this.getCategories, 
+     this.getCarProducts,
   });
 
   final int selectedIndex;
   final Function(int) setSelectedIndex;
-  final Function() getProducts;
-  final Function() getCategories;
+  final Function()? getProducts;
+  final Function()? getCarProducts;
+  final Function()? getCategories;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +42,8 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(0);
-                getProducts;
-                getCategories;
+                getProducts!();
+                getCategories!();
               },
             ),
             AnimatedButton(
@@ -54,6 +56,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(1);
+                getCarProducts!();
               },
             ),
             AnimatedButton(

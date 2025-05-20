@@ -9,6 +9,7 @@ class ProductModel extends Product {
     required super.image,
     required super.categoryId,
     required super.category,
+    required super.idStock,
     required super.stockQuantity,
   });
 
@@ -21,7 +22,9 @@ class ProductModel extends Product {
       image: json['imageUrl'],
       categoryId: json['categoryId'],
       category: json['category'],
+      idStock: json['idStock'],
       stockQuantity: json['stockQuantity'].toDouble(),
+      
     );
   }
 
@@ -34,6 +37,7 @@ class ProductModel extends Product {
       'imageUrl': image,
       'categoryId': categoryId,
       'category': category,
+      'idStock': idStock,
       'stockQuantity': stockQuantity,
     };
   }
@@ -47,6 +51,7 @@ class ProductModel extends Product {
       image: image,
       categoryId: categoryId,
       category: category,
+      idStock: idStock,
       stockQuantity: stockQuantity,
     );
   }

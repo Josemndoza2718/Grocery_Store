@@ -46,6 +46,8 @@ class _HomePageState extends State<HomePage> {
     return double.parse(cleaned);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -137,9 +139,11 @@ class _HomePageState extends State<HomePage> {
                 unSelectColor: AppColors.lightgrey,
                 onTap: (index) {
                   viewModel.setPressedIndex(index);
-                  viewModel.setSelectedCategory(viewModel.listCategories[index].name);
+                  viewModel.setSelectedCategory(
+                      viewModel.listCategories[index].name);
                   viewModel.setIsFilterList(true);
-                  viewModel.getProductsByCategory(viewModel.listCategories[index].id);
+                  viewModel.getProductsByCategory(
+                      viewModel.listCategories[index].id);
                 },
                 onPressed: (index) {
                   viewModel.setPressedIndex(index);
@@ -152,18 +156,23 @@ class _HomePageState extends State<HomePage> {
                     .deleteCategory(viewModel.listCategories[index].id),
               ),
               ProductsListWidget(
-                page: AddProductPage(),
+                page: const AddProductPage(),
                 listProducts: viewModel.listProducts,
                 listProductsByCategory: viewModel.listProductsByCategory,
                 onTap: (index) {
                   var addProductViewModel = context.read<AddProductViewModel>();
-                   addProductViewModel.getCategoryId(viewModel.listProducts, index);
+                  addProductViewModel.getCategoryId(
+                      viewModel.listProducts, index);
                 },
                 onPressed: (index) {
                   var viewModel = context.read<ShopViewModel>();
-                  viewModel.addProductByCar(context.read<HomeViewModel>().listProducts[index]);
+                  viewModel.addProductByCar(
+                      context.read<HomeViewModel>().listProducts[index]);
                   viewModel.getCarProducts();
-                  showFloatingMessage(context: context, message: "Product added to cart", color: AppColors.green);
+                  showFloatingMessage(
+                      context: context,
+                      message: "Product added to cart",
+                      color: AppColors.green);
                 },
                 onClose: () => viewModel.getProducts(),
                 moneyConversion: viewModel.moneyConversion,

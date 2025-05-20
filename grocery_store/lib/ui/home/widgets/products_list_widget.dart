@@ -32,6 +32,21 @@ class ProductsListWidget extends StatelessWidget {
   final bool isFilterList;
   final Widget page;
 
+    String setselectedMeasurements(int? value) {
+    switch (value) {
+      case 0:
+        return 'other';
+      case 1:
+        return 'lt';
+      case 2:
+        return 'item';
+      case 3:
+        return 'kg';
+      default:
+        return "other";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Flexible(
@@ -44,7 +59,6 @@ class ProductsListWidget extends StatelessWidget {
           scrollDirection: Axis.vertical,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            //mainAxisSpacing: 2,
             childAspectRatio: 0.75,
           ),
           itemCount: isFilterList
@@ -184,7 +198,9 @@ class ProductsListWidget extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          "${isFilterList ? listProductsByCategory![index].stockQuantity : listProducts![index].stockQuantity} und.",
+                          "${isFilterList 
+                          ? listProductsByCategory![index].stockQuantity 
+                          : "${listProducts![index].stockQuantity}"} ${setselectedMeasurements(listProducts![index].idStock)}",
                           style: const TextStyle(fontSize: 14),
                         ),
                       ),
@@ -197,13 +213,16 @@ class ProductsListWidget extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "${isFilterList ? listProductsByCategory![index].price : listProducts![index].price}\$",
-                                  style: const TextStyle(
+                                  "${(isFilterList 
+                                  ? (listProductsByCategory![index].price.toStringAsFixed(2)) 
+                                  : (listProducts![index].price.toStringAsFixed(2)))}\$",                                  style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  "${(isFilterList ? listProductsByCategory![index].price : (listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                  "${(isFilterList 
+                                  ? ((listProductsByCategory![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)
+                                  : ((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
                                   style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold),

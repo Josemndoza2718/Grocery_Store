@@ -18,8 +18,17 @@ class AddProductViewModel extends ChangeNotifier {
 
   File? galleryImage;
 
+  int _selectedQuantity = 0;
+
+  int get selectedQuantity => _selectedQuantity;
+
   set setID(int value) {
     _id = value;
+    notifyListeners();
+  }
+
+  set selectedQuantity(int value) {
+    _selectedQuantity = value;
     notifyListeners();
   }
 
@@ -64,6 +73,7 @@ class AddProductViewModel extends ChangeNotifier {
           stockQuantity: stockQuantity,
           categoryId: id,
           category: category,
+          idStock: selectedQuantity,
           image: galleryImage!.path,
         ),
       );

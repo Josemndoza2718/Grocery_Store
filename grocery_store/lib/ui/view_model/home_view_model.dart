@@ -59,6 +59,7 @@ class HomeViewModel extends ChangeNotifier {
   String get selectedCategory => _selectedCategory;
   bool get isFilterList => _isFilterList;
 
+
   set moneyConversion(double value) {
     _moneyConversion = value;
     notifyListeners();
