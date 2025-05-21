@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/shop/widgets/shop_list_widget.dart';
 import 'package:grocery_store/ui/view_model/shop_view_model.dart';
+import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:provider/provider.dart';
 
 class ShopePage extends StatefulWidget {
@@ -15,7 +16,7 @@ class ShopePage extends StatefulWidget {
 
 class _ShopePageState extends State<ShopePage> {
   
-
+  TextEditingController clientController = TextEditingController();
   bool isActive = false;
   
   
@@ -118,58 +119,44 @@ class _ShopePageState extends State<ShopePage> {
             if (isActive)
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          hintText: "Name or Id",
-                          filled: true,
-                          fillColor: AppColors.lightwhite,
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: AppColors.green,
-                              width: 4,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
+                child: CustomTextFormField(
+                isButtonActive: true,
+                controller: clientController,
+                decoration: InputDecoration(
+                  hintText: "Name or Id",
+                  filled: true,
+                  fillColor: AppColors.lightwhite,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: AppColors.green,
+                      width: 4,
                     ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isActive = false;
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.green,
-                        ),
-                        width: 50,
-                        height: 50,
-                        child: const Icon(
-                          Icons.save,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    )
-                  ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    isActive = false;
+                  });
+                },
                 ),
               ),
             //GridViewButtons
             ShopListWidget(
               listProducts: viewModel.listProducts,
+              quantityProduct: viewModel.quantityProduct,
+              onTap: () => viewModel.isActive = !viewModel.isActive,
+              isActive: viewModel.isActive,
+              onAddProduct: () => viewModel.addQuatityProduct(),
+              onRemoveProduct: () => viewModel.removeQuatityProduct(),
               moneyConversion: viewModel.moneyConversion,
               onDeleteProduct: (index) => viewModel
                   .deletedCarProduct(viewModel.listProducts[index].id),

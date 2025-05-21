@@ -103,7 +103,6 @@ class HomeViewModel extends ChangeNotifier {
     for (var element in listProducts) {
       if (element.categoryId == category) {
         if (!listProductsByCategory.contains(element)) {
-          //listProductsByCategory.clear();
           listProductsByCategory.add(element);
         }
       }

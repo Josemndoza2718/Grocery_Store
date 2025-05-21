@@ -12,7 +12,6 @@ class ShopViewModel extends ChangeNotifier {
     required this.createCarProductsUseCases,
     required this.deleteCarProductsUseCases,
     required this.updateCarProductsUseCases,
-
   }) {
     getCarProducts();
     getMoneyConversion();
@@ -25,36 +24,44 @@ class ShopViewModel extends ChangeNotifier {
 
   List<Product> listProducts = [];
 
- 
-  int _pressedIndex = -1;
   double _moneyConversion = 0;
-
- 
-  int _selectedCategoryById = 0;
+  int _quantityProduct = 0;
+  bool _isActive = false;
 
   double get moneyConversion => _moneyConversion;
-  int get pressedIndex => _pressedIndex;
-  int get selectedCategoryById => _selectedCategoryById;
+  int get quantityProduct => _quantityProduct;
+  bool get isActive => _isActive;
+  
+  set isActive(bool value) {
+    _isActive = value;
+    notifyListeners();
+  }
+
+  void addQuatityProduct() {
+    _quantityProduct++;
+    notifyListeners();
+  }
+
+  set quantityProduct(int value) {
+    _quantityProduct = value;
+    notifyListeners();
+  }
+
+  void removeQuatityProduct() {
+    if (quantityProduct > 0) {
+      _quantityProduct--;
+    }
+    notifyListeners();
+  }
 
   set moneyConversion(double value) {
     _moneyConversion = value;
     notifyListeners();
   }
 
-  void getMoneyConversion()async {
+  void getMoneyConversion() async {
     double money = await Prefs.getMoneyConversion();
     _moneyConversion = money;
-    notifyListeners();
-  }
-
-  void setPressedIndex(int index) {
-    _pressedIndex = index;
-    notifyListeners();
-  }
-
-
-  void setselectedCategoryById(int categoryId) {
-    _selectedCategoryById = categoryId;
     notifyListeners();
   }
 

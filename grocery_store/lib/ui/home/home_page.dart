@@ -11,6 +11,7 @@ import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/shop_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
+import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -46,15 +47,11 @@ class _HomePageState extends State<HomePage> {
     return double.parse(cleaned);
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context)
-            .unfocus(); // Esto quita el foco de cualquier TextField
-      },
+      onTap: () => FocusScope.of(context)
+          .unfocus(), // Esto quita el foco de cualquier TextField
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, viewModel, _) {
@@ -69,63 +66,43 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("Tasa en uso: ${viewModel.moneyConversion}"),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: TextFormField(
-                            controller: moneyconversionController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              DecimalInputFormatter(),
-                            ],
-                            decoration: InputDecoration(
-                              hintText: "Money Conversion",
-                              filled: true,
-                              fillColor: AppColors.lightwhite,
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: AppColors.green,
-                                  width: 4,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              disabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        GestureDetector(
-                          onTap: () {
-                            double value = parseFormattedCurrency(
-                                moneyconversionController.value.text);
-
-                            viewModel.setMoneyConversion(value);
-
-                            Prefs.setMoneyConversion(value);
-
-                            moneyconversionController.clear();
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: AppColors.green,
-                            ),
-                            width: 50,
-                            height: 50,
-                            child: const Icon(
-                              Icons.send_rounded,
-                              color: AppColors.white,
-                            ),
-                          ),
-                        )
+                    CustomTextFormField(
+                      isButtonActive: true,
+                      controller: moneyconversionController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        DecimalInputFormatter(),
                       ],
+                      decoration: InputDecoration(
+                        hintText: "Money Conversion",
+                        filled: true,
+                        fillColor: AppColors.lightwhite,
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: AppColors.green,
+                            width: 4,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onTap: () {
+                        double value = parseFormattedCurrency(
+                            moneyconversionController.value.text);
+
+                        viewModel.setMoneyConversion(value);
+
+                        Prefs.setMoneyConversion(value);
+
+                        moneyconversionController.clear();
+                      },
                     ),
                   ],
                 ),
