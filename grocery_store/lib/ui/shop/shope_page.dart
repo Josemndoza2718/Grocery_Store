@@ -19,11 +19,10 @@ class _ShopePageState extends State<ShopePage> {
   TextEditingController clientController = TextEditingController();
   bool isActive = false;
   
-  
+
   
   @override
   Widget build(BuildContext context) {
-    
     return SafeArea(
       child: Consumer<ShopViewModel>(builder: (context, viewModel, _) {
         return Column(
@@ -37,11 +36,16 @@ class _ShopePageState extends State<ShopePage> {
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 10),
                     child: DropdownButtonFormField(
-                      value: "General",
+                      value: null,
                       dropdownColor:AppColors.green,
                       iconEnabledColor: AppColors.white,
                       decoration: const InputDecoration(
                         hintText: 'Select client',
+                        hintStyle: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                         filled: true,
                         fillColor: AppColors.green,
                         border: OutlineInputBorder(
@@ -51,35 +55,19 @@ class _ShopePageState extends State<ShopePage> {
                           ),
                         ),
                       ),
-                      items: const [
-                        DropdownMenuItem<String>(
-                          value: "General",
-                          child: Text("General",
-                              style: TextStyle(
-                                color: AppColors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              )),
-                        ), 
-                        DropdownMenuItem<String>(
-                          value: "Client 1",
-                          child: Text("Client 1",
-                              style: TextStyle(
-                                color: AppColors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              )),
-                        ),
-                        DropdownMenuItem<String>(
-                          value: "Client 2",
-                          child: Text("Client 2",
-                              style: TextStyle(
-                                color: AppColors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              )),
-                        ),
-                      ],
+                      items: viewModel.listClients.map((client) {
+                        return DropdownMenuItem(
+                          value: client.id,
+                          child: Text(
+                            client.name,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                       onChanged: (value) {},
                     ),
                   ),
@@ -88,7 +76,7 @@ class _ShopePageState extends State<ShopePage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
-                        isActive = true;
+                        isActive = !isActive;
                       });
                     },
                     child: Container(
@@ -123,6 +111,10 @@ class _ShopePageState extends State<ShopePage> {
                 isButtonActive: true,
                 controller: clientController,
                 decoration: InputDecoration(
+                  icon: const Icon(
+                    Icons.person,
+                    color: AppColors.green,
+                  ),
                   hintText: "Name or Id",
                   filled: true,
                   fillColor: AppColors.lightwhite,
@@ -143,6 +135,11 @@ class _ShopePageState extends State<ShopePage> {
                   ),
                 ),
                 onTap: () {
+                  //viewModel.deletedClient(viewModel.listClients[0].id);
+                  viewModel.createClient(name: clientController.text).then((_) {
+                    viewModel.getClients();
+                    clientController.clear();
+                  });
                   setState(() {
                     isActive = false;
                   });
@@ -152,14 +149,18 @@ class _ShopePageState extends State<ShopePage> {
             //GridViewButtons
             ShopListWidget(
               listProducts: viewModel.listProducts,
-              quantityProduct: viewModel.quantityProduct,
-              onTap: () => viewModel.isActive = !viewModel.isActive,
+              //quantityProduct: viewModel.quantityProduct, //viewModel.listProducts.map((e) => viewModel.quantityProduct).toList(),
+              quantityProduct: {
+                for (var product in viewModel.listProducts)
+                  product.id: viewModel.quantityProduct.toString()
+              },
+              onTap: (index) => viewModel.isActive = !viewModel.isActive,
+              onSetTap: (index) => viewModel.setQuantityProduct(index),
               isActive: viewModel.isActive,
-              onAddProduct: () => viewModel.addQuatityProduct(),
-              onRemoveProduct: () => viewModel.removeQuatityProduct(),
+              onAddProduct: (value) => viewModel.addQuantityProduct(value),
+              onRemoveProduct: (index) => viewModel.removeQuantityProduct(),
               moneyConversion: viewModel.moneyConversion,
-              onDeleteProduct: (index) => viewModel
-                  .deletedCarProduct(viewModel.listProducts[index].id),
+              onDeleteProduct: (index) => viewModel.deletedCarProduct(viewModel.listProducts[index].id),
             ),
             const SizedBox(height: 80),
           ],

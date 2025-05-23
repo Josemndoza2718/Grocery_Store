@@ -44,6 +44,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                 setSelectedIndex(0);
                 getProducts!();
                 getCategories!();
+                
               },
             ),
             AnimatedButton(

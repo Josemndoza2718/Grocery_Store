@@ -437,12 +437,10 @@ class _AddProductPageState extends State<AddProductPage> {
                                 }).toList(),
                                 onChanged: (String? newValue) {
                                   if (newValue != null) {
-                                    var addProductViewModel =
-                                        context.read<AddProductViewModel>();
+                                    var addProductViewModel = context.read<AddProductViewModel>();
+                                    
                                     homeViewModel.setSelectedCategory(newValue);
-                                    //editCategory = newValue;
-                                    addProductViewModel.setID = int.parse(
-                                        homeViewModel.selectedCategory);
+                                    addProductViewModel.setID = int.parse(homeViewModel.selectedCategory);
                                   }
                                 },
                               ),

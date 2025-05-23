@@ -20,5 +20,12 @@ class ClientModel extends Client {
     };
   }
 
+  Client toEntity() {
+    return Client(
+      id: id,
+      name: name,
+    );
+  }
+
  
 }
