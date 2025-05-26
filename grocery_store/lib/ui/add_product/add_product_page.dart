@@ -54,7 +54,8 @@ class _AddProductPageState extends State<AddProductPage> {
   ) async {
     if (widget.product != null) {
       await homeViewModel
-          .updateProduct(Product(
+          .updateProduct(
+            Product(
               id: widget.product!.id,
               name: nameEditController.text,
               description: descriptionEditController.text,
@@ -62,8 +63,8 @@ class _AddProductPageState extends State<AddProductPage> {
               image: viewModel.galleryImage?.path ?? widget.product!.image,
               categoryId: int.parse(homeViewModel.selectedCategory),
               category: editCategory,
-              idStock: 0,
-              stockQuantity: double.parse(quantityEditController.text)))
+              stockQuantity: double.parse(quantityEditController.text),
+              ))
           .then((_) {
         {
           Navigator.pop(context);

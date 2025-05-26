@@ -75,6 +75,7 @@ class AddProductViewModel extends ChangeNotifier {
           category: category,
           idStock: selectedQuantity,
           image: galleryImage!.path,
+          quantity: 0,
         ),
       );
     }

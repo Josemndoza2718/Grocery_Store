@@ -149,16 +149,11 @@ class _ShopePageState extends State<ShopePage> {
             //GridViewButtons
             ShopListWidget(
               listProducts: viewModel.listProducts,
-              //quantityProduct: viewModel.quantityProduct, //viewModel.listProducts.map((e) => viewModel.quantityProduct).toList(),
-              quantityProduct: {
-                for (var product in viewModel.listProducts)
-                  product.id: viewModel.quantityProduct.toString()
-              },
               onTap: (index) => viewModel.isActive = !viewModel.isActive,
-              onSetTap: (index) => viewModel.setQuantityProduct(index),
+              onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
               isActive: viewModel.isActive,
               onAddProduct: (value) => viewModel.addQuantityProduct(value),
-              onRemoveProduct: (index) => viewModel.removeQuantityProduct(),
+              onRemoveProduct: (index) => viewModel.removeQuantityProduct(index),
               moneyConversion: viewModel.moneyConversion,
               onDeleteProduct: (index) => viewModel.deletedCarProduct(viewModel.listProducts[index].id),
             ),

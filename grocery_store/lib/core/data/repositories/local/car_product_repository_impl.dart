@@ -40,6 +40,7 @@ class CarProductRepositoryImpl implements CarProductRepository {
       category: product.category,
       idStock: product.idStock,
       stockQuantity: product.stockQuantity,
+      quantity: product.quantity
     );
 
     await store.record(product.id).add(db, (productModel.toJson()));
@@ -84,6 +85,7 @@ class CarProductRepositoryImpl implements CarProductRepository {
       category: product.category,
       idStock: product.idStock,
       stockQuantity: product.stockQuantity,
+      quantity: product.quantity
     );
 
     store.record(product.id).put(db, (productModel.toJson()));

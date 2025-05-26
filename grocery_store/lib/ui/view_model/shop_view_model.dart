@@ -41,11 +41,11 @@ class ShopViewModel extends ChangeNotifier {
   List<Client> listClients = [];
 
   double _moneyConversion = 0;
-  int _quantityProduct = 0;
+  double _quantityProduct = 0;
   bool _isActive = false;
 
   double get moneyConversion => _moneyConversion;
-  int get quantityProduct => _quantityProduct;
+  double get quantityProduct => _quantityProduct;
   bool get isActive => _isActive;
 
   Future<void> createClient({
@@ -77,26 +77,22 @@ class ShopViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addQuantityProduct(int id) {
-    for (var element in listProducts) {
-      if (element.id == id) {
-        if (element.stockQuantity > 0) {
-          _quantityProduct++;
+  void addQuantityProduct(int index) {
+    if (listProducts[index].stockQuantity > 0 && listProducts[index].quantity < listProducts[index].stockQuantity) {
+          listProducts[index].quantity ++;
         }
-      }
-    }
     notifyListeners();
   }
 
-  void setQuantityProduct(int value) {
-    _quantityProduct = value;
+  void removeQuantityProduct(int index) {
+     if (listProducts[index].quantity > 0 ) {
+          listProducts[index].quantity --;
+        }
     notifyListeners();
   }
 
-  void removeQuantityProduct() {
-    if (quantityProduct > 0) {
-      _quantityProduct--;
-    }
+  void setQuantityProductForm(int index , double value) {
+    listProducts[index].quantity = value;
     notifyListeners();
   }
 

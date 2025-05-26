@@ -6,8 +6,9 @@ class Product {
   final String image;
   final int categoryId;
   final String category;
-  final int idStock;
+  final int? idStock;
   final double stockQuantity;
+  double quantity;
 
   Product({
     required this.id,
@@ -17,7 +18,8 @@ class Product {
     required this.image,
     required this.categoryId,
     required this.category,
-    required this.idStock,
     required this.stockQuantity,
+    this.idStock,
+    this.quantity = 0,
   });
 }

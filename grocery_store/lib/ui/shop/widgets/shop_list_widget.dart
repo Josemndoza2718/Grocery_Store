@@ -13,8 +13,6 @@ class ShopListWidget extends StatelessWidget {
     this.moneyConversion,
     required this.listProducts,
     required this.onDeleteProduct,
-    //required this.quantityProduct,
-    required this.quantityProduct,
     required this.onAddProduct,
     required this.onRemoveProduct,
     required this.onTap,
@@ -24,17 +22,14 @@ class ShopListWidget extends StatelessWidget {
   final List<Product>? listProducts;
   final Function(int) onDeleteProduct;
   final double? moneyConversion;
-  //final int quantityProduct;
-  final Map<int, String> quantityProduct;
   final Function(int) onAddProduct;
   final Function(int) onRemoveProduct;
   final Function(int) onTap;
-  final Function(int) onSetTap;
+  final Function(int, String?) onSetTap;
   final bool isActive;
 
   final Map<int, TextEditingController> quantityController = {};
 
-  //final Map<int, String> quantityProduct = {};
   @override
   Widget build(BuildContext context) {
     return Flexible(
@@ -55,7 +50,6 @@ class ShopListWidget extends StatelessWidget {
             itemCount: listProducts!.length,
             itemBuilder: (context, index) {
               quantityController[index] ??= TextEditingController();
-              quantityProduct[index] ??= ("0");
               return GestureDetector(
                   child: Container(
                 margin: const EdgeInsets.all(10),
@@ -71,7 +65,8 @@ class ShopListWidget extends StatelessWidget {
                         color: AppColors.black.withAlpha((0.1 * 255).toInt()),
                         spreadRadius: 1,
                         blurRadius: 5,
-                        offset: const Offset(0, 3), // changes position of shadow
+                        offset:
+                            const Offset(0, 3), // changes position of shadow
                       ),
                     ],
                     borderRadius: BorderRadius.circular(10),
@@ -100,8 +95,7 @@ class ShopListWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     listProducts![index].name,
@@ -165,8 +159,13 @@ class ShopListWidget extends StatelessWidget {
                                         ),
                                   !isActive
                                       ? GestureDetector(
-                                          onTap: () => onTap(index),
-                                          child: Text("${quantityProduct[index]}"),)
+                                          onTap: () { 
+                                            onTap(index);},
+                                          child: Text(
+                                              "${quantityController[index]!.text.isEmpty
+                                              ? listProducts![index].quantity.toStringAsFixed(0)
+                                              : quantityController[index]?.text}"),
+                                        )
                                       : SizedBox(
                                           width: 100,
                                           child: TextFormField(
@@ -202,18 +201,14 @@ class ShopListWidget extends StatelessWidget {
                                                     BorderRadius.circular(10),
                                               ),
                                             ),
-                                            onChanged: (value) {
-                                            },
+                                            onChanged: (value) {},
                                           ),
                                         ),
                                   !isActive
                                       ? GestureDetector(
                                           onTap: () {
-                                            onAddProduct(listProducts![index].id);
-                                            if(int.parse(quantityProduct[index] ?? "0") <= listProducts![index].stockQuantity){
-                                              
-                                              quantityProduct[index] = (int.parse(quantityProduct[index] ?? "0") + 1).toString();
-                                            }
+                                            onAddProduct(index);
+                                            //onSetTap(index, null);
                                           },
                                           child: const Icon(
                                             Icons.add_circle,
@@ -222,11 +217,11 @@ class ShopListWidget extends StatelessWidget {
                                         )
                                       : GestureDetector(
                                           onTap: () {
-                                            if (quantityController[index]?.text != null && 
-                                            (int.parse(quantityController[index]!.text) <= listProducts![index].stockQuantity)) {
-                                              onSetTap(int.parse(quantityController[index]!.text));
+                                            if (quantityController[index]?.text !=null &&
+                                                (int.parse(quantityController[index]!.text) <= listProducts![index].stockQuantity)) {
+                                              onSetTap(index, quantityController[index]!.text);
                                               onTap(index);
-                                            }else{
+                                            } else {
                                               quantityController[index]?.clear();
                                               showFloatingMessage(
                                                   context: context,
