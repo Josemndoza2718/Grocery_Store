@@ -9,7 +9,7 @@ import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 class ShopListWidget extends StatelessWidget {
   ShopListWidget({
     super.key,
-    this.isActive = false,
+    this.isActiveList = const [],
     this.moneyConversion,
     required this.listProducts,
     required this.onDeleteProduct,
@@ -26,7 +26,7 @@ class ShopListWidget extends StatelessWidget {
   final Function(int) onRemoveProduct;
   final Function(int) onTap;
   final Function(int, String?) onSetTap;
-  final bool isActive;
+  final List<bool> isActiveList;
 
   final Map<int, TextEditingController> quantityController = {};
 
@@ -142,7 +142,7 @@ class ShopListWidget extends StatelessWidget {
                                 spacing: 8,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  isActive
+                                  isActiveList[index]
                                       ? GestureDetector(
                                           onTap: () => onTap(index),
                                           child: const Icon(
@@ -157,7 +157,7 @@ class ShopListWidget extends StatelessWidget {
                                             color: AppColors.darkgreen,
                                           ),
                                         ),
-                                  !isActive
+                                  !isActiveList[index]
                                       ? GestureDetector(
                                           onTap: () { 
                                             onTap(index);},
@@ -204,7 +204,7 @@ class ShopListWidget extends StatelessWidget {
                                             onChanged: (value) {},
                                           ),
                                         ),
-                                  !isActive
+                                  !isActiveList[index]
                                       ? GestureDetector(
                                           onTap: () {
                                             onAddProduct(index);

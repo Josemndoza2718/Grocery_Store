@@ -149,13 +149,43 @@ class _ShopePageState extends State<ShopePage> {
             //GridViewButtons
             ShopListWidget(
               listProducts: viewModel.listProducts,
-              onTap: (index) => viewModel.isActive = !viewModel.isActive,
+              isActiveList: viewModel.isActiveList,
+              moneyConversion: viewModel.moneyConversion,
+              onTap: (index) => viewModel.isActiveListProduct(index),
               onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
-              isActive: viewModel.isActive,
               onAddProduct: (value) => viewModel.addQuantityProduct(value),
               onRemoveProduct: (index) => viewModel.removeQuantityProduct(index),
-              moneyConversion: viewModel.moneyConversion,
               onDeleteProduct: (index) => viewModel.deletedCarProduct(viewModel.listProducts[index].id),
+            ),
+            //Button
+            if (viewModel.listProducts.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                /* viewModel.createSale().then((_) {
+                  viewModel.getClients();
+                  viewModel.getProducts();
+                }); */
+              },
+              child: Container(
+                height: 55,
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                    color: AppColors.green,
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Buy",
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 80),
           ],

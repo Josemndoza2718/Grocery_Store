@@ -39,14 +39,15 @@ class ShopViewModel extends ChangeNotifier {
 
   List<Product> listProducts = [];
   List<Client> listClients = [];
+  List<bool> _isActiveList = [];
 
   double _moneyConversion = 0;
   double _quantityProduct = 0;
-  bool _isActive = false;
 
   double get moneyConversion => _moneyConversion;
   double get quantityProduct => _quantityProduct;
-  bool get isActive => _isActive;
+  List<bool> get isActiveList => _isActiveList;
+  List<Product> get listProductsByCar => listProducts;
 
   Future<void> createClient({
     required String name,
@@ -72,8 +73,9 @@ class ShopViewModel extends ChangeNotifier {
     getCarProducts();
   }
 
-  set isActive(bool value) {
-    _isActive = value;
+ 
+  void isActiveListProduct(int index) {
+    _isActiveList[index] = !_isActiveList[index];
     notifyListeners();
   }
 
@@ -116,6 +118,7 @@ class ShopViewModel extends ChangeNotifier {
 
   Future<void> getCarProducts() async {
     listProducts = await getCarProductsUseCases.call();
+    _isActiveList = List.filled(listProducts.length, false);
     notifyListeners();
   }
 

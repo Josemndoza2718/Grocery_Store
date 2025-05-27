@@ -84,8 +84,7 @@ class _AddProductPageState extends State<AddProductPage> {
           price: double.parse(priceController.text),
           stockQuantity: double.parse(quantityController.text),
           category: homeViewModel.selectedCategory,
-        )
-            .then((_) {
+        ).then((_) {
           {
             Navigator.pop(context);
             homeViewModel.setSelectedCategory("");
