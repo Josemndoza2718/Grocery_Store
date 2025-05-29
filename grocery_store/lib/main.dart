@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store/core/data/repositories/local/car_client_repository_impl%20copy.dart';
+import 'package:grocery_store/core/data/repositories/local/car_client_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/car_product_repository_impl.dart';
+import 'package:grocery_store/core/data/repositories/local/cash_product_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/category_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
 import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cash/create_cash_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cash/delete_car_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cash/get_cash_products_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
@@ -20,6 +24,7 @@ import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_c
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
+import 'package:grocery_store/ui/view_model/check_view_model.dart';
 import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/origin/main_page.dart';
@@ -48,19 +53,15 @@ class MyApp extends StatelessWidget {
                       repository: CategoryRepositoryImpl(),
                     ),
                     //Products
-                    createProductsUseCases: CreateProductsUseCases(
-                        repository: ProductRepositoryImpl()),
-                    getProductsUseCases: GetProductsUseCases(
-                        repository: ProductRepositoryImpl()),
-                    deleteProductsUseCases: DeleteProductsUseCases(
-                        repository: ProductRepositoryImpl()),
-                    updateProductsUseCases: UpdateProductsUseCases(
-                        repository: ProductRepositoryImpl()),
+                    createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()),
+                    getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
+                    deleteProductsUseCases: DeleteProductsUseCases(repository: ProductRepositoryImpl()),
+                    updateProductsUseCases: UpdateProductsUseCases(repository: ProductRepositoryImpl()),
                   )),
           ChangeNotifierProvider(
               create: (context) => ShopViewModel(
                     getCarProductsUseCases: GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                    createCarProductsUseCases: CreateCarProductsUseCases(repository: CarProductRepositoryImpl()),
+                    addCarProductsUseCases: CreateCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     deleteCarProductsUseCases: DeleteCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     updateCarProductsUseCases: UpdateCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     createClientUseCases: CreateClientUseCases(repository: ClientRepositoryImpl()),
@@ -69,13 +70,17 @@ class MyApp extends StatelessWidget {
                   )),
           ChangeNotifierProvider(
               create: (context) => AddCategoryViewModel(
-                  createCategoriesUseCases: CreateCategoriesUseCases(
-                      repository: CategoryRepositoryImpl()))),
+                  createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()))),
           ChangeNotifierProvider(
               create: (context) => AddProductViewModel(
-                  createProductsUseCases: CreateProductsUseCases(
-                      repository: ProductRepositoryImpl()))),
+                  createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()))),
           ChangeNotifierProvider(create: (context) => MainPageViewModel()),
+          ChangeNotifierProvider(create: (context) => CheckViewModel(
+            createCashProductsUseCases:  CreateCashProductsUseCases(repository: CashProductRepositoryImpl()),
+            getCarProductsUseCases: GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
+            deleteCashProductsUseCases: DeleteCashProductsUseCases(repository: CashProductRepositoryImpl()),
+            
+            )),
         ],
         child: const MaterialApp(
             title: 'Material App',

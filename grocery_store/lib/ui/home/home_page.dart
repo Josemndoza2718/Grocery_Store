@@ -143,8 +143,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 onPressed: (index) {
                   var viewModel = context.read<ShopViewModel>();
-                  viewModel.addProductByCar(
-                      context.read<HomeViewModel>().listProducts[index]);
+                  viewModel.addProductByCar(context.read<HomeViewModel>().listProducts[index]);
                   viewModel.getCarProducts();
                   showFloatingMessage(
                       context: context,

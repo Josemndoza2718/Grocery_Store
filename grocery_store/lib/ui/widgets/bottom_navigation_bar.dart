@@ -10,6 +10,8 @@ class BottomNavigationBarWidget extends StatelessWidget {
      this.getProducts,
      this.getCategories, 
      this.getCarProducts,
+     this.getMoneyConversion,
+ 
   });
 
   final int selectedIndex;
@@ -17,6 +19,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
   final Function()? getProducts;
   final Function()? getCarProducts;
   final Function()? getCategories;
+  final Function()? getMoneyConversion;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +61,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               onTap: () {
                 setSelectedIndex(1);
                 getCarProducts!();
+                getMoneyConversion!();
               },
             ),
             AnimatedButton(

@@ -15,7 +15,7 @@ import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases
 class ShopViewModel extends ChangeNotifier {
   ShopViewModel({
     required this.getCarProductsUseCases,
-    required this.createCarProductsUseCases,
+    required this.addCarProductsUseCases,
     required this.deleteCarProductsUseCases,
     required this.updateCarProductsUseCases,
     required this.createClientUseCases,
@@ -28,7 +28,7 @@ class ShopViewModel extends ChangeNotifier {
   }
 
   final GetCarProductsUseCases getCarProductsUseCases;
-  final CreateCarProductsUseCases createCarProductsUseCases;
+  final CreateCarProductsUseCases addCarProductsUseCases;
   final DeleteCarProductsUseCases deleteCarProductsUseCases;
   final UpdateCarProductsUseCases updateCarProductsUseCases;
 
@@ -43,9 +43,11 @@ class ShopViewModel extends ChangeNotifier {
 
   double _moneyConversion = 0;
   double _quantityProduct = 0;
+  bool _isActive = false;
 
   double get moneyConversion => _moneyConversion;
   double get quantityProduct => _quantityProduct;
+  bool get isActive => _isActive;
   List<bool> get isActiveList => _isActiveList;
   List<Product> get listProductsByCar => listProducts;
 
@@ -61,6 +63,23 @@ class ShopViewModel extends ChangeNotifier {
         name: name,
       ),
     );
+  }
+
+  String getRandomString(int length) {
+  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final random = Random();
+
+  return String.fromCharCodes(
+    Iterable.generate(
+      length,
+      (_) => characters.codeUnitAt(random.nextInt(characters.length)),
+    ),
+  );
+}
+
+  void toggleIsActive() {
+    _isActive = !_isActive;
+    notifyListeners();
   }
 
   Future<void> getClients() async {
@@ -112,7 +131,7 @@ class ShopViewModel extends ChangeNotifier {
   //Car_Products
   Future<void> addProductByCar(Product product) async {
     if (product.stockQuantity > 0) {
-      await createCarProductsUseCases.call(product);
+      await addCarProductsUseCases.call(product);
     }
   }
 
@@ -124,7 +143,6 @@ class ShopViewModel extends ChangeNotifier {
 
   Future<void> deletedCarProduct(int id) async {
     await deleteCarProductsUseCases.deleteCarProduct(id);
-    //listProductsByCar.remove(id);
     getCarProducts();
   }
 }

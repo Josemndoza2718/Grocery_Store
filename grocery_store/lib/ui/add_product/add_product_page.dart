@@ -453,8 +453,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                 },
                                 child: Container(
                                   width: double.infinity,
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
+                                  padding:const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
                                       color: AppColors.white,
                                       borderRadius: BorderRadius.circular(10)),
