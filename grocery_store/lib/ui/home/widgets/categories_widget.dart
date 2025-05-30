@@ -65,12 +65,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
-            child: Text(
-              "Categories",
-              style: TextStyle(fontSize: 18),
-            ),
+          const Text(
+            "Categories",
+            style: TextStyle(fontSize: 18),
           ),
           Container(
             color: Colors.transparent,

@@ -4,30 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/car/widgets/shop_list_widget.dart';
 import 'package:grocery_store/ui/view_model/check_view_model.dart';
-import 'package:grocery_store/ui/view_model/shop_view_model.dart';
+import 'package:grocery_store/ui/view_model/car_view_model.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:provider/provider.dart';
 
-class ShopePage extends StatefulWidget {
-  const ShopePage({super.key});
+class CarPage extends StatefulWidget {
+  const CarPage({super.key});
 
   @override
-  State<ShopePage> createState() => _ShopePageState();
+  State<CarPage> createState() => _CarPageState();
 }
 
-class _ShopePageState extends State<ShopePage> {
-  TextEditingController clientController = TextEditingController();
+class _CarPageState extends State<CarPage> {
+  //TextEditingController clientController = TextEditingController();
   
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Consumer<ShopViewModel>(builder: (context, viewModel, _) {
+      child: Consumer<CarViewModel>(builder: (context, viewModel, _) {
         return Column(
           spacing: 16,
           children: [
             const SizedBox(height: 10),
-            Row(
+            /* Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
@@ -99,7 +99,6 @@ class _ShopePageState extends State<ShopePage> {
                 ),
               ],
             ),
-            //const SizedBox(height: 10),
             if (viewModel.isActive)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -142,6 +141,20 @@ class _ShopePageState extends State<ShopePage> {
                   },
                 ),
               ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              child: const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Car to: ",
+                  style: TextStyle(
+                              color: AppColors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                ),
+              ),
+            ), */
             //GridViewButtons
             ShopListWidget(
               listProducts: viewModel.listProducts,
@@ -157,7 +170,7 @@ class _ShopePageState extends State<ShopePage> {
             if (viewModel.listProducts.isNotEmpty)
               GestureDetector(
                 onTap: () {
-                  var shopViewModel = context.read<ShopViewModel>();
+                  /* var shopViewModel = context.read<CarViewModel>();
                   String defaulClientName = shopViewModel.getRandomString(8);
                   
                   var viewModel = context.read<CheckViewModel>();
@@ -167,7 +180,7 @@ class _ShopePageState extends State<ShopePage> {
                   viewModel.addCheckProduct(
                     status: "bought",
                     ownerCarName: defaulClientName,
-                  );
+                  ); */
                 },
                 child: Container(
                   height: 55,

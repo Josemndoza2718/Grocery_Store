@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/cash/widget/check_widget.dart';
 import 'package:grocery_store/ui/view_model/check_view_model.dart';
-import 'package:grocery_store/ui/view_model/shop_view_model.dart';
+import 'package:grocery_store/ui/view_model/car_view_model.dart';
 import 'package:provider/provider.dart';
 
 class CheckPage extends StatefulWidget {
@@ -26,11 +26,11 @@ class _CheckPageState extends State<CheckPage> {
           children: [
             const SizedBox(height: 10),
             CheckWidget(
-              listProducts: context.read<ShopViewModel>().listProducts,
+              listProducts: context.read<CarViewModel>().listProducts,
               subToTal: 0,
-              moneyConversion: context.read<ShopViewModel>().moneyConversion,
+              moneyConversion: context.read<CarViewModel>().moneyConversion,
             ),
-            if (context.read<ShopViewModel>().listProducts.isNotEmpty)
+            if (context.read<CarViewModel>().listProducts.isNotEmpty)
               const Text(
                 "Metodos de Pago",
                 textAlign: TextAlign.center,

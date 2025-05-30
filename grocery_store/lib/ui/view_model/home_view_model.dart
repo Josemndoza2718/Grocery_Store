@@ -1,10 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
+import 'package:grocery_store/core/domain/entities/client.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/get_categories_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_cases%20copy.dart';
@@ -23,6 +29,10 @@ class HomeViewModel extends ChangeNotifier {
     required this.createProductsUseCases,
     required this.deleteProductsUseCases,
     required this.updateProductsUseCases,
+    //Clients
+    required this.createClientUseCases,
+    required this.getClientsUseCases,
+    required this.deleteClientsUseCases,
   }) {
     getCategories();
     getProducts();
@@ -39,11 +49,20 @@ class HomeViewModel extends ChangeNotifier {
   final DeleteProductsUseCases deleteProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases;
 
+  //Clients
+  final CreateClientUseCases createClientUseCases;
+  final GetClientsUseCases getClientsUseCases;
+  final DeleteClientsUseCases deleteClientsUseCases;
+
 
   List<Category> listCategories = [];
   List<Product> listProducts = [];
   List<Product> listProductsByCategory = [];
-  List<Product> listProductsByCar = [];
+
+
+
+  List<Client> listClients = [];
+  bool _isActive = false;
 
   int _selectedIndexGrid = -1;
   int _pressedIndex = -1;
@@ -58,6 +77,47 @@ class HomeViewModel extends ChangeNotifier {
   int get selectedIndexGrid => _selectedIndexGrid;
   String get selectedCategory => _selectedCategory;
   bool get isFilterList => _isFilterList;
+  bool get isActive => _isActive;
+
+    Future<void> createClient({
+    required String name,
+  }) async {
+    Random random = Random();
+    int randomNumber = random.nextInt(100000000);
+
+    await createClientUseCases.call(
+      Client(
+        id: randomNumber,
+        name: name,
+      ),
+    );
+  }
+
+    Future<void> getClients() async {
+    listClients = await getClientsUseCases.call();
+    notifyListeners();
+  }
+
+  Future<void> deletedClient(int id) async {
+    await deleteClientsUseCases.deleteClient(id);
+  }
+
+    String getRandomString(int length) {
+  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final random = Random();
+
+  return String.fromCharCodes(
+    Iterable.generate(
+      length,
+      (_) => characters.codeUnitAt(random.nextInt(characters.length)),
+    ),
+  );
+}
+
+  void toggleIsActive() {
+    _isActive = !_isActive;
+    notifyListeners();
+  }
 
 
   set moneyConversion(double value) {

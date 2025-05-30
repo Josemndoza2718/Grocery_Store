@@ -51,10 +51,10 @@ class ProductsListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Flexible(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10),
+        /* margin: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
             color: AppColors.lightwhite,
-            borderRadius: BorderRadius.circular(10)),
+            borderRadius: BorderRadius.circular(10)), */
         child: GridView.builder(
           scrollDirection: Axis.vertical,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -148,7 +148,7 @@ class ProductsListWidget extends StatelessWidget {
                   );
                 },
                 child: Container(
-                  margin: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(115, 184, 184, 184),
                     borderRadius: BorderRadius.circular(10),

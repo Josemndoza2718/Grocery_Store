@@ -28,7 +28,7 @@ import 'package:grocery_store/ui/view_model/check_view_model.dart';
 import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/origin/main_page.dart';
-import 'package:grocery_store/ui/view_model/shop_view_model.dart';
+import 'package:grocery_store/ui/view_model/car_view_model.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());
@@ -43,30 +43,30 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(
               create: (context) => HomeViewModel(
                     //Categories
-                    createCategoriesUseCases: CreateCategoriesUseCases(
-                        repository: CategoryRepositoryImpl()),
-                    deleteCategoriesUseCases: DeleteCategoriesUseCases(
-                        repository: CategoryRepositoryImpl()),
-                    updateCategoriesUseCases: UpdateCategoriesUseCases(
-                        repository: CategoryRepositoryImpl()),
-                    getCategoriesUseCases: GetCategoriesUseCases(
-                      repository: CategoryRepositoryImpl(),
+                    createCategoriesUseCases: CreateCategoriesUseCases(repository: CategoryRepositoryImpl()),
+                    deleteCategoriesUseCases: DeleteCategoriesUseCases(repository: CategoryRepositoryImpl()),
+                    updateCategoriesUseCases: UpdateCategoriesUseCases(repository: CategoryRepositoryImpl()),
+                    getCategoriesUseCases: GetCategoriesUseCases(repository: CategoryRepositoryImpl(),
                     ),
                     //Products
                     createProductsUseCases: CreateProductsUseCases(repository: ProductRepositoryImpl()),
                     getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
                     deleteProductsUseCases: DeleteProductsUseCases(repository: ProductRepositoryImpl()),
                     updateProductsUseCases: UpdateProductsUseCases(repository: ProductRepositoryImpl()),
+                    //Clients
+                    createClientUseCases:CreateClientUseCases(repository: ClientRepositoryImpl()),
+                    getClientsUseCases: GetClientsUseCases(repository: ClientRepositoryImpl()),
+                    deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()),
                   )),
           ChangeNotifierProvider(
-              create: (context) => ShopViewModel(
+              create: (context) => CarViewModel(
                     getCarProductsUseCases: GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     addCarProductsUseCases: CreateCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     deleteCarProductsUseCases: DeleteCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     updateCarProductsUseCases: UpdateCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                    createClientUseCases: CreateClientUseCases(repository: ClientRepositoryImpl()),
+                    /* createClientUseCases: CreateClientUseCases(repository: ClientRepositoryImpl()),
                     getClientsUseCases: GetClientsUseCases(repository: ClientRepositoryImpl()),
-                    deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()),
+                    deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()), */
                   )),
           ChangeNotifierProvider(
               create: (context) => AddCategoryViewModel(

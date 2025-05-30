@@ -12,18 +12,18 @@ import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cas
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 
-class ShopViewModel extends ChangeNotifier {
-  ShopViewModel({
+class CarViewModel extends ChangeNotifier {
+  CarViewModel({
     required this.getCarProductsUseCases,
     required this.addCarProductsUseCases,
     required this.deleteCarProductsUseCases,
     required this.updateCarProductsUseCases,
-    required this.createClientUseCases,
+    /* required this.createClientUseCases,
     required this.getClientsUseCases,
-    required this.deleteClientsUseCases,
+    required this.deleteClientsUseCases, */
   }) {
     getCarProducts();
-    getClients();
+    //getClients();
     getMoneyConversion();
   }
 
@@ -32,10 +32,10 @@ class ShopViewModel extends ChangeNotifier {
   final DeleteCarProductsUseCases deleteCarProductsUseCases;
   final UpdateCarProductsUseCases updateCarProductsUseCases;
 
-  //Clients
+  /* //Clients
   final CreateClientUseCases createClientUseCases;
   final GetClientsUseCases getClientsUseCases;
-  final DeleteClientsUseCases deleteClientsUseCases;
+  final DeleteClientsUseCases deleteClientsUseCases; */
 
   List<Product> listProducts = [];
   List<Client> listClients = [];
@@ -51,7 +51,7 @@ class ShopViewModel extends ChangeNotifier {
   List<bool> get isActiveList => _isActiveList;
   List<Product> get listProductsByCar => listProducts;
 
-  Future<void> createClient({
+/*   Future<void> createClient({
     required String name,
   }) async {
     Random random = Random();
@@ -63,9 +63,9 @@ class ShopViewModel extends ChangeNotifier {
         name: name,
       ),
     );
-  }
+  } */
 
-  String getRandomString(int length) {
+/*   String getRandomString(int length) {
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   final random = Random();
 
@@ -80,9 +80,9 @@ class ShopViewModel extends ChangeNotifier {
   void toggleIsActive() {
     _isActive = !_isActive;
     notifyListeners();
-  }
+  } */
 
-  Future<void> getClients() async {
+/*   Future<void> getClients() async {
     listClients = await getClientsUseCases.call();
     notifyListeners();
   }
@@ -90,7 +90,7 @@ class ShopViewModel extends ChangeNotifier {
   Future<void> deletedClient(int id) async {
     await deleteClientsUseCases.deleteClient(id);
     getCarProducts();
-  }
+  } */
 
  
   void isActiveListProduct(int index) {
