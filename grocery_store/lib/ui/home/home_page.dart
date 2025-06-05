@@ -56,14 +56,14 @@ class _HomePageState extends State<HomePage> {
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, viewModel, _) {
-          return Column(
-            spacing: 16,
-            children: [
-              const SizedBox(height: 8),
-              //Money Conversion
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Column(
+              spacing: 16,
+              children: [
+                const SizedBox(height: 8),
+                //Money Conversion
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("Tasa en uso: ${viewModel.moneyConversion}"),
@@ -107,91 +107,98 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      child: DropdownButtonFormField(
-                        value: null,
-                        dropdownColor: AppColors.green,
-                        iconEnabledColor: AppColors.white,
-                        decoration: const InputDecoration(
-                          hintText: 'Select client',
-                          hintStyle: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          filled: true,
-                          fillColor: AppColors.green,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(10),
-                            ),
-                          ),
-                        ),
-                        items: viewModel.listClients.map((client) {
-                          return DropdownMenuItem(
-                            value: client.id,
-                            child: Text(
-                              client.name,
-                              style: const TextStyle(
-                                color: AppColors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {},
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    child: GestureDetector(
+                //const SizedBox(height: 10),
+                //Client Menu
+                Row(
+                  spacing: 8,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
                       onTap: () {
                         viewModel.toggleIsActive();
                       },
                       child: Container(
                         height: 55,
-                        width: double.infinity,
+                        //width: double.infinity,
                         padding: const EdgeInsets.all(8),
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                            color: AppColors.green,
+                            color: AppColors.darkgreen,
                             borderRadius: BorderRadius.circular(10)),
-                        child: const Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            "New client",
-                            style: TextStyle(
-                              color: AppColors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        child: const Icon(
+                          Icons.person_add_alt_1_sharp,
+                          color: AppColors.white,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              if (viewModel.isActive)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: CustomTextFormField(
+                    Flexible(
+                      child: Container(
+                        //margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(left: 12),
+                        decoration: BoxDecoration(
+                          color: AppColors.green,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: DropdownMenu<int>(
+                          width: double.infinity,
+                          enableSearch: true,
+                          enableFilter: true,
+                          requestFocusOnTap: true,
+                          hintText: 'Select client',
+                          textStyle: const TextStyle(
+                            color: AppColors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          inputDecorationTheme: const InputDecorationTheme(
+                            border: InputBorder.none,
+                          ),
+                          menuStyle: MenuStyle(
+                            backgroundColor:
+                                WidgetStateProperty.all(AppColors.white),
+                            shape: WidgetStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                          dropdownMenuEntries:
+                              viewModel.listClients.map((client) {
+                            return DropdownMenuEntry<int>(
+                              value: client.id,
+                              label: client.name,
+                              style: MenuItemButton.styleFrom(
+                                foregroundColor: AppColors.black,
+                              ),
+                              trailingIcon: IconButton(
+                                  onPressed: () {
+                                    viewModel.deletedClient(client.id);
+                                  },
+                                  icon: const Icon(
+                                    Icons.remove_circle,
+                                    color: AppColors.red,
+                                  )),
+                            );
+                          }).toList(),
+                          onSelected: (value) {
+                            final selectedClient =
+                                viewModel.listClients.firstWhere(
+                              (element) => element.id == value,
+                            );
+                            viewModel.clientId = value!;
+                            if (selectedClient != null) {
+                              viewModel.setClientName = selectedClient.name;
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (viewModel.isActive)
+                  CustomTextFormField(
                     isButtonActive: true,
                     controller: clientController,
                     decoration: InputDecoration(
-                      icon: const Icon(
-                        Icons.person,
-                        color: AppColors.green,
-                      ),
                       hintText: "Name or Id",
                       filled: true,
                       fillColor: AppColors.lightwhite,
@@ -212,101 +219,128 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     onTap: () {
-                      //viewModel.deletedClient(viewModel.listClients[0].id);
-                      viewModel
-                          .createClient(name: clientController.text)
-                          .then((_) {
-                        viewModel.getClients();
-                        clientController.clear();
-                      });
-                      viewModel.toggleIsActive();
+                      if (clientController.text.isNotEmpty &&
+                          clientController.text != "") {
+                        bool exists = viewModel.listClients.any(
+                            (element) => element.name == clientController.text);
+
+                        if (!exists) {
+                          viewModel
+                              .createClient(name: clientController.text)
+                              .then((_) {
+                            viewModel.getClients();
+                            clientController.clear();
+                          });
+                          viewModel.toggleIsActive();
+                          showFloatingMessage(
+                              context: context,
+                              message: "User added",
+                              color: AppColors.green);
+                        } else {
+                          showFloatingMessage(
+                              context: context,
+                              message: "Username already exists",
+                              color: AppColors.red);
+                        }
+                      }
                     },
                   ),
-                ),
-              /* Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                child: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Car to: ",
-                    style: TextStyle(
-                      color: AppColors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+
+                //GridViewButtons
+                Flexible(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: AppColors.lightwhite,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      children: [
+                        //Text("Client ${viewModel.clientName}"),
+                        CategoriesWidget(
+                          pressedIndex: viewModel.pressedIndex,
+                          selectedIndexGrid: viewModel.selectedIndexGrid,
+                          listCategories: viewModel.listCategories,
+                          selectColor: AppColors.green,
+                          unSelectColor: AppColors.lightgrey,
+                          onTap: (index) {
+                            viewModel.setPressedIndex(index);
+                            viewModel.setSelectedCategory(
+                                viewModel.listCategories[index].name);
+                            viewModel.setIsFilterList(true);
+                            viewModel.getProductsByCategory(
+                                viewModel.listCategories[index].id);
+                          },
+                          onPressed: (index) {
+                            viewModel.setPressedIndex(index);
+                            viewModel.getProducts();
+                            viewModel.setIsFilterList(false);
+                          },
+                          onTapUp: viewModel.setSelectedIndexGrid,
+                          onClose: () => viewModel.getCategories(),
+                          onDeleteCategory: (index) => viewModel.deleteCategory(
+                              viewModel.listCategories[index].id),
+                        ),
+                        ProductsListWidget(
+                          page: const AddProductPage(),
+                          listProducts: viewModel.listProducts,
+                          listProductsByCategory:
+                              viewModel.listProductsByCategory,
+                          onTap: (index) {
+                            var addProductViewModel =
+                                context.read<AddProductViewModel>();
+                            addProductViewModel.getCategoryId(
+                                viewModel.listProducts, index);
+                          },
+                          onPressed: (index) {
+                            var viewModel = context.read<CarViewModel>();
+
+                            var homeViewModel = context.read<HomeViewModel>();
+
+                            for (var element in viewModel.listCarts) {
+                              if (element.ownerId != homeViewModel.clientId) {
+                                if (homeViewModel.clientName.isNotEmpty &&
+                                    homeViewModel.clientId != null) {
+                                  if (homeViewModel.listProducts.isNotEmpty) {
+                                    viewModel.createCart(
+                                      ownerId: homeViewModel.clientId,
+                                      ownerCarName: homeViewModel.clientName,
+                                      products: homeViewModel.listProducts,
+                                    );
+                                    showFloatingMessage(
+                                        context: context,
+                                        message: "Product added to cart",
+                                        color: AppColors.green);
+                                  }
+                                } else {
+                                  showFloatingMessage(
+                                      context: context,
+                                      message:
+                                          "¡¡¡Warning!!!. Please select a client",
+                                      color: AppColors.red);
+                                }
+                              } else {
+                                viewModel.updateCart(
+                                  cartId: viewModel.listCarts[index].id,
+                                  ownerId: homeViewModel.clientId,
+                                  ownerCarName: homeViewModel.clientName,
+                                  products: homeViewModel.listProducts,
+                                );
+                              }
+                            }
+                          },
+                          onClose: () => viewModel.getProducts(),
+                          moneyConversion: viewModel.moneyConversion,
+                          category: viewModel.selectedCategory,
+                          isFilterList: viewModel.isFilterList,
+                          onDeleteProduct: (index) => viewModel
+                              .deleteProduct(viewModel.listProducts[index].id),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ), */
-              //GridViewButtons
-
-              Flexible(
-                child: Container(
-                  //padding: const EdgeInsets.symmetric(horizontal: 8),
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                      color: AppColors.lightwhite,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Column(
-                    children: [
-                      CategoriesWidget(
-                        pressedIndex: viewModel.pressedIndex,
-                        selectedIndexGrid: viewModel.selectedIndexGrid,
-                        listCategories: viewModel.listCategories,
-                        selectColor: AppColors.green,
-                        unSelectColor: AppColors.lightgrey,
-                        onTap: (index) {
-                          viewModel.setPressedIndex(index);
-                          viewModel.setSelectedCategory(
-                              viewModel.listCategories[index].name);
-                          viewModel.setIsFilterList(true);
-                          viewModel.getProductsByCategory(
-                              viewModel.listCategories[index].id);
-                        },
-                        onPressed: (index) {
-                          viewModel.setPressedIndex(index);
-                          viewModel.getProducts();
-                          viewModel.setIsFilterList(false);
-                        },
-                        onTapUp: viewModel.setSelectedIndexGrid,
-                        onClose: () => viewModel.getCategories(),
-                        onDeleteCategory: (index) => viewModel
-                            .deleteCategory(viewModel.listCategories[index].id),
-                      ),
-                      ProductsListWidget(
-                        page: const AddProductPage(),
-                        listProducts: viewModel.listProducts,
-                        listProductsByCategory:
-                            viewModel.listProductsByCategory,
-                        onTap: (index) {
-                          var addProductViewModel =
-                              context.read<AddProductViewModel>();
-                          addProductViewModel.getCategoryId(
-                              viewModel.listProducts, index);
-                        },
-                        onPressed: (index) {
-                          var viewModel = context.read<CarViewModel>();
-                          viewModel.addProductByCar(context
-                              .read<HomeViewModel>()
-                              .listProducts[index]);
-                          viewModel.getCarProducts();
-                          showFloatingMessage(
-                              context: context,
-                              message: "Product added to cart",
-                              color: AppColors.green);
-                        },
-                        onClose: () => viewModel.getProducts(),
-                        moneyConversion: viewModel.moneyConversion,
-                        category: viewModel.selectedCategory,
-                        isFilterList: viewModel.isFilterList,
-                        onDeleteProduct: (index) => viewModel
-                            .deleteProduct(viewModel.listProducts[index].id),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 80),
-            ],
+                const SizedBox(height: 80),
+              ],
+            ),
           );
         }),
       ),

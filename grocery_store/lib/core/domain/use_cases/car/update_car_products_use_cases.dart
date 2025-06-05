@@ -1,5 +1,5 @@
 import 'package:grocery_store/core/data/repositories/local/car_product_repository_impl.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/entities/cart.dart';
 
 class UpdateCarProductsUseCases {
   const UpdateCarProductsUseCases({required this.repository});
@@ -7,7 +7,7 @@ class UpdateCarProductsUseCases {
   final CarProductRepositoryImpl repository;
 
  
-  Future<void> updateProduct(Product product) async {
-    await repository.updateCarProduct(product);
+  Future<void> updateProduct(Cart cart) async {
+    await repository.updateCarProduct(cart);
   }
 }

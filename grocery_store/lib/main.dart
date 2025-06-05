@@ -10,7 +10,6 @@ import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cas
 import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/create_cash_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/cash/get_cash_products_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
@@ -20,7 +19,7 @@ import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_ca
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
@@ -64,9 +63,9 @@ class MyApp extends StatelessWidget {
                     addCarProductsUseCases: CreateCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     deleteCarProductsUseCases: DeleteCarProductsUseCases(repository: CarProductRepositoryImpl()),
                     updateCarProductsUseCases: UpdateCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                    /* createClientUseCases: CreateClientUseCases(repository: ClientRepositoryImpl()),
+                    createClientUseCases: CreateClientUseCases(repository: ClientRepositoryImpl()),
                     getClientsUseCases: GetClientsUseCases(repository: ClientRepositoryImpl()),
-                    deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()), */
+                    deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()),
                   )),
           ChangeNotifierProvider(
               create: (context) => AddCategoryViewModel(

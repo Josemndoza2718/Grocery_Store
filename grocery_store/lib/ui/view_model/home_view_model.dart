@@ -13,12 +13,11 @@ import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_ca
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_categories_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
-    
     //Categories
     required this.createCategoriesUseCases,
     required this.deleteCategoriesUseCases,
@@ -34,6 +33,7 @@ class HomeViewModel extends ChangeNotifier {
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
   }) {
+    getClients();
     getCategories();
     getProducts();
   }
@@ -54,15 +54,15 @@ class HomeViewModel extends ChangeNotifier {
   final GetClientsUseCases getClientsUseCases;
   final DeleteClientsUseCases deleteClientsUseCases;
 
-
   List<Category> listCategories = [];
   List<Product> listProducts = [];
   List<Product> listProductsByCategory = [];
 
-
-
   List<Client> listClients = [];
   bool _isActive = false;
+
+  String clientName = "";
+  int clientId = 0;
 
   int _selectedIndexGrid = -1;
   int _pressedIndex = -1;
@@ -79,46 +79,64 @@ class HomeViewModel extends ChangeNotifier {
   bool get isFilterList => _isFilterList;
   bool get isActive => _isActive;
 
-    Future<void> createClient({
+  Future<void> createClient({
     required String name,
   }) async {
-    Random random = Random();
-    int randomNumber = random.nextInt(100000000);
-
-    await createClientUseCases.call(
-      Client(
-        id: randomNumber,
-        name: name,
-      ),
-    );
+    if (name.isNotEmpty && name != "") {
+      bool exists = listClients.any((element) => element.name == name);
+      if (!exists) {
+        Random random = Random();
+        int randomNumber = random.nextInt(100000000);
+        await createClientUseCases.call(
+          Client(
+            id: randomNumber,
+            name: name,
+          ),
+        );
+        await getClients();
+      } else {
+        print("ya existe");
+      }
+    }
   }
 
-    Future<void> getClients() async {
+  Future<void> getClients() async {
     listClients = await getClientsUseCases.call();
     notifyListeners();
   }
 
   Future<void> deletedClient(int id) async {
     await deleteClientsUseCases.deleteClient(id);
+    getClients();
   }
 
-    String getRandomString(int length) {
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  final random = Random();
+  set setClientName(String value) {
+    clientName = value;
+    notifyListeners();
+  }
 
-  return String.fromCharCodes(
-    Iterable.generate(
-      length,
-      (_) => characters.codeUnitAt(random.nextInt(characters.length)),
-    ),
-  );
-}
+  set setClientId(int value) {
+    clientId = value;
+    notifyListeners();
+  }
+
+  String getRandomString(int length) {
+    const characters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+
+    return String.fromCharCodes(
+      Iterable.generate(
+        length,
+        (_) => characters.codeUnitAt(random.nextInt(characters.length)),
+      ),
+    );
+  }
 
   void toggleIsActive() {
     _isActive = !_isActive;
     notifyListeners();
   }
-
 
   set moneyConversion(double value) {
     _moneyConversion = value;
@@ -149,8 +167,6 @@ class HomeViewModel extends ChangeNotifier {
     _selectedCategory = category;
     notifyListeners();
   }
-
-
 
   //Products
   Future<void> getProducts() async {

@@ -1,7 +1,8 @@
-import 'package:grocery_store/core/domain/entities/check.dart';
+import 'package:grocery_store/core/data/models/product_model.dart';
+import 'package:grocery_store/core/domain/entities/cart.dart';
 
-class CheckModel extends Check {
-  CheckModel({
+class CartModel extends Cart {
+  CartModel({
     required super.id,
     required super.ownerId,
     super.ownerCarName,
@@ -9,13 +10,15 @@ class CheckModel extends Check {
     required super.products,
   });
 
-  factory CheckModel.fromJson(Map<String, dynamic> json) {
-    return CheckModel(
+  factory CartModel.fromJson(Map<String, dynamic> json) {
+    return CartModel(
       id: json['id'],
       ownerId: json['owner_id'],
       ownerCarName: json['owner_car_name'],
       status: json['status'],
-      products: json['products'],
+      products: (json['products'] as List)
+          .map((item) => ProductModel.fromJson(item))
+          .toList(),
     );
   }
 
@@ -25,12 +28,12 @@ class CheckModel extends Check {
       'owner_id': ownerId,
       'owner_car_name': ownerCarName,
       'status': status,
-      'products': products,
+      'products': products.map((p) => p.toJson()).toList(),
     };
   }
 
     toEntity(){
-    return Check(
+    return Cart(
       id: id,
       ownerId: ownerId,
       ownerCarName: ownerCarName,

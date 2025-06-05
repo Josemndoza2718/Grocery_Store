@@ -44,6 +44,8 @@ class ProductModel extends Product {
     };
   }
 
+  
+
   toEntity(){
     return Product(
       id: id,

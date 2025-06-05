@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/core/domain/entities/check.dart';
+import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/create_cash_products_use_cases.dart';
@@ -13,7 +13,7 @@ class CheckViewModel extends ChangeNotifier {
     required this.getCarProductsUseCases,
     required this.deleteCashProductsUseCases,
   }){
-    getCarProducts();
+    //getCarProducts();
   }
 
   final CreateCashProductsUseCases createCashProductsUseCases;
@@ -23,7 +23,7 @@ class CheckViewModel extends ChangeNotifier {
   List<Product> listProducts = [];
   List<Product> get listProductsByCar => listProducts;
 
-  Future<void> addCheckProduct({
+  /* Future<void> addCheckProduct({
     String? ownerCarName,
     required String status,
   }) async {
@@ -32,7 +32,7 @@ class CheckViewModel extends ChangeNotifier {
       int randomId = random.nextInt(100000000);
       int randomOwnerId = random.nextInt(100000000);
 
-      await createCashProductsUseCases.call(Check(
+      await createCashProductsUseCases.call(Cart(
         id: randomId,
         ownerId: randomOwnerId,
         ownerCarName: ownerCarName,
@@ -40,13 +40,13 @@ class CheckViewModel extends ChangeNotifier {
         status: status,
       ));
     }
-  }
+  } */
 
-  Future<void> getCarProducts() async {
+/*   Future<void> getCarProducts() async {
     listProducts = await getCarProductsUseCases.call();
     notifyListeners();
   }
-
+ */
   Future<void> deletedCarProduct(int id) async {
     await deleteCashProductsUseCases.deleteCashProduct(id);
   }

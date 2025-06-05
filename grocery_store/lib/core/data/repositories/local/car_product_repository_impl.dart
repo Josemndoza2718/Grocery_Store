@@ -1,5 +1,6 @@
+import 'package:grocery_store/core/data/models/cart_model.dart';
 import 'package:grocery_store/core/data/models/product_model.dart';
-import 'package:grocery_store/core/domain/entities/check.dart';
+import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/repositories/local/car_product_repository.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,12 +10,9 @@ import 'package:path/path.dart';
 class CarProductRepositoryImpl implements CarProductRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
-  //late final Database db;
   var store = intMapStoreFactory.store('car_products');
 
-  /* ProductRepositoryImpl() {
-    initDatabase();
-  } */
+
 
   Future<Database> initDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -27,6 +25,22 @@ class CarProductRepositoryImpl implements CarProductRepository {
   }
 
   @override
+  Future<void> addCarProduct(Cart cart) async {
+    final db = await initDatabase();
+
+    CartModel cartModel = CartModel(
+        id: cart.id,
+        ownerId: cart.ownerId,
+        ownerCarName: cart.ownerCarName,
+        status: cart.status,
+        products: cart.products
+        );
+
+    await store.record(cart.id).add(db, (cartModel.toJson()));
+    //await store.addAll(db, cart.products.map((e) => cartModel.toJson()).toList());
+  }
+
+  /* @override
   Future<void> addCarProduct(Product product) async {
     final db = await initDatabase();
 
@@ -43,23 +57,27 @@ class CarProductRepositoryImpl implements CarProductRepository {
         quantity: product.quantity);
 
     await store.record(product.id).add(db, (productModel.toJson()));
-  }
+  } */
 
   @override
   Future<void> deleteCarProduct(int id) async {
     final db = await initDatabase();
+    //final finder = Finder(filter: Filter.byKey(id));
+
+    //await store.delete(db, finder: finder);
+    //await store.delete(db);
     await store.record(id).delete(db);
   }
 
   @override
-  Future<List<Product>> getAllCarProducts() async {
+  Future<List<Cart>> getAllCarProducts() async {
     final db = await initDatabase();
     final result = await store.find(db).then((records) {
       return records.map((record) {
-        return ProductModel.fromJson(record.value);
+        return CartModel.fromJson(record.value);
       }).toList();
     });
-    return result.map<Product>((e) => e.toEntity()).toList();
+    return result.map<Cart>((e) => e.toEntity()).toList();
   }
 
   @override
@@ -72,20 +90,17 @@ class CarProductRepositoryImpl implements CarProductRepository {
   }
 
   @override
-  Future<void> updateCarProduct(Product product) async {
+  Future<void> updateCarProduct(Cart cart) async {
     final db = await initDatabase();
-    ProductModel productModel = ProductModel(
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        image: product.image,
-        categoryId: product.categoryId,
-        category: product.category,
-        idStock: product.idStock,
-        stockQuantity: product.stockQuantity,
-        quantity: product.quantity);
 
-    store.record(product.id).put(db, (productModel.toJson()));
+    CartModel cartModel = CartModel(
+        id: cart.id,
+        ownerId: cart.ownerId,
+        ownerCarName: cart.ownerCarName,
+        status: cart.status,
+        products: cart.products
+        );
+
+    store.record(cart.id).put(db, (cartModel.toJson()));
   }
 }

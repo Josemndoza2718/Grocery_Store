@@ -1,6 +1,6 @@
-import 'package:grocery_store/core/data/models/check_model.dart';
+import 'package:grocery_store/core/data/models/cart_model.dart';
 import 'package:grocery_store/core/data/models/product_model.dart';
-import 'package:grocery_store/core/domain/entities/check.dart';
+import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/repositories/local/cash_product_repository.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,10 +23,10 @@ class CashProductRepositoryImpl implements CashProductRepository {
   }
 
   @override
-  Future<void> addCashProduct(Check check) async {
+  Future<void> addCashProduct(Cart check) async {
     final db = await initDatabase();
 
-    CheckModel carModel = CheckModel(
+    CartModel carModel = CartModel(
       id: check.id,
       ownerId: check.ownerId,
       ownerCarName: check.ownerCarName,

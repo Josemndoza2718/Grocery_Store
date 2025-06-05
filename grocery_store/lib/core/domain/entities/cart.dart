@@ -1,13 +1,13 @@
 import 'package:grocery_store/core/domain/entities/product.dart';
 
-class Check {
+class Cart {
   final int id;
   final int ownerId;
   final String? ownerCarName;
   final String status;
   final List<Product> products;
 
-  Check({
+  Cart({
     required this.id,
     required this.ownerId,
     this.ownerCarName,
