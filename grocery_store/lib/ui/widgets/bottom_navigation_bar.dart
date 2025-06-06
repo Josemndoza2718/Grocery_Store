@@ -7,11 +7,10 @@ class BottomNavigationBarWidget extends StatelessWidget {
     super.key,
     required this.selectedIndex,
     required this.setSelectedIndex,
-     this.getProducts,
-     this.getCategories, 
-     this.getCarProducts,
-     this.getMoneyConversion,
- 
+    this.getProducts,
+    this.getCategories, 
+    this.getCarProducts,
+    this.getMoneyConversion,
   });
 
   final int selectedIndex;
@@ -60,6 +59,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(1);
+                getProducts!();
                 getCarProducts!();
                 getMoneyConversion!();
               },

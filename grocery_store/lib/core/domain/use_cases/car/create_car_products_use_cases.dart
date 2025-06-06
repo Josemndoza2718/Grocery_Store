@@ -4,7 +4,7 @@ import 'package:grocery_store/core/domain/entities/cart.dart';
 class CreateCarProductsUseCases {
   const CreateCarProductsUseCases({required this.repository});
 
-  final CarProductRepositoryImpl repository;
+  final CartRepositoryImpl repository;
 
   Future<void> call(Cart cart) async {
     await repository.addCarProduct(cart);

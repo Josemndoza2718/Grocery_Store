@@ -295,36 +295,49 @@ class _HomePageState extends State<HomePage> {
 
                             var homeViewModel = context.read<HomeViewModel>();
 
-                            for (var element in viewModel.listCarts) {
-                              if (element.ownerId != homeViewModel.clientId) {
-                                if (homeViewModel.clientName.isNotEmpty &&
-                                    homeViewModel.clientId != null) {
-                                  if (homeViewModel.listProducts.isNotEmpty) {
-                                    viewModel.createCart(
-                                      ownerId: homeViewModel.clientId,
-                                      ownerCarName: homeViewModel.clientName,
-                                      products: homeViewModel.listProducts,
-                                    );
-                                    showFloatingMessage(
-                                        context: context,
-                                        message: "Product added to cart",
-                                        color: AppColors.green);
-                                  }
-                                } else {
-                                  showFloatingMessage(
-                                      context: context,
-                                      message:
-                                          "¡¡¡Warning!!!. Please select a client",
-                                      color: AppColors.red);
-                                }
-                              } else {
-                                viewModel.updateCart(
-                                  cartId: viewModel.listCarts[index].id,
-                                  ownerId: homeViewModel.clientId,
-                                  ownerCarName: homeViewModel.clientName,
-                                  products: homeViewModel.listProducts,
-                                );
-                              }
+                            if (homeViewModel.clientName.isEmpty) {
+                              showFloatingMessage(
+                                  context: context,
+                                  message: "¡¡¡Warning!!!. Please select a client",
+                                  color: AppColors.red);
+                              return;
+                            }
+
+                            if (homeViewModel.listProducts.isEmpty) {
+                              showFloatingMessage(
+                                  context: context,
+                                  message: "No products to add to cart",
+                                  color: AppColors.red);
+                              return;
+                            }
+
+                            // Check if a cart for the client already exists
+                            final existingCart = viewModel.listCarts.where(
+                                (element) => element.ownerId == homeViewModel.clientId,
+                            ).toList();
+
+                            if (existingCart.isEmpty) {
+                              viewModel.createCart(
+                                ownerId: homeViewModel.clientId,
+                                ownerCarName: homeViewModel.clientName,
+                                products: homeViewModel.listProducts[index],
+                              );
+                              showFloatingMessage(
+                                  context: context,
+                                  message: "Product added to cart",
+                                  color: AppColors.green);
+                            } else {
+                              viewModel.updateCart(
+                                cartId: existingCart.first.id,
+                                ownerId: homeViewModel.clientId,
+                                ownerCarName: homeViewModel.clientName,
+                                products: homeViewModel.listProducts,
+                              );
+                              showFloatingMessage(
+                                  context: context,
+                                  message:
+                                      "Product added to ${homeViewModel.clientName}'s cart ",
+                                  color: AppColors.green);
                             }
                           },
                           onClose: () => viewModel.getProducts(),

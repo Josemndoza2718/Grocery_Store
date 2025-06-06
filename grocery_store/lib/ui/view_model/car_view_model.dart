@@ -12,9 +12,11 @@ import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_
 import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases%20copy.dart';
 
 class CarViewModel extends ChangeNotifier {
   CarViewModel({
+    required this.getProductsUseCases,
     required this.getCarProductsUseCases,
     required this.addCarProductsUseCases,
     required this.deleteCarProductsUseCases,
@@ -23,11 +25,17 @@ class CarViewModel extends ChangeNotifier {
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
   }) {
-    getCarProducts();
+    getAllCarts();
     getMoneyConversion();
   }
 
-  final GetCarProductsUseCases getCarProductsUseCases;
+  //Products
+  final GetProductsUseCases getProductsUseCases;
+  /* final DeleteProductsUseCases deleteProductsUseCases;
+  final UpdateProductsUseCases updateProductsUseCases; */
+
+  //Carts
+  final GetAllCartsUseCases getCarProductsUseCases;
   final CreateCarProductsUseCases addCarProductsUseCases;
   final DeleteCarProductsUseCases deleteCarProductsUseCases;
   final UpdateCarProductsUseCases updateCarProductsUseCases;
@@ -100,9 +108,13 @@ class CarViewModel extends ChangeNotifier {
   Future<void> createCart({
     required int ownerId,
     required String ownerCarName,
-    required List<Product> products,
+    required Product products,
   }) async {
-    if (ownerId != null && products.isNotEmpty && ownerCarName.isNotEmpty) {
+
+    List<Product> listProductsInCart = [];
+    listProductsInCart.add(products);
+
+    if (ownerId != null && listProductsInCart.isNotEmpty && ownerCarName.isNotEmpty) {
       Random random = Random();
       int randomNumber = random.nextInt(100000000);
 
@@ -112,10 +124,10 @@ class CarViewModel extends ChangeNotifier {
           ownerId: ownerId,
           ownerCarName: ownerCarName,
           status: 'pending',
-          products: products,
+          products: listProductsInCart,
         ),
       );
-      getCarProducts();
+      getAllCarts();
     }
   }
 
@@ -136,8 +148,21 @@ class CarViewModel extends ChangeNotifier {
           products: products,
         ),
       );
-      getCarProducts();
+      getAllCarts();
     }
+  }
+
+   Future<void> getAllCarts() async {
+    listCarts = await getCarProductsUseCases.call();
+    listProducts = await getProductsUseCases.call();
+    _isActiveList = List.filled(listCarts.length, false);
+    _isActivePanel = List.filled(listCarts.length, false);
+    notifyListeners();
+  }
+
+  Future<void> deletedCart(int id) async {
+    await deleteCarProductsUseCases.deleteCarProduct(id);
+    getAllCarts();
   }
 
   /* Future<void> addProductByCar(Product product) async {
@@ -146,12 +171,7 @@ class CarViewModel extends ChangeNotifier {
     }
   } */
 
-  Future<void> getCarProducts() async {
-    listCarts = await getCarProductsUseCases.call();
-    _isActiveList = List.filled(listCarts.length, false);
-    _isActivePanel = List.filled(listCarts.length, false);
-    notifyListeners();
-  }
+ 
 
   /*  Future<void> getListProducts() async {
     listProducts = await getCarProductsUseCases.call();
@@ -160,8 +180,8 @@ class CarViewModel extends ChangeNotifier {
     notifyListeners();
   } */
 
-  Future<void> deletedCarProduct(int id) async {
+  Future<void> deletedProduct(int id) async {
     await deleteCarProductsUseCases.deleteCarProduct(id);
-    getCarProducts();
+    getAllCarts();
   }
 }

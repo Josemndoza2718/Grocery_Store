@@ -59,10 +59,11 @@ class MyApp extends StatelessWidget {
                   )),
           ChangeNotifierProvider(
               create: (context) => CarViewModel(
-                    getCarProductsUseCases: GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                    addCarProductsUseCases: CreateCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                    deleteCarProductsUseCases: DeleteCarProductsUseCases(repository: CarProductRepositoryImpl()),
-                    updateCarProductsUseCases: UpdateCarProductsUseCases(repository: CarProductRepositoryImpl()),
+                    getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
+                    getCarProductsUseCases: GetAllCartsUseCases(repository: CartRepositoryImpl()),
+                    addCarProductsUseCases: CreateCarProductsUseCases(repository: CartRepositoryImpl()),
+                    deleteCarProductsUseCases: DeleteCarProductsUseCases(repository: CartRepositoryImpl()),
+                    updateCarProductsUseCases: UpdateCarProductsUseCases(repository: CartRepositoryImpl()),
                     createClientUseCases: CreateClientUseCases(repository: ClientRepositoryImpl()),
                     getClientsUseCases: GetClientsUseCases(repository: ClientRepositoryImpl()),
                     deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()),
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => MainPageViewModel()),
           ChangeNotifierProvider(create: (context) => CheckViewModel(
             createCashProductsUseCases:  CreateCashProductsUseCases(repository: CashProductRepositoryImpl()),
-            getCarProductsUseCases: GetCarProductsUseCases(repository: CarProductRepositoryImpl()),
+            getCarProductsUseCases: GetAllCartsUseCases(repository: CartRepositoryImpl()),
             deleteCashProductsUseCases: DeleteCashProductsUseCases(repository: CashProductRepositoryImpl()),
             
             )),

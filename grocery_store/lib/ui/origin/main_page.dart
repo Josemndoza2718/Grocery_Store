@@ -48,7 +48,7 @@ class MainPage extends StatelessWidget {
                     },
                     getProducts: () => context.read<HomeViewModel>().getProducts(),
                     getCategories: () => context.read<HomeViewModel>().getCategories(),
-                    getCarProducts: () => context.read<CarViewModel>().getCarProducts(),
+                    getCarProducts: () => context.read<CarViewModel>().getAllCarts(),
                     getMoneyConversion: () => context.read<CarViewModel>().getMoneyConversion(),
                   ),
                 ),

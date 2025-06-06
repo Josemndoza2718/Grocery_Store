@@ -17,7 +17,7 @@ class CheckViewModel extends ChangeNotifier {
   }
 
   final CreateCashProductsUseCases createCashProductsUseCases;
-  final GetCarProductsUseCases getCarProductsUseCases;
+  final GetAllCartsUseCases getCarProductsUseCases;
   final DeleteCashProductsUseCases deleteCashProductsUseCases;
 
   List<Product> listProducts = [];

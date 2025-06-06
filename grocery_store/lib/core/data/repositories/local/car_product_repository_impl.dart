@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:path/path.dart';
 
-class CarProductRepositoryImpl implements CarProductRepository {
+class CartRepositoryImpl implements CarProductRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
   var store = intMapStoreFactory.store('car_products');

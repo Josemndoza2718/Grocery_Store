@@ -36,12 +36,12 @@ class _CarPageState extends State<CarPage> {
                 moneyConversion: viewModel.moneyConversion,
                 onTap: (index) => viewModel.isActiveListProduct(index),
                 onTapPanel: (index) => viewModel.isActiveListPanel(index),
-                onRemoveCart: (index) => viewModel.deletedCarProduct(viewModel.listCarts[index].id),
+                onRemoveCart: (index) => viewModel.deletedCart(viewModel.listCarts[index].id),
                 onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
                 onAddProduct: (value) => viewModel.addQuantityProduct(value),
                 onRemoveProduct: (index) => viewModel.removeQuantityProduct(index),
                 onDeleteProduct: (index) {
-                  viewModel.deletedCarProduct(viewModel.listProducts[index].id);
+                  viewModel.deletedProduct(viewModel.listProducts[index].id);
                   showFloatingMessage(
                       context: context,
                       message: "Product deleted to cart",
