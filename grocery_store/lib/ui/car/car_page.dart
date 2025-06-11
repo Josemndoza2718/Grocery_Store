@@ -28,26 +28,29 @@ class _CarPageState extends State<CarPage> {
             children: [
               const SizedBox(height: 10),
               //GridViewButtons
-              ShopListWidget(
-                listCarts: viewModel.listCarts,
-                listProducts: viewModel.listProducts,
-                isActiveList: viewModel.isActiveList,
-                isActivePanel: viewModel.isActivePanel,
-                moneyConversion: viewModel.moneyConversion,
-                onTap: (index) => viewModel.isActiveListProduct(index),
-                onTapPanel: (index) => viewModel.isActiveListPanel(index),
-                onRemoveCart: (index) => viewModel.deletedCart(viewModel.listCarts[index].id),
-                onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
-                onAddProduct: (value) => viewModel.addQuantityProduct(value),
-                onRemoveProduct: (index) => viewModel.removeQuantityProduct(index),
-                onDeleteProduct: (index) {
-                  viewModel.deletedProduct(viewModel.listProducts[index].id);
-                  showFloatingMessage(
-                      context: context,
-                      message: "Product deleted to cart",
-                      color: AppColors.red);
-                },
-              ),
+              // ignore: unnecessary_null_comparison
+              if (viewModel.listCarts != null && viewModel.listCarts.isNotEmpty)
+                ShopListWidget(
+                  listCarts: viewModel.listCarts,
+                  listProducts: viewModel.listProducts,
+                  isActivePanel: viewModel.isActivePanel,
+                  moneyConversion: viewModel.moneyConversion,
+                  quantityProduct: viewModel.quantityProduct,
+                  onTapPanel: (index) => viewModel.isActiveListPanel(index),
+                  onRemoveCart: (index) => viewModel.deletedCart(index),
+                  onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
+                  onAddProduct: (value) => viewModel.addQuantityProduct(value),
+                  onRemoveProduct: (value) => viewModel.removeQuantityProduct(value),
+                  onSetQuantityProduct: (id, value) => viewModel.onSetQuantityProduct(id, value),
+                  onChanged: (value, productId) => viewModel.updateQuantityManually(value, productId),
+                  onDeleteProduct: (index) {
+                    viewModel.deletedProduct(viewModel.listProducts[index].id);
+                    showFloatingMessage(
+                        context: context,
+                        message: "Product deleted to cart",
+                        color: AppColors.red);
+                  },
+                ),
               //Button
               if (viewModel.listProducts.isNotEmpty)
                 GestureDetector(

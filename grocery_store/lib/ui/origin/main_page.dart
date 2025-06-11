@@ -3,6 +3,7 @@ import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/cash/check_page.dart';
 import 'package:grocery_store/ui/home/home_page.dart';
 import 'package:grocery_store/ui/car/car_page.dart';
+import 'package:grocery_store/ui/last_page/last.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/car_view_model.dart';
@@ -21,6 +22,7 @@ class MainPage extends StatelessWidget {
     const HomePage(),
     const CarPage(),
     const CheckPage(),
+    const LastPage(),
   ];
 
   @override

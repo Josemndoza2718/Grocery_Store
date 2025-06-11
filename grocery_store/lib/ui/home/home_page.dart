@@ -185,10 +185,8 @@ class _HomePageState extends State<HomePage> {
                               (element) => element.id == value,
                             );
                             viewModel.clientId = value!;
-                            if (selectedClient != null) {
-                              viewModel.setClientName = selectedClient.name;
-                            }
-                          },
+                            viewModel.setClientName = selectedClient.name;
+                                                    },
                         ),
                       ),
                     ),

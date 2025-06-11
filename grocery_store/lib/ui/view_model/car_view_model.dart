@@ -49,31 +49,89 @@ class CarViewModel extends ChangeNotifier {
   List<Cart> listCarts = [];
   List<Client> listClients = [];
 
-  List<bool> _isActiveList = [];
   List<bool> _isActivePanel = [];
 
   double _moneyConversion = 0;
   double _quantityProduct = 0;
-  bool _isActive = false;
 
   double get moneyConversion => _moneyConversion;
   double get quantityProduct => _quantityProduct;
-  bool get isActive => _isActive;
-  List<bool> get isActiveList => _isActiveList;
   List<bool> get isActivePanel => _isActivePanel;
   List<Product> get listProductsByCar => listProducts;
-
-  void isActiveListProduct(int index) {
-    _isActiveList[index] = !_isActiveList[index];
-    notifyListeners();
-  }
 
   void isActiveListPanel(int index) {
     _isActivePanel[index] = !_isActivePanel[index];
     notifyListeners();
   }
 
-  void addQuantityProduct(int index) {
+  void onSetQuantityProduct(int id, double value) {
+    for (var element in listProducts) {
+      if (element.id == id) {
+        if (element.stockQuantity > 0 &&
+            element.quantity < element.stockQuantity) {
+          element.quantity = value;
+        }
+        notifyListeners();
+        return;
+      }
+    }
+  }
+
+  void addQuantityProduct(String productId) {
+    // Buscar el producto en todas las categorías
+    for (var category in listCarts) {
+      for (var product in category.products) {
+        if (product.id.toString() == productId) {
+          if (product.quantity < product.stockQuantity) {
+            product.quantity++;
+            notifyListeners(); // Notifica a los oyentes
+          }
+          return; // Salir una vez encontrado y actualizado
+        }
+      }
+    }
+  }
+
+  void removeQuantityProduct(String productId) {
+    // Buscar el producto en todas las categorías
+    for (var category in listCarts) {
+      for (var product in category.products) {
+        if (product.id.toString() == productId) {
+          if (product.quantity > 0) {
+            product.quantity--;
+            notifyListeners(); // Notifica a los oyentes
+          }
+          return; // Salir una vez encontrado y actualizado
+        }
+      }
+    }
+  }
+
+  void updateQuantityManually(String value, String productId) {
+    double? newQuantity = double.tryParse(value);
+    if (newQuantity != null) {
+      for (var category in listCarts) {
+        for (var product in category.products) {
+          if (product.id.toString() == productId) {
+            if (newQuantity >= 0 && newQuantity <= product.stockQuantity) {
+              product.quantity = newQuantity;
+            } else if (newQuantity > product.stockQuantity) {
+              product.quantity = product.stockQuantity; // Limitar al stock máximo
+            } else {
+              product.quantity = 0; // Si es negativo o no válido
+            }
+            notifyListeners(); // Notifica a los oyentes
+            return;
+          }
+        }
+      }
+    }
+    // Si el valor no es un número o está vacío, no hacemos nada (o podríamos reiniciar a 0)
+  }
+
+
+
+  /* void addQuantityProduct(int index) {
     if (listProducts[index].stockQuantity > 0 &&
         listProducts[index].quantity < listProducts[index].stockQuantity) {
       listProducts[index].quantity++;
@@ -86,7 +144,7 @@ class CarViewModel extends ChangeNotifier {
       listProducts[index].quantity--;
     }
     notifyListeners();
-  }
+  } */
 
   void setQuantityProductForm(int index, double value) {
     listProducts[index].quantity = value;
@@ -110,11 +168,12 @@ class CarViewModel extends ChangeNotifier {
     required String ownerCarName,
     required Product products,
   }) async {
-
     List<Product> listProductsInCart = [];
     listProductsInCart.add(products);
 
-    if (ownerId != null && listProductsInCart.isNotEmpty && ownerCarName.isNotEmpty) {
+    if (ownerId != null &&
+        listProductsInCart.isNotEmpty &&
+        ownerCarName.isNotEmpty) {
       Random random = Random();
       int randomNumber = random.nextInt(100000000);
 
@@ -137,8 +196,10 @@ class CarViewModel extends ChangeNotifier {
     required String ownerCarName,
     required List<Product> products,
   }) async {
-    if (cartId != null && ownerId != null && products.isNotEmpty && ownerCarName.isNotEmpty) {
-      
+    if (cartId != null &&
+        ownerId != null &&
+        products.isNotEmpty &&
+        ownerCarName.isNotEmpty) {
       await updateCarProductsUseCases.updateProduct(
         Cart(
           id: cartId,
@@ -152,10 +213,9 @@ class CarViewModel extends ChangeNotifier {
     }
   }
 
-   Future<void> getAllCarts() async {
+  Future<void> getAllCarts() async {
     listCarts = await getCarProductsUseCases.call();
     listProducts = await getProductsUseCases.call();
-    _isActiveList = List.filled(listCarts.length, false);
     _isActivePanel = List.filled(listCarts.length, false);
     notifyListeners();
   }
@@ -170,8 +230,6 @@ class CarViewModel extends ChangeNotifier {
       await addCarProductsUseCases.call(product);
     }
   } */
-
- 
 
   /*  Future<void> getListProducts() async {
     listProducts = await getCarProductsUseCases.call();
