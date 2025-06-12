@@ -35,7 +35,6 @@ class _CarPageState extends State<CarPage> {
                   listProducts: viewModel.listProducts,
                   isActivePanel: viewModel.isActivePanel,
                   moneyConversion: viewModel.moneyConversion,
-                  quantityProduct: viewModel.quantityProduct,
                   onTapPanel: (index) => viewModel.isActiveListPanel(index),
                   onRemoveCart: (index) => viewModel.deletedCart(index),
                   onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
@@ -52,7 +51,7 @@ class _CarPageState extends State<CarPage> {
                   },
                 ),
               //Button
-              if (viewModel.listProducts.isNotEmpty)
+              /* if (viewModel.listProducts.isNotEmpty)
                 GestureDetector(
                   onTap: () {
                     /* var shopViewModel = context.read<CarViewModel>();
@@ -87,7 +86,7 @@ class _CarPageState extends State<CarPage> {
                       ),
                     ),
                   ),
-                ),
+                ), */
               const SizedBox(height: 80),
             ],
           ),

@@ -52,10 +52,8 @@ class CarViewModel extends ChangeNotifier {
   List<bool> _isActivePanel = [];
 
   double _moneyConversion = 0;
-  double _quantityProduct = 0;
 
   double get moneyConversion => _moneyConversion;
-  double get quantityProduct => _quantityProduct;
   List<bool> get isActivePanel => _isActivePanel;
   List<Product> get listProductsByCar => listProducts;
 
