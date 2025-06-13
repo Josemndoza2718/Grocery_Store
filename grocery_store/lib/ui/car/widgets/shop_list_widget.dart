@@ -27,7 +27,7 @@ class ShopListWidget extends StatefulWidget {
 
   final List<Cart>? listCarts;
   final List<Product>? listProducts;
-  final Function(int) onDeleteProduct;
+  final Function(int, int ) onDeleteProduct;
   final double? moneyConversion;
   final Function(String) onAddProduct;
   final Function(String) onRemoveProduct;
@@ -90,7 +90,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
   }
 }
 
-  void initData(){
+/*   void initData(){
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = Provider.of<CarViewModel>(context, listen: false);
       for (Cart element in widget.listCarts ?? []) {
@@ -101,7 +101,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
       }
       viewModel.addListener(_onProductProviderChanged);
     });
-  }
+  } */
 
 
 
@@ -296,7 +296,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                                                       ),
                                                       GestureDetector(
                                                         onTap: () {
-                                                          widget.onDeleteProduct(index);
+                                                          widget.onDeleteProduct(cart.id , product.id);
                                                         },
                                                         child: const Icon(
                                                           Icons.delete_forever,

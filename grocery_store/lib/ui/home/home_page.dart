@@ -280,20 +280,16 @@ class _HomePageState extends State<HomePage> {
                         ProductsListWidget(
                           page: const AddProductPage(),
                           listProducts: viewModel.listProducts,
-                          listProductsByCategory:
-                              viewModel.listProductsByCategory,
+                          listProductsByCategory: viewModel.listProductsByCategory,
                           onTap: (index) {
-                            var addProductViewModel =
-                                context.read<AddProductViewModel>();
-                            addProductViewModel.getCategoryId(
-                                viewModel.listProducts, index);
+                            var addProductViewModel = context.read<AddProductViewModel>();
+                            addProductViewModel.getCategoryId(viewModel.listProducts, index);
                           },
                           onPressed: (index) {
-                            var viewModel = context.read<CarViewModel>();
+                            var carViewModel = context.read<CarViewModel>();
 
-                            var homeViewModel = context.read<HomeViewModel>();
-
-                            if (homeViewModel.clientName.isEmpty) {
+                            
+                            if (viewModel.clientName.isEmpty) {
                               showFloatingMessage(
                                   context: context,
                                   message: "¡¡¡Warning!!!. Please select a client",
@@ -301,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                               return;
                             }
 
-                            if (homeViewModel.listProducts.isEmpty) {
+                            if (viewModel.listProducts.isEmpty) {
                               showFloatingMessage(
                                   context: context,
                                   message: "No products to add to cart",
@@ -310,31 +306,30 @@ class _HomePageState extends State<HomePage> {
                             }
 
                             // Check if a cart for the client already exists
-                            final existingCart = viewModel.listCarts.where(
-                                (element) => element.ownerId == homeViewModel.clientId,
+                            final existingCart = carViewModel.listCarts.where(
+                                (element) => element.ownerId == viewModel.clientId,
                             ).toList();
 
                             if (existingCart.isEmpty) {
-                              viewModel.createCart(
-                                ownerId: homeViewModel.clientId,
-                                ownerCarName: homeViewModel.clientName,
-                                products: homeViewModel.listProducts[index],
+                              carViewModel.createCart(
+                                ownerId: viewModel.clientId,
+                                ownerCarName: viewModel.clientName,
+                                products: viewModel.listProducts[index],
                               );
                               showFloatingMessage(
                                   context: context,
                                   message: "Product added to cart",
                                   color: AppColors.green);
                             } else {
-                              viewModel.updateCart(
+                              carViewModel.updateCart(
                                 cartId: existingCart.first.id,
-                                ownerId: homeViewModel.clientId,
-                                ownerCarName: homeViewModel.clientName,
-                                products: homeViewModel.listProducts,
+                                ownerId: viewModel.clientId,
+                                ownerCarName: viewModel.clientName,
+                                products: viewModel.listProducts,
                               );
                               showFloatingMessage(
                                   context: context,
-                                  message:
-                                      "Product added to ${homeViewModel.clientName}'s cart ",
+                                  message: "Product added to ${viewModel.clientName}'s cart ",
                                   color: AppColors.green);
                             }
                           },
@@ -342,8 +337,7 @@ class _HomePageState extends State<HomePage> {
                           moneyConversion: viewModel.moneyConversion,
                           category: viewModel.selectedCategory,
                           isFilterList: viewModel.isFilterList,
-                          onDeleteProduct: (index) => viewModel
-                              .deleteProduct(viewModel.listProducts[index].id),
+                          onDeleteProduct: (index) => viewModel.deleteProduct(viewModel.listProducts[index].id),
                         ),
                       ],
                     ),

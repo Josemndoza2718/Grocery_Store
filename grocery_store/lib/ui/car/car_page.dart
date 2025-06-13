@@ -42,8 +42,8 @@ class _CarPageState extends State<CarPage> {
                   onRemoveProduct: (value) => viewModel.removeQuantityProduct(value),
                   onSetQuantityProduct: (id, value) => viewModel.onSetQuantityProduct(id, value),
                   onChanged: (value, productId) => viewModel.updateQuantityManually(value, productId),
-                  onDeleteProduct: (index) {
-                    viewModel.deletedProduct(viewModel.listProducts[index].id);
+                  onDeleteProduct: (cartId, productId) {
+                    viewModel.deleteProductCart(cartId, productId);
                     showFloatingMessage(
                         context: context,
                         message: "Product deleted to cart",

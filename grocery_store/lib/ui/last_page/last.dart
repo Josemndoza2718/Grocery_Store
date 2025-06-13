@@ -252,9 +252,6 @@ class _CategoryProductExpansionListState
     final productProvider = Provider.of<ProductProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Catálogo por Categorías'),
-      ),
       body: SingleChildScrollView(
         child: ExpansionPanelList(
           expansionCallback: (int categoryIndex, bool isExpanded) {

@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -114,7 +116,8 @@ class CarViewModel extends ChangeNotifier {
             if (newQuantity >= 0 && newQuantity <= product.stockQuantity) {
               product.quantity = newQuantity;
             } else if (newQuantity > product.stockQuantity) {
-              product.quantity = product.stockQuantity; // Limitar al stock máximo
+              product.quantity =
+                  product.stockQuantity; // Limitar al stock máximo
             } else {
               product.quantity = 0; // Si es negativo o no válido
             }
@@ -126,23 +129,6 @@ class CarViewModel extends ChangeNotifier {
     }
     // Si el valor no es un número o está vacío, no hacemos nada (o podríamos reiniciar a 0)
   }
-
-
-
-  /* void addQuantityProduct(int index) {
-    if (listProducts[index].stockQuantity > 0 &&
-        listProducts[index].quantity < listProducts[index].stockQuantity) {
-      listProducts[index].quantity++;
-    }
-    notifyListeners();
-  }
-
-  void removeQuantityProduct(int index) {
-    if (listProducts[index].quantity > 0) {
-      listProducts[index].quantity--;
-    }
-    notifyListeners();
-  } */
 
   void setQuantityProductForm(int index, double value) {
     listProducts[index].quantity = value;
@@ -223,21 +209,16 @@ class CarViewModel extends ChangeNotifier {
     getAllCarts();
   }
 
-  /* Future<void> addProductByCar(Product product) async {
-    if (product.stockQuantity > 0) {
-      await addCarProductsUseCases.call(product);
+  Future<void> deleteProductCart(int cartId, int productId) async {
+    for (var element in listCarts) {
+      if (element.id == cartId) {
+        element.products.removeWhere((product) => product.id == productId);
+        await updateCarProductsUseCases.updateProduct(element);
+        notifyListeners();
+        break;
+      }
     }
-  } */
-
-  /*  Future<void> getListProducts() async {
-    listProducts = await getCarProductsUseCases.call();
-    _isActiveList = List.filled(listProducts.length, false);
-    _isActivePanel = List.filled(listProducts.length, false);
-    notifyListeners();
-  } */
-
-  Future<void> deletedProduct(int id) async {
-    await deleteCarProductsUseCases.deleteCarProduct(id);
+    //await deleteProductCartUseCases.deleteProductCart(cartId, productId);
     getAllCarts();
   }
 }
