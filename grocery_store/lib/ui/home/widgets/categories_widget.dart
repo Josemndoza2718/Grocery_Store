@@ -231,11 +231,14 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Image.file(
-                                File(widget.listCategories![realIndex].image),
-                                height: 45,
-                                width: 45,
-                                fit: BoxFit.cover,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.file(
+                                  File(widget.listCategories![realIndex].image),
+                                  height: 45,
+                                  width: 45,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                             Text(widget.listCategories![realIndex].name,

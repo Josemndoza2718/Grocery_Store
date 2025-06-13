@@ -9,7 +9,7 @@ import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
-import 'package:grocery_store/ui/view_model/car_view_model.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:intl/intl.dart';

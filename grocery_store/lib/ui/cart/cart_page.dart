@@ -2,19 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/car/widgets/shop_list_widget.dart';
-import 'package:grocery_store/ui/view_model/car_view_model.dart';
+import 'package:grocery_store/ui/cart/widgets/shop_list_widget.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:provider/provider.dart';
 
-class CarPage extends StatefulWidget {
-  const CarPage({super.key});
+class CartPage extends StatefulWidget {
+  const CartPage({super.key});
 
   @override
-  State<CarPage> createState() => _CarPageState();
+  State<CartPage> createState() => _CartPageState();
 }
 
-class _CarPageState extends State<CarPage> {
+class _CartPageState extends State<CartPage> {
   
 
   @override
@@ -43,7 +43,7 @@ class _CarPageState extends State<CarPage> {
                   onSetQuantityProduct: (id, value) => viewModel.onSetQuantityProduct(id, value),
                   onChanged: (value, productId) => viewModel.updateQuantityManually(value, productId),
                   onDeleteProduct: (cartId, productId) {
-                    viewModel.deleteProductCart(cartId, productId);
+                    viewModel.updateProductCart(cartId, productId);
                     showFloatingMessage(
                         context: context,
                         message: "Product deleted to cart",

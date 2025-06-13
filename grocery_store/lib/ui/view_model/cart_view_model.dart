@@ -209,7 +209,7 @@ class CarViewModel extends ChangeNotifier {
     getAllCarts();
   }
 
-  Future<void> deleteProductCart(int cartId, int productId) async {
+  Future<void> updateProductCart(int cartId, int productId) async {
     for (var element in listCarts) {
       if (element.id == cartId) {
         element.products.removeWhere((product) => product.id == productId);

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/cash/check_page.dart';
 import 'package:grocery_store/ui/home/home_page.dart';
-import 'package:grocery_store/ui/car/car_page.dart';
+import 'package:grocery_store/ui/cart/cart_page.dart';
 import 'package:grocery_store/ui/last_page/last.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
-import 'package:grocery_store/ui/view_model/car_view_model.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +20,7 @@ class MainPage extends StatelessWidget {
 
   static final List<Widget> _pages = [
     const HomePage(),
-    const CarPage(),
+    const CartPage(),
     const CheckPage(),
     const LastPage(),
   ];

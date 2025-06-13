@@ -27,7 +27,7 @@ import 'package:grocery_store/ui/view_model/check_view_model.dart';
 import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/origin/main_page.dart';
-import 'package:grocery_store/ui/view_model/car_view_model.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(const MyApp());

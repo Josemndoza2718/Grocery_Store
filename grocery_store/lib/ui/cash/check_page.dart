@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/cash/widget/check_widget.dart';
 import 'package:grocery_store/ui/view_model/check_view_model.dart';
-import 'package:grocery_store/ui/view_model/car_view_model.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:provider/provider.dart';
 
 class CheckPage extends StatefulWidget {
@@ -16,124 +16,273 @@ class CheckPage extends StatefulWidget {
 
 class _CheckPageState extends State<CheckPage> {
   TextEditingController clientController = TextEditingController();
+  double sliderValue = 2;
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Consumer<CheckViewModel>(builder: (context, viewModel, _) {
-        return Column(
-          spacing: 16,
-          children: [
-            const SizedBox(height: 10),
-            CheckWidget(
-              listProducts: context.read<CarViewModel>().listProducts,
-              subToTal: 0,
-              moneyConversion: context.read<CarViewModel>().moneyConversion,
-            ),
-            if (context.read<CarViewModel>().listProducts.isNotEmpty)
-              const Text(
-                "Metodos de Pago",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Column(
+            spacing: 16,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                height: 200,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.lightwhite,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Flexible(
+                    child: Column(spacing: 8, children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            border: const Border(
+                              bottom: BorderSide(
+                                width: 6,
+                                color: AppColors.ultralightgrey,
+                              ),
+                              right: BorderSide(
+                                width: 6,
+                                color: AppColors.ultralightgrey,
+                              ),
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.white),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                //Product Image
+                                Container(
+                                  height: 100,
+                                  width: 90,
+                                  //padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    //color: AppColors.darkgreen,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                        "https://www.iconpacks.net/icons/2/free-user-icon-3297-thumb.png"),
+                                    /* Image.file(
+                                                    File(product.image),
+                                                    height: double.infinity,
+                                                    width: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                  ), */
+                                  ),
+                                ),
+                                //Product Data
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        //Title
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text(
+                                              "Nombre",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {},
+                                              child: const Icon(
+                                                Icons.delete_forever,
+                                                color: AppColors.red,
+                                                //size: 30,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        //Description
+                                        const Text(
+                                          "product.description",
+                                          style: TextStyle(fontSize: 14),
+                                        ),
+                                        const Text(
+                                          "price", //"${product.price.toStringAsFixed(2)}\$",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        const Text(
+                                          "Total price", //"${((product.price) * (widget.moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SliderTheme(
+                                data: const SliderThemeData(
+                                  trackHeight: 10,
+                                  thumbColor: AppColors.green,
+                                  /* thumbShape: RoundSliderThumbShape(
+                                    disabledThumbRadius: 14,
+                                    enabledThumbRadius: 14,
+                                  ), */
+                                  /* rangeThumbShape: RoundRangeSliderThumbShape(
+                                    disabledThumbRadius: 14,
+                                    enabledThumbRadius: 14,
+                                  ), */
+                                  tickMarkShape: RoundSliderTickMarkShape(
+                                    tickMarkRadius: 7,
+                                  ),
+                                  activeTrackColor: AppColors.green,
+                                  inactiveTrackColor: AppColors.lightgrey,
+                                  overlayColor: AppColors.green,
+                                  overlayShape: RoundSliderOverlayShape(
+                                    overlayRadius: 7,
+                                  ),
+                                ),
+                                child: Slider(
+                                    value: sliderValue,
+                                    min: 2,
+                                    max: 12,
+                                    divisions: 6,
+                                    label: sliderValue.round().toString(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        sliderValue = value;
+                                      });
+                                    })),
+                          ],
+                        ),
+                      ),
+                    ]),
+                  ),
                 ),
               ),
-            // Métodos de pago
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      //margin: const EdgeInsets.all(10),
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.only(bottom: 5, right: 5),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.ultralightgrey),
+              /* CheckWidget(
+                listProducts: context.read<CarViewModel>().listProducts,
+                subToTal: 0,
+                moneyConversion: context.read<CarViewModel>().moneyConversion,
+              ),
+              if (context.read<CarViewModel>().listProducts.isNotEmpty)
+                const Text(
+                  "Metodos de Pago",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              // Métodos de pago
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () {},
                       child: Container(
-                        height: 55,
-                        width: double.infinity,
-                        //padding: const EdgeInsets.all(8),
-                        //margin: const EdgeInsets.symmetric(horizontal: 10),
+                        //margin: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(bottom: 5, right: 5),
                         decoration: BoxDecoration(
-                            color: AppColors.darkgreen,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: const Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            spacing: 4,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.credit_card,
-                                color: AppColors.white,
-                              ),
-                              Text(
-                                "Tarjeta",
-                                style: TextStyle(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.ultralightgrey),
+                        child: Container(
+                          height: 55,
+                          width: double.infinity,
+                          //padding: const EdgeInsets.all(8),
+                          //margin: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                              color: AppColors.darkgreen,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: const Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              spacing: 4,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.credit_card,
                                   color: AppColors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  "Tarjeta",
+                                  style: TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Flexible(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      //margin: const EdgeInsets.all(10),
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.only(bottom: 5, right: 5),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.ultralightgrey),
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () {},
                       child: Container(
-                        height: 55,
-                        width: double.infinity,
-                        //padding: const EdgeInsets.all(8),
-                        //margin: const EdgeInsets.symmetric(horizontal: 10),
+                        //margin: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(bottom: 5, right: 5),
                         decoration: BoxDecoration(
-                            color: AppColors.darkgreen,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: const Align(
-                          alignment: Alignment.center,
-                          child: Row(
-                            spacing: 4,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.attach_money,
-                                color: AppColors.white,
-                              ),
-                              Text(
-                                "Efectivo",
-                                style: TextStyle(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.ultralightgrey),
+                        child: Container(
+                          height: 55,
+                          width: double.infinity,
+                          //padding: const EdgeInsets.all(8),
+                          //margin: const EdgeInsets.symmetric(horizontal: 10),
+                          decoration: BoxDecoration(
+                              color: AppColors.darkgreen,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: const Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              spacing: 4,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.attach_money,
                                   color: AppColors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  "Efectivo",
+                                  style: TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 80),
-          ],
+                ],
+              ), */
+              const SizedBox(height: 80),
+            ],
+          ),
         );
       }),
     );

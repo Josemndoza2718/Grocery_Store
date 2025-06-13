@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/view_model/car_view_model.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ShopListWidget extends StatefulWidget {
@@ -90,22 +90,6 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
   }
 }
 
-/*   void initData(){
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = Provider.of<CarViewModel>(context, listen: false);
-      for (Cart element in widget.listCarts ?? []) {
-        for (var product in element.products) {
-          _quantityControllers[product.id.toString()] =
-              TextEditingController(text: product.quantity.toString());
-        }
-      }
-      viewModel.addListener(_onProductProviderChanged);
-    });
-  } */
-
-
-
-
   void _onProductProviderChanged() {
     // Este método se llamará cada vez que notifyListeners() sea invocado en ProductProvider
     for (Cart element in widget.listCarts ?? []) {
@@ -134,7 +118,6 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
 
   @override
   Widget build(BuildContext context) {
-    //initData();
     return Flexible(
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
