@@ -133,34 +133,36 @@ class _CheckPageState extends State<CheckPage> {
                                 ),
                               ],
                             ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text("${sliderValue.round()}/12",)),
                             SliderTheme(
                                 data: const SliderThemeData(
-                                  trackHeight: 10,
-                                  thumbColor: AppColors.green,
-                                  /* thumbShape: RoundSliderThumbShape(
-                                    disabledThumbRadius: 14,
-                                    enabledThumbRadius: 14,
-                                  ), */
-                                  /* rangeThumbShape: RoundRangeSliderThumbShape(
-                                    disabledThumbRadius: 14,
-                                    enabledThumbRadius: 14,
-                                  ), */
-                                  tickMarkShape: RoundSliderTickMarkShape(
-                                    tickMarkRadius: 7,
+                                  trackHeight: 5,
+                                  thumbColor: AppColors.darkgreen,
+                                  thumbShape: RoundSliderThumbShape(
+                                    disabledThumbRadius: 12,
+                                    enabledThumbRadius: 12,
                                   ),
-                                  activeTrackColor: AppColors.green,
+                                  rangeThumbShape: RoundRangeSliderThumbShape(
+                                    disabledThumbRadius: 12,
+                                    enabledThumbRadius: 12,
+                                  ),
+                                  tickMarkShape: RoundSliderTickMarkShape(tickMarkRadius: 7),
+                                  rangeTickMarkShape: RoundRangeSliderTickMarkShape(tickMarkRadius: 7),
+                                  activeTrackColor: AppColors.darkgreen,
                                   inactiveTrackColor: AppColors.lightgrey,
-                                  overlayColor: AppColors.green,
-                                  overlayShape: RoundSliderOverlayShape(
-                                    overlayRadius: 7,
-                                  ),
+                                  inactiveTickMarkColor: AppColors.lightgrey,
+                                  activeTickMarkColor: AppColors.darkgreen,
+                                  //overlayColor: AppColors.green,
+                                  overlayShape: RoundSliderOverlayShape(overlayRadius: 8),
                                 ),
                                 child: Slider(
                                     value: sliderValue,
-                                    min: 2,
+                                    min: 0,
                                     max: 12,
                                     divisions: 6,
-                                    label: sliderValue.round().toString(),
+                                    //label: sliderValue.round().toString(),
                                     onChanged: (value) {
                                       setState(() {
                                         sliderValue = value;
