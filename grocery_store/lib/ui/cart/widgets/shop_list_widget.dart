@@ -13,6 +13,7 @@ class ShopListWidget extends StatefulWidget {
     super.key,
     this.isActivePanel = const [],
     this.moneyConversion,
+    this.payProduct = 0,
     required this.listCarts,
     required this.listProducts,
     required this.onDeleteProduct,
@@ -21,21 +22,24 @@ class ShopListWidget extends StatefulWidget {
     required this.onTapPanel,
     required this.onRemoveCart,
     required this.onSetQuantityProduct,
-    required this.onSetTap,
+    //required this.onSetTap,
     required this.onChanged,
+    required this.onSetPayProduct,
   });
 
   final List<Cart>? listCarts;
   final List<Product>? listProducts;
   final Function(int, int ) onDeleteProduct;
   final double? moneyConversion;
+  final int payProduct;
   final Function(String) onAddProduct;
   final Function(String) onRemoveProduct;
   final Function(int) onTapPanel;
   final Function(int) onRemoveCart;
   final Function(int, double) onSetQuantityProduct;
-  final Function(int, String?) onSetTap;
+  //final Function(int, String?) onSetTap;
   final Function(String, String) onChanged;
+  final Function(int, int ) onSetPayProduct;
   final List<bool> isActivePanel;
 
   @override
@@ -44,6 +48,7 @@ class ShopListWidget extends StatefulWidget {
 
 class _ShopListWidgetState extends State<ShopListWidget> {
   final Map<String, TextEditingController> _quantityControllers = {};
+  bool isPayment = false;
   
 
   @override
@@ -54,7 +59,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
     // Accede al provider en initState, pero asegúrate de que esté disponible en el contexto.
     // Esto se hace con un pequeño truco de post-frame callback.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = Provider.of<CarViewModel>(context, listen: false);
+      final viewModel = Provider.of<CartViewModel>(context, listen: false);
       for (Cart element in widget.listCarts ?? []) {
         for (var product in element.products) {
           _quantityControllers[product.id.toString()] =
@@ -108,7 +113,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
 @override
   void dispose() {
     // Es importante liberar los controladores y remover el listener
-    final viewModel = Provider.of<CarViewModel>(context, listen: false);
+    final viewModel = Provider.of<CartViewModel>(context, listen: false);
     viewModel.removeListener(_onProductProviderChanged);
     _quantityControllers.forEach((key, controller) => controller.dispose());
     super.dispose();
@@ -156,48 +161,129 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                         children: [
                           //Buttons DPP
                           Row(
+                            spacing: 8,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  widget.onRemoveCart(cart.id);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.red,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    widget.onRemoveCart(cart.id);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.red,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
-                                ),
-                                child: const Text(
-                                  "Delete",
-                                  style: TextStyle(color: AppColors.white),
+                                  child: const Text(
+                                    "Delete",
+                                    style: TextStyle(color: AppColors.white),
+                                  ),
                                 ),
                               ),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isPayment = !isPayment;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.green,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
-                                ),
-                                child: const Text(
-                                  "Payment",
-                                  style: TextStyle(color: AppColors.white),
+                                  child: const Text(
+                                    "Payment",
+                                    style: TextStyle(color: AppColors.white),
+                                  ),
                                 ),
                               ),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.green,
-                                  shape: RoundedRectangleBorder(
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          //Payment Options
+                          if(isPayment)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () => widget.onSetPayProduct(cart.id, 2),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.yellow,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
+                                  child: const Text("2 parts"),
                                 ),
-                                child: const Text(
-                                  "Pay",
-                                  style: TextStyle(color: AppColors.white),
+                              ),
+                              GestureDetector(
+                                onTap: () => widget.onSetPayProduct(cart.id, 4),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.yellow,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Text("4 parts"),
                                 ),
+                              ),
+                              GestureDetector(
+                                onTap: () => widget.onSetPayProduct(cart.id, 6),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.yellow,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Text("6 parts"),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => widget.onSetPayProduct(cart.id, 8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.yellow,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Text("8 parts"),
+                                ),
+                              ),
+                              
+                            ],
+                          ),
+                          if(isPayment)
+                          const SizedBox(height: 8),
+                          if(isPayment)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.yellow,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text("10 parts"),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.yellow,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text("12 parts"),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.yellow,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Text("Direct Payment"),
                               ),
                             ],
                           ),
@@ -208,7 +294,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                             itemCount: cart.products.length,
                             itemBuilder: (context, index) {
                               final product = cart.products[index];
-                                                    
+                              
                               return Container(
                                 padding: const EdgeInsets.all(8),
                                 child: Flexible(

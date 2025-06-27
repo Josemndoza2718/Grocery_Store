@@ -4,7 +4,8 @@ class Cart {
   final int id;
   final int ownerId;
   final String? ownerCarName;
-  final String status;
+  String status;
+  int payPart;
   final List<Product> products;
 
   Cart({
@@ -12,6 +13,7 @@ class Cart {
     required this.ownerId,
     this.ownerCarName,
     this.status = 'pending',
+    this.payPart = 0,
     required this.products,
   });
 }

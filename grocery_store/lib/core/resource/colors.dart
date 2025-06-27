@@ -18,6 +18,8 @@ class AppColors {
   
   static const black = Color(0xff000000);
 
+  static const transparent = Color(0x00000000);
+
   static const background = Color(0xffFFF3D4);
   
 }

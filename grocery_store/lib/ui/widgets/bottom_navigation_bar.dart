@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/animated_button.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
   const BottomNavigationBarWidget({
@@ -62,6 +64,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                 getProducts!();
                 getCarProducts!();
                 getMoneyConversion!();
+                
               },
             ),
             AnimatedButton(
@@ -74,6 +77,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(2);
+                context.read<CartViewModel>().setListPayProduct();
               },
             ),
             AnimatedButton(

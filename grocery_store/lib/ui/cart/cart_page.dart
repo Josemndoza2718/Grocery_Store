@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/cart/widgets/shop_list_widget.dart';
 import 'package:grocery_store/ui/view_model/cart_view_model.dart';
-import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
+import 'package:grocery_store/ui/widgets/floatingMessage.dart';
 import 'package:provider/provider.dart';
 
 class CartPage extends StatefulWidget {
@@ -20,7 +20,7 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Consumer<CarViewModel>(builder: (context, viewModel, _) {
+      child: Consumer<CartViewModel>(builder: (context, viewModel, _) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Column(
@@ -37,7 +37,7 @@ class _CartPageState extends State<CartPage> {
                   moneyConversion: viewModel.moneyConversion,
                   onTapPanel: (index) => viewModel.isActiveListPanel(index),
                   onRemoveCart: (index) => viewModel.deletedCart(index),
-                  onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
+                  //onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
                   onAddProduct: (value) => viewModel.addQuantityProduct(value),
                   onRemoveProduct: (value) => viewModel.removeQuantityProduct(value),
                   onSetQuantityProduct: (id, value) => viewModel.onSetQuantityProduct(id, value),
@@ -48,6 +48,9 @@ class _CartPageState extends State<CartPage> {
                         context: context,
                         message: "Product deleted to cart",
                         color: AppColors.red);
+                  },
+                  onSetPayProduct: (p0, p1) {
+                    viewModel.onSetPayProduct(p0, p1);
                   },
                 ),
               //Button

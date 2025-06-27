@@ -16,8 +16,8 @@ import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_ca
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases%20copy.dart';
 
-class CarViewModel extends ChangeNotifier {
-  CarViewModel({
+class CartViewModel extends ChangeNotifier {
+  CartViewModel({
     required this.getProductsUseCases,
     required this.getCarProductsUseCases,
     required this.addCarProductsUseCases,
@@ -49,13 +49,16 @@ class CarViewModel extends ChangeNotifier {
 
   List<Product> listProducts = [];
   List<Cart> listCarts = [];
+  List<Cart> filterlistCarts = [];
   List<Client> listClients = [];
 
   List<bool> _isActivePanel = [];
 
   double _moneyConversion = 0;
+  int _payPart = 0;
 
   double get moneyConversion => _moneyConversion;
+  int get payPart => _payPart;
   List<bool> get isActivePanel => _isActivePanel;
   List<Product> get listProductsByCar => listProducts;
 
@@ -139,6 +142,30 @@ class CarViewModel extends ChangeNotifier {
     _moneyConversion = value;
     notifyListeners();
   }
+
+  void onSetPayProduct(int id, int value) {
+    for (var element in listCarts) {
+      if (element.id == id) {
+        element.status = "paypart";
+        element.payPart = value;
+        notifyListeners();
+        return;
+      }
+    }
+  }
+  void setListPayProduct() {
+    for (var element in listCarts) {
+      if (element.status == 'paypart') {
+        filterlistCarts.add(element);
+        notifyListeners();
+        return;
+      }
+        notifyListeners();
+        return;
+      }
+  }
+
+  
 
   void getMoneyConversion() async {
     double money = await Prefs.getMoneyConversion();

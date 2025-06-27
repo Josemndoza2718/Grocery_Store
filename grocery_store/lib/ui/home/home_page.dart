@@ -10,7 +10,7 @@ import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/cart_view_model.dart';
-import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
+import 'package:grocery_store/ui/widgets/floatingMessage.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -51,8 +51,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context)
-          .unfocus(), // Esto quita el foco de cualquier TextField
+      onTap: () => FocusScope.of(context).unfocus(), // Esto quita el foco de cualquier TextField
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, viewModel, _) {
@@ -286,7 +285,7 @@ class _HomePageState extends State<HomePage> {
                             addProductViewModel.getCategoryId(viewModel.listProducts, index);
                           },
                           onPressed: (index) {
-                            var carViewModel = context.read<CarViewModel>();
+                            var carViewModel = context.read<CartViewModel>();
 
                             
                             if (viewModel.clientName.isEmpty) {

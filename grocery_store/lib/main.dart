@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
                     deleteClientsUseCases: DeleteClientsUseCases(repository: ClientRepositoryImpl()),
                   )),
           ChangeNotifierProvider(
-              create: (context) => CarViewModel(
+              create: (context) => CartViewModel(
                     getProductsUseCases: GetProductsUseCases(repository: ProductRepositoryImpl()),
                     getCarProductsUseCases: GetAllCartsUseCases(repository: CartRepositoryImpl()),
                     addCarProductsUseCases: CreateCarProductsUseCases(repository: CartRepositoryImpl()),

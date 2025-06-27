@@ -30,6 +30,11 @@ class MainPage extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.green,
+        title: const Text("Grocery Store", style: TextStyle(fontSize: 20, color: AppColors.white)),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Consumer<MainPageViewModel>(
           builder: (context, viewModel, _) {
@@ -50,8 +55,8 @@ class MainPage extends StatelessWidget {
                     },
                     getProducts: () => context.read<HomeViewModel>().getProducts(),
                     getCategories: () => context.read<HomeViewModel>().getCategories(),
-                    getCarProducts: () => context.read<CarViewModel>().getAllCarts(),
-                    getMoneyConversion: () => context.read<CarViewModel>().getMoneyConversion(),
+                    getCarProducts: () => context.read<CartViewModel>().getAllCarts(),
+                    getMoneyConversion: () => context.read<CartViewModel>().getMoneyConversion(),
                   ),
                 ),
               ],
