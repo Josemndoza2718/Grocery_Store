@@ -1,251 +1,108 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/add_product/add_product_page.dart';
+import 'package:intl/intl.dart';
 
-class ProductsListWidget extends StatelessWidget {
-  const ProductsListWidget({
+class PaymentInPartsWidget extends StatelessWidget {
+  final int itemCount;
+  final double price;
+  PaymentInPartsWidget({
     super.key,
-    required this.listProducts,
-    required this.onTap,
-    required this.onPressed,
-    required this.onClose,
-    required this.isFilterList,
-    this.moneyConversion,
-    this.category,
-    this.listProductsByCategory,
-    required this.onDeleteProduct,
-    required this.page,
+    required this.itemCount,
+    required this.price,
   });
 
-  final List<Product>? listProducts;
-  final List<Product>? listProductsByCategory;
-  final Function(int) onTap;
-  final Function(int) onPressed;
-  final Function() onClose;
-  final Function(int) onDeleteProduct;
-  final double? moneyConversion;
-  final String? category;
-  final bool isFilterList;
-  final Widget page;
-
-    String setselectedMeasurements(int? value) {
-    switch (value) {
-      case 0:
-        return 'other';
-      case 1:
-        return 'lt';
-      case 2:
-        return 'item';
-      case 3:
-        return 'kg';
-      default:
-        return "other";
-    }
-  }
+  int number = 1;
+  DateTime hoy = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.transparent,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Container(
-        /* margin: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-            color: AppColors.lightwhite,
-            borderRadius: BorderRadius.circular(10)), */
-        child: GridView.builder(
-          scrollDirection: Axis.vertical,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.75,
-          ),
-          itemCount: isFilterList
-              ? listProductsByCategory!.length
-              : listProducts!.length + 1,
-          itemBuilder: (context, index) {
-            if (index == listProducts?.length) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => page,
-                    ),
-                  ).then((_) {
-                    onClose();
-                  });
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(10),
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(115, 184, 184, 184),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+        height: 250, //530,
+        width: double.infinity,
+        color: AppColors.transparent,
+        child: ListView.separated(
+          //physics: const NeverScrollableScrollPhysics(),
+          itemCount: itemCount,
+          separatorBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  width: 16,
+                  color: AppColors.transparent,
+                  child: Column(
+                    spacing: 4,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Icon(
-                        Icons.add_circle,
-                        size: 40,
+                      Container(
+                        height: 8,
+                        width: 2,
+                        color: AppColors.darkgreen,
                       ),
-                      Text(
-                        "Add Product",
-                        style: TextStyle(fontSize: 12),
+                      Container(
+                        height: 8,
+                        width: 2,
+                        color: AppColors.darkgreen,
+                      ),
+                      Container(
+                        height: 8,
+                        width: 2,
+                        color: AppColors.darkgreen,
                       ),
                     ],
                   ),
                 ),
-              );
-            }
-            return GestureDetector(
-                onTap: () {
-                  onTap(index);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddProductPage(
-                        product: isFilterList
-                            ? listProductsByCategory![index]
-                            : listProducts![index],
+              ],
+            ),
+          ),
+          itemBuilder: (context, index) => Container(
+            color: AppColors.transparent,
+            child: Row(
+              spacing: 8,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  height: 30,
+                  width: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.darkgreen,
+                  ),
+                  child: Center(
+                    child: Text(
+                      "${number++}",
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontSize: 14,
                       ),
                     ),
-                  ).then((_) {
-                    onClose();
-                  });
-                },
-                onLongPress: () {
-                  HapticFeedback.mediumImpact();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Delete Category'),
-                        content: const Text(
-                            'Are you sure you want to delete this category?'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              onDeleteProduct(index);
-
-                              /* viewModel
-                                    .deleteCategory(listCategories![index].id); */
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(115, 184, 184, 184),
-                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        //height: 100,
-                        padding: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: AppColors.green),
-                        child: Container(
-                          //height: 70,
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: AppColors.darkgreen),
-                          child: Center(
-                            child: Image.file(
-                              File(isFilterList
-                                  ? listProductsByCategory![index].image
-                                  : listProducts![index].image),
-                              height: 80,
-                              width: 80,
-                              //fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          isFilterList
-                              ? listProductsByCategory![index].name
-                              : listProducts![index].name,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      /* Text(
-                              "description: ${listProducts![index].description}",
-                              style: const TextStyle(fontSize: 12),
-                            ), */
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          "${isFilterList 
-                          ? listProductsByCategory![index].stockQuantity 
-                          : "${listProducts![index].stockQuantity}"} ${setselectedMeasurements(listProducts![index].idStock)}",
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${(isFilterList 
-                                  ? (listProductsByCategory![index].price.toStringAsFixed(2)) 
-                                  : (listProducts![index].price.toStringAsFixed(2)))}\$",                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  "${(isFilterList 
-                                  ? ((listProductsByCategory![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)
-                                  : ((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                onPressed(index);
-                              },
-                              child: const Icon(
-                                (Icons.add_box),
-                                color: Colors.black,
-                                size: 40,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                ),
+                Text(
+                  DateFormat('dd/MM/yyyy')
+                      .format(hoy.add(Duration(days: 15 * index))),
+                  style: const TextStyle(
+                    color: AppColors.black,
+                    fontSize: 14,
                   ),
-                ));
-          },
+                ),
+                const Spacer(),
+                Text("${price / itemCount}\$",
+                    style: const TextStyle(
+                      color: AppColors.black,
+                      fontSize: 14,
+                    )),
+              ],
+            ),
+          ),
         ),
       ),
     );

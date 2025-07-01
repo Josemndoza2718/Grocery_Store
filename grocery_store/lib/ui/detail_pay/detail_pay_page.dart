@@ -4,10 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
+import 'package:grocery_store/ui/detail_pay/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/widgets/general_button.dart';
-import 'package:grocery_store/ui/widgets/general_list_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +19,6 @@ class DetailPayPage extends StatefulWidget {
 }
 
 class DetailPayPageState extends State<DetailPayPage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,43 +119,52 @@ class DetailPayPageState extends State<DetailPayPage> {
                       isFilterList: false,
                       onDeleteProduct: (index) => {}),
                 ), */
-                GeneralListWidget(
-                  itemCount: 8,
-                  crossAxisCount: 2,
-                  color: AppColors.lightwhite,
-                  onTap: (index) {
-                    viewModel.setPressedIndex(index);
-                    viewModel.setSelectedCategory(viewModel.listCategories[index].name);
-                    viewModel.setIsFilterList(true);
-                    viewModel.getProductsByCategory(viewModel.listCategories[index].id);
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 90,
-                        width: 90,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.file(
-                                File(viewModel.listProducts[0].image),
-                                // height: 80,
-                                // width: 80,
-                                fit: BoxFit.cover,
-                              ),
-                        ),
+                Container(
+                  height: 250,
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                        color: AppColors.lightwhite,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      Text("X ${viewModel.listProducts[0].quantity}",
-                          style: const TextStyle(
-                            color: AppColors.black,
-                            fontSize: 14,
-                          )),
-                    ],
-                  ),
+                  child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                      itemCount: viewModel.listProducts.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.18,
+                      ),
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: [
+                            Container(
+                              height: 90,
+                              width: 90,
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.file(
+                                  File(viewModel.listProducts[index].image),
+                                  // height: 80,
+                                  // width: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            Text("X ${viewModel.listProducts[index].quantity}",
+                                style: const TextStyle(
+                                  color: AppColors.black,
+                                  fontSize: 14,
+                                )),
+                          ],
+                        );
+                      }),
                 ),
-                PaymentInstallmentsWidget(itemCount: widget.payPart, price: 400,),
+                PaymentInPartsWidget(
+                  itemCount: widget.payPart,
+                  price: 400,
+                ),
                 const SizedBox(height: 8),
-                const GeneralButton(
+                GeneralButton(
                   child: Center(
                     child: Text(
                       "📷 Añadir Comprobante",
@@ -168,31 +175,40 @@ class DetailPayPageState extends State<DetailPayPage> {
                       ),
                     ),
                   ),
+                  /* onTap: () async {
+                          final pickedImageGalery = await PhoneImage()
+                              .pickImageFromGallery(ImageSource.gallery);
+
+                          if (pickedImageGalery != null) {
+                            viewModel.setGalleryImage(pickedImageGalery);
+                          }
+                        }, */
                 ),
-                GeneralListWidget(
-                  itemCount: 8,
-                  color: AppColors.transparent,
-                  onTap: (index) {
-                    viewModel.setPressedIndex(index);
-                    viewModel.setSelectedCategory(
-                        viewModel.listCategories[index].name);
-                    viewModel.setIsFilterList(true);
-                    viewModel.getProductsByCategory(
-                        viewModel.listCategories[index].id);
-                  },
-                  child: GestureDetector(
-                    child: Container(
-                      height: 60,
-                      width: 60,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          "https://mundo-oriental.com/upload/3229.jpg",
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                //Comprobantes de pago
+                SizedBox(
+                  height: 250,
+                  child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1,
+                      childAspectRatio: 1.18,
                     ),
+                    itemCount: 4,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        height: 60,
+                        width: 60,
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            "https://mundo-oriental.com/upload/3229.jpg",
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -201,111 +217,6 @@ class DetailPayPageState extends State<DetailPayPage> {
           ),
         );
       }),
-    );
-  }
-}
-
-class PaymentInstallmentsWidget extends StatelessWidget {
-
-  final int itemCount;
-  final double price;
-  PaymentInstallmentsWidget({
-    super.key, required this.itemCount, required this.price,
-  });
-
-  int n = 1;
-  DateTime hoy = DateTime.now();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.transparent,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Container(
-        height: 250, //530,
-        width: double.infinity,
-        color: AppColors.transparent,
-        child: ListView.separated(
-          //physics: const NeverScrollableScrollPhysics(),
-          itemCount: itemCount,
-          separatorBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  width: 16,
-                  color: AppColors.transparent,
-                  child: Column(
-                    spacing: 4,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        height: 8,
-                        width: 2,
-                        color: AppColors.darkgreen,
-                      ),
-                      Container(
-                        height: 8,
-                        width: 2,
-                        color: AppColors.darkgreen,
-                      ),
-                      Container(
-                        height: 8,
-                        width: 2,
-                        color: AppColors.darkgreen,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          itemBuilder: (context, index) => Container(
-            color: AppColors.transparent,
-            child: Row(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  height: 30,
-                  width: 30,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: AppColors.darkgreen,
-                  ),
-                  child: Center(
-                    child: Text( 
-                      "${n++}",
-                      style: const TextStyle(
-                        color: AppColors.white,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-                Text(
-                  DateFormat('dd/MM/yyyy').format(hoy.add(Duration(days: 15 * index))),
-                  style: const TextStyle(
-                    color: AppColors.black,
-                    fontSize: 14,
-                  ),
-                ),
-                const Spacer(),
-                Text("${price/itemCount}\$",
-                    style: TextStyle(
-                      color: AppColors.black,
-                      fontSize: 14,
-                    )),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

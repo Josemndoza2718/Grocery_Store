@@ -87,12 +87,12 @@ class CartViewModel extends ChangeNotifier {
         if (product.id.toString() == productId) {
           if (product.quantity < product.stockQuantity) {
             product.quantity++;
-            notifyListeners(); // Notifica a los oyentes
-          }
-          return; // Salir una vez encontrado y actualizado
+            // Notifica a los oyentes
+          } // Salir una vez encontrado y actualizado
         }
       }
     }
+    notifyListeners(); 
   }
 
   void removeQuantityProduct(String productId) {
@@ -124,12 +124,11 @@ class CartViewModel extends ChangeNotifier {
             } else {
               product.quantity = 0; // Si es negativo o no válido
             }
-            notifyListeners(); // Notifica a los oyentes
-            return;
           }
         }
       }
     }
+    notifyListeners();
     // Si el valor no es un número o está vacío, no hacemos nada (o podríamos reiniciar a 0)
   }
 
@@ -149,20 +148,18 @@ class CartViewModel extends ChangeNotifier {
         element.status = "paypart";
         element.payPart = value;
         notifyListeners();
-        return;
       }
     }
   }
+
   void setListPayProduct() {
+    //filterlistCarts.clear();
     for (var element in listCarts) {
-      if (element.status == 'paypart') {
+      if (element.status != 'pending') {
         filterlistCarts.add(element);
-        notifyListeners();
-        return;
       }
-        notifyListeners();
-        return;
-      }
+    }
+    notifyListeners();
   }
 
   
@@ -207,6 +204,7 @@ class CartViewModel extends ChangeNotifier {
     required String ownerCarName,
     required List<Product> products,
   }) async {
+    
     if (cartId != null &&
         ownerId != null &&
         products.isNotEmpty &&
@@ -223,6 +221,29 @@ class CartViewModel extends ChangeNotifier {
       getAllCarts();
     }
   }
+
+  /* Future<void> updateCart({
+    required int cartId,
+    required int ownerId,
+    required String ownerCarName,
+    required Product products,
+  }) async {
+    List<Product> listProductsInCart = [];
+    listProductsInCart.add(products);
+
+    if (ownerCarName.isNotEmpty) {
+      await updateCarProductsUseCases.updateProduct(
+        Cart(
+          id: cartId,
+          ownerId: ownerId,
+          ownerCarName: ownerCarName,
+          status: 'pending',
+          products: listProductsInCart,
+        ),
+      );
+      getAllCarts();
+    }
+  } */
 
   Future<void> getAllCarts() async {
     listCarts = await getCarProductsUseCases.call();

@@ -11,6 +11,7 @@ class GeneralListWidget extends StatefulWidget {
     this.label,
     this.childAspectRatio = 1.18,
     required this.itemCount,
+    required this.itemBuilder,
     this.scrollDirection = Axis.horizontal,
     required this.child,
     this.onTap,
@@ -28,6 +29,7 @@ class GeneralListWidget extends StatefulWidget {
   final Widget child;
   final Function(int)? onTap;
   final Color color;
+  final Function(BuildContext, int) itemBuilder;
 
   @override
   State<GeneralListWidget> createState() => _GeneralListWidgetState();
@@ -51,7 +53,8 @@ class _GeneralListWidgetState extends State<GeneralListWidget> {
           childAspectRatio: widget.childAspectRatio,
         ),
         itemCount: widget.itemCount,
-        itemBuilder: (context, index) {
+        itemBuilder: 
+        (context, index) {
           return widget.child;
         
           /* if (hasAllItemsButton && index == 0) {

@@ -411,16 +411,12 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                                                           keyboardType: TextInputType.number,
                                                           textAlign: TextAlign.center,
                                                           decoration: InputDecoration(
-                                                            hintText: "0.0",
-                                                            /* hintStyle: const TextStyle(
-                                                                      fontSize: 12,
-                                                                    ), */
+                                                            //hintText: "0.0",
                                                             enabled: true,
                                                             isCollapsed: true,
                                                             filled: true,
                                                             fillColor: Colors.transparent, //AppColors.lightgrey,
-                                                            focusedBorder:
-                                                                OutlineInputBorder(
+                                                            focusedBorder: OutlineInputBorder(
                                                               borderSide:
                                                                   const BorderSide(
                                                                 width: 2,
@@ -431,8 +427,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                                                                   BorderRadius.circular(
                                                                       10),
                                                             ),
-                                                            disabledBorder:
-                                                                OutlineInputBorder(
+                                                            disabledBorder: OutlineInputBorder(
                                                               borderSide:
                                                                   BorderSide
                                                                       .none,
@@ -440,8 +435,7 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                                                                   BorderRadius.circular(
                                                                       10),
                                                             ),
-                                                            border:
-                                                                OutlineInputBorder(
+                                                            border: OutlineInputBorder(
                                                               borderSide:
                                                                   BorderSide
                                                                       .none,

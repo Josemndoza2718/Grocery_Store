@@ -60,128 +60,139 @@ class _CheckPageState extends State<CheckPage> {
                             child: const Text(
                               "No debts",
                               style: TextStyle(
-                                color: AppColors.lightwhite,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold
-                              ),
+                                  color: AppColors.lightwhite,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold),
                             ),
                           )
-                        : GeneralListWidget(
-                            height: 200,
-                            itemCount: viewModel.filterlistCarts.length,
-                            crossAxisCount: 1,
-                            childAspectRatio: 2.3,
-                            scrollDirection: Axis.vertical,
-                            color: AppColors.transparent,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DetailPayPage(
-                                        payPart: viewModel
-                                            .filterlistCarts[0].payPart,
+                        : Container(
+                          height: 250,
+                          child: GridView.builder(
+                              scrollDirection: Axis.vertical,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 1,
+                                childAspectRatio: 2.3,
+                              ),
+                              itemCount: viewModel.filterlistCarts.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailPayPage(
+                                            payPart: viewModel
+                                                .filterlistCarts[0].payPart,
+                                          ),
+                                        ));
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    margin:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.white,
+                                      border: const Border(
+                                        bottom: BorderSide(
+                                          width: 6,
+                                          color: AppColors.ultralightgrey,
+                                        ),
+                                        right: BorderSide(
+                                          width: 6,
+                                          color: AppColors.ultralightgrey,
+                                        ),
                                       ),
-                                    ));
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: AppColors.white,
-                                  border: const Border(
-                                    bottom: BorderSide(
-                                      width: 6,
-                                      color: AppColors.ultralightgrey,
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                    right: BorderSide(
-                                      width: 6,
-                                      color: AppColors.ultralightgrey,
-                                    ),
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    //Product Image
-                                    Container(
-                                      height: 100,
-                                      width: 90,
-                                      //padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        //color: AppColors.darkgreen,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
-                                            "https://www.iconpacks.net/icons/2/free-user-icon-3297-thumb.png"),
-                                        /* Image.file(
-                                                      File(product.image),
-                                                      height: double.infinity,
-                                                      width: double.infinity,
-                                                      fit: BoxFit.cover,
-                                                    ), */
-                                      ),
-                                    ),
-                                    //Product Data
-                                    Expanded(
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            //Title
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        //Product Image
+                                        Container(
+                                          height: 100,
+                                          width: 90,
+                                          //padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            //color: AppColors.darkgreen,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.network(
+                                                "https://www.iconpacks.net/icons/2/free-user-icon-3297-thumb.png"),
+                                            /* Image.file(
+                                                          File(product.image),
+                                                          height: double.infinity,
+                                                          width: double.infinity,
+                                                          fit: BoxFit.cover,
+                                                        ), */
+                                          ),
+                                        ),
+                                        //Product Data
+                                        Expanded(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                const Text(
-                                                  "Nombre",
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
+                                                //Title
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    const Text(
+                                                      "Nombre",
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () {},
+                                                      child: const Icon(
+                                                        Icons.delete_forever,
+                                                        color: AppColors.red,
+                                                        //size: 30,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                GestureDetector(
-                                                  onTap: () {},
-                                                  child: const Icon(
-                                                    Icons.delete_forever,
-                                                    color: AppColors.red,
-                                                    //size: 30,
-                                                  ),
+                                                //Description
+                                                const Text(
+                                                  "product.description",
+                                                  style: TextStyle(fontSize: 14),
+                                                ),
+                                                const Text(
+                                                  "price", //"${product.price.toStringAsFixed(2)}\$",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const Text(
+                                                  "Total price", //"${((product.price) * (widget.moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 ),
                                               ],
                                             ),
-                                            //Description
-                                            const Text(
-                                              "product.description",
-                                              style: TextStyle(fontSize: 14),
-                                            ),
-                                            const Text(
-                                              "price", //"${product.price.toStringAsFixed(2)}\$",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            const Text(
-                                              "Total price", //"${((product.price) * (widget.moneyConversion ?? 0)).toStringAsFixed(2)}bs",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             ),
-                          ),
+                        ),
                   ]),
                 ),
               );
