@@ -381,6 +381,12 @@ void didUpdateWidget(covariant ShopListWidget oldWidget) {
                                                     style:const TextStyle(fontSize: 14),
                                                   ),
                                                   Text(
+                                                    "${product.id}",
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:FontWeight.normal),
+                                                  ),
+                                                  Text(
                                                     "${product.price.toStringAsFixed(2)}\$",
                                                     style: const TextStyle(
                                                         fontSize: 14,

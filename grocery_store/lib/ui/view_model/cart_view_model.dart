@@ -51,6 +51,7 @@ class CartViewModel extends ChangeNotifier {
   List<Cart> listCarts = [];
   List<Cart> filterlistCarts = [];
   List<Client> listClients = [];
+  List<Product> listProductsAddCart = [];
 
   List<bool> _isActivePanel = [];
 
@@ -92,7 +93,7 @@ class CartViewModel extends ChangeNotifier {
         }
       }
     }
-    notifyListeners(); 
+    notifyListeners();
   }
 
   void removeQuantityProduct(String productId) {
@@ -102,12 +103,11 @@ class CartViewModel extends ChangeNotifier {
         if (product.id.toString() == productId) {
           if (product.quantity > 0) {
             product.quantity--;
-            notifyListeners(); // Notifica a los oyentes
           }
-          return; // Salir una vez encontrado y actualizado
         }
       }
     }
+    notifyListeners(); // Notifica a los oyentes
   }
 
   void updateQuantityManually(String value, String productId) {
@@ -162,8 +162,6 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  
-
   void getMoneyConversion() async {
     double money = await Prefs.getMoneyConversion();
     _moneyConversion = money;
@@ -202,24 +200,28 @@ class CartViewModel extends ChangeNotifier {
     required int cartId,
     required int ownerId,
     required String ownerCarName,
-    required List<Product> products,
+    required Product products,
   }) async {
-    
-    if (cartId != null &&
-        ownerId != null &&
-        products.isNotEmpty &&
-        ownerCarName.isNotEmpty) {
-      await updateCarProductsUseCases.updateProduct(
-        Cart(
-          id: cartId,
-          ownerId: ownerId,
-          ownerCarName: ownerCarName,
-          status: 'pending',
-          products: products,
-        ),
-      );
-      getAllCarts();
+    //listProductsAddCart.clear();
+
+    if (!listProductsAddCart.contains(products)) {
+      listProductsAddCart.add(products);
+      if (ownerCarName.isNotEmpty) {
+        await updateCarProductsUseCases.updateProduct(
+          Cart(
+            id: cartId,
+            ownerId: ownerId,
+            ownerCarName: ownerCarName,
+            status: 'pending',
+            products: listProductsAddCart,
+          ),
+        );
+        getAllCarts();
+      }
+    } else {
+      print("No Agregado");
     }
+    notifyListeners();
   }
 
   /* Future<void> updateCart({

@@ -324,7 +324,7 @@ class _HomePageState extends State<HomePage> {
                                 cartId: existingCart.first.id,
                                 ownerId: viewModel.clientId,
                                 ownerCarName: viewModel.clientName,
-                                products: viewModel.listProducts, //viewModel.listProducts[index],
+                                products: viewModel.listProducts[index],
                               );
                               showFloatingMessage(
                                   context: context,
