@@ -1,18 +1,17 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
+import 'package:grocery_store/ui/home/widgets/decimal_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/floatingMessage.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -51,7 +50,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(), // Esto quita el foco de cualquier TextField
+      onTap: () => FocusScope.of(context)
+          .unfocus(), // Esto quita el foco de cualquier TextField
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, viewModel, _) {
@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                             );
                             viewModel.clientId = value!;
                             viewModel.setClientName = selectedClient.name;
-                                                    },
+                          },
                         ),
                       ),
                     ),
@@ -242,17 +242,50 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-
                 //GridViewButtons
                 Flexible(
                   child: Container(
                     decoration: BoxDecoration(
-                        color: AppColors.lightwhite,
+                        color: AppColors.lightgrey,
                         borderRadius: BorderRadius.circular(10)),
                     child: Column(
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Container(
+                                margin: const EdgeInsets.all(8),
+                                child: SearchBar(
+                                  controller: searchController,
+                                  leading: const Icon(Icons.search),
+                                  shape: const WidgetStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  )),
+                                  onChanged: (value) {
+                                    if (value.isNotEmpty) {
+                                      viewModel.filterProducts(value);
+                                    } else {
+                                      viewModel.getProducts();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle),
+                              onPressed: () {
+                                // Show filter options
+                              },
+                            ),
+                          ],
+                        ),
+
                         //Text("Client ${viewModel.clientName}"),
-                        CategoriesWidget(
+                        /* CategoriesWidget(
                           pressedIndex: viewModel.pressedIndex,
                           selectedIndexGrid: viewModel.selectedIndexGrid,
                           listCategories: viewModel.listCategories,
@@ -275,23 +308,27 @@ class _HomePageState extends State<HomePage> {
                           onClose: () => viewModel.getCategories(),
                           onDeleteCategory: (index) => viewModel.deleteCategory(
                               viewModel.listCategories[index].id),
-                        ),
+                        ), */
                         ProductsListWidget(
-                          page: const AddProductPage(),
-                          listProducts: viewModel.listProducts,
-                          listProductsByCategory: viewModel.listProductsByCategory,
+                          listProducts: viewModel.listFilterProducts.isNotEmpty
+                              ? viewModel.listFilterProducts
+                              : viewModel.listProducts,
+                          listProductsByCategory:
+                              viewModel.listProductsByCategory,
                           onTap: (index) {
-                            var addProductViewModel = context.read<AddProductViewModel>();
-                            addProductViewModel.getCategoryId(viewModel.listProducts, index);
+                            var addProductViewModel =
+                                context.read<AddProductViewModel>();
+                            addProductViewModel.getCategoryId(
+                                viewModel.listProducts, index);
                           },
                           onPressed: (index) {
                             var carViewModel = context.read<CartViewModel>();
 
-                            
                             if (viewModel.clientName.isEmpty) {
                               showFloatingMessage(
                                   context: context,
-                                  message: "¡¡¡Warning!!!. Please select a client",
+                                  message:
+                                      "¡¡¡Warning!!!. Please select a client",
                                   color: AppColors.red);
                               return;
                             }
@@ -305,9 +342,12 @@ class _HomePageState extends State<HomePage> {
                             }
 
                             // Check if a cart for the client already exists
-                            final existingCart = carViewModel.listCarts.where(
-                                (element) => element.ownerId == viewModel.clientId,
-                            ).toList();
+                            final existingCart = carViewModel.listCarts
+                                .where(
+                                  (element) =>
+                                      element.ownerId == viewModel.clientId,
+                                )
+                                .toList();
 
                             if (existingCart.isEmpty) {
                               carViewModel.createCart(
@@ -328,7 +368,8 @@ class _HomePageState extends State<HomePage> {
                               );
                               showFloatingMessage(
                                   context: context,
-                                  message: "Product added to ${viewModel.clientName}'s cart ",
+                                  message:
+                                      "Product added to ${viewModel.clientName}'s cart ",
                                   color: AppColors.green);
                             }
                           },
@@ -336,7 +377,8 @@ class _HomePageState extends State<HomePage> {
                           moneyConversion: viewModel.moneyConversion,
                           category: viewModel.selectedCategory,
                           isFilterList: viewModel.isFilterList,
-                          onDeleteProduct: (index) => viewModel.deleteProduct(viewModel.listProducts[index].id),
+                          onDeleteProduct: (index) => viewModel
+                              .deleteProduct(viewModel.listProducts[index].id),
                         ),
                       ],
                     ),
@@ -348,31 +390,6 @@ class _HomePageState extends State<HomePage> {
           );
         }),
       ),
-    );
-  }
-}
-
-class DecimalInputFormatter extends TextInputFormatter {
-  final NumberFormat _formatter = NumberFormat("#,##0.00", "es_ES");
-
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    // Quitar caracteres no numéricos excepto la coma
-    String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
-    if (newText.isEmpty) {
-      return newValue.copyWith(text: '');
-    }
-
-    // Convertir a número con 2 decimales (suponemos que los últimos dos dígitos son decimales)
-    double value = double.parse(newText) / 100;
-
-    final formattedText = _formatter.format(value);
-
-    return TextEditingValue(
-      text: formattedText,
-      selection: TextSelection.collapsed(offset: formattedText.length),
     );
   }
 }

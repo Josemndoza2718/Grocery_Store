@@ -19,7 +19,6 @@ class ProductsListWidget extends StatelessWidget {
     this.category,
     this.listProductsByCategory,
     required this.onDeleteProduct,
-    required this.page,
   });
 
   final bool isPayMode;
@@ -32,7 +31,6 @@ class ProductsListWidget extends StatelessWidget {
   final double? moneyConversion;
   final String? category;
   final bool isFilterList;
-  final Widget page;
 
   String setselectedMeasurements(int? value) {
     switch (value) {
@@ -56,21 +54,22 @@ class ProductsListWidget extends StatelessWidget {
         height: isPayMode ? 250 : double.infinity,
         decoration: isPayMode
             ? BoxDecoration(
-                color: AppColors.lightwhite, borderRadius: BorderRadius.circular(10))
+                color: AppColors.lightwhite,
+                borderRadius: BorderRadius.circular(10))
             : null,
         child: GridView.builder(
           scrollDirection: isPayMode ? Axis.horizontal : Axis.vertical,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2 ,
+            crossAxisCount: 2,
             childAspectRatio: isPayMode ? 1.2 : 0.75,
           ),
           itemCount: isPayMode
               ? listProducts!.length
               : isFilterList
                   ? listProductsByCategory!.length
-                  : listProducts!.length + 1,
+                  : listProducts!.length,
           itemBuilder: (context, index) {
-            if (index == listProducts?.length) {
+            /* if (index == listProducts?.length) {
               return isPayMode
                   ? null
                   : GestureDetector(
@@ -106,7 +105,7 @@ class ProductsListWidget extends StatelessWidget {
                         ),
                       ),
                     );
-            }
+            } */
 
             return GestureDetector(
               onTap: isPayMode
@@ -174,9 +173,9 @@ class ProductsListWidget extends StatelessWidget {
                             width: 90,
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                //color: AppColors.darkgreen,
-                                ),
+                              borderRadius: BorderRadius.circular(10),
+                              //color: AppColors.darkgreen,
+                            ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: Image.file(
@@ -231,9 +230,7 @@ class ProductsListWidget extends StatelessWidget {
                                   color: AppColors.darkgreen),
                               child: Center(
                                 child: Image.file(
-                                  File(isFilterList
-                                      ? listProductsByCategory![index].image
-                                      : listProducts![index].image),
+                                  File(listProducts![index].image),
                                   height: 80,
                                   width: 80,
                                   //fit: BoxFit.cover,

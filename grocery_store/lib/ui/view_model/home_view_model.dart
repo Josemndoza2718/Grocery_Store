@@ -56,6 +56,7 @@ class HomeViewModel extends ChangeNotifier {
 
   List<Category> listCategories = [];
   List<Product> listProducts = [];
+  List<Product> listFilterProducts = [];
   List<Product> listProductsByCategory = [];
 
   List<Client> listClients = [];
@@ -140,6 +141,18 @@ class HomeViewModel extends ChangeNotifier {
 
   set moneyConversion(double value) {
     _moneyConversion = value;
+    notifyListeners();
+  }
+
+  void filterProducts(String query) {
+    if (query.isEmpty) {
+      listFilterProducts = [];
+    } else {
+      listFilterProducts = listProducts
+          .where((product) =>
+              product.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
     notifyListeners();
   }
 
