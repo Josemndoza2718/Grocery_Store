@@ -27,21 +27,17 @@ class ProductRepositoryImpl implements ProductRepository {
 
   @override
   Future<void> addProduct(Product product) async {
-
-    final db =await initDatabase(); 
+    final db = await initDatabase();
 
     ProductModel productModel = ProductModel(
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      image: product.image,
-      categoryId: product.categoryId,
-      category: product.category,
-      idStock: product.idStock,
-      stockQuantity: product.stockQuantity,
-      quantity: product.quantity
-    );
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        image: product.image,
+        idStock: product.idStock,
+        stockQuantity: product.stockQuantity,
+        quantity: product.quantity);
 
     await store.record(product.id).add(db, (productModel.toJson()));
   }
@@ -76,17 +72,14 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> updateProduct(Product product) async {
     final db = await initDatabase();
     ProductModel productModel = ProductModel(
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      image: product.image,
-      categoryId: product.categoryId,
-      category: product.category,
-      idStock: product.idStock,
-      stockQuantity: product.stockQuantity,
-      quantity: product.quantity
-    );
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        image: product.image,
+        idStock: product.idStock,
+        stockQuantity: product.stockQuantity,
+        quantity: product.quantity);
 
     store.record(product.id).put(db, (productModel.toJson()));
   }

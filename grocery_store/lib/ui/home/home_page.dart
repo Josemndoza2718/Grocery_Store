@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/add_product/add_product_page.dart';
-import 'package:grocery_store/ui/home/widgets/categories_widget.dart';
 import 'package:grocery_store/ui/home/widgets/decimal_widget.dart';
 import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
 import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
@@ -32,8 +31,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       initMoney();
+      var viewModel = context.read<HomeViewModel>();
+      await viewModel.getProducts();
+      viewModel.initList();
     });
   }
 
@@ -246,7 +248,7 @@ class _HomePageState extends State<HomePage> {
                 Flexible(
                   child: Container(
                     decoration: BoxDecoration(
-                        color: AppColors.lightgrey,
+                        color: AppColors.lightwhite,
                         borderRadius: BorderRadius.circular(10)),
                     child: Column(
                       children: [
@@ -255,8 +257,11 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Flexible(
                               child: Container(
+                                height: 50,
                                 margin: const EdgeInsets.all(8),
                                 child: SearchBar(
+                                  backgroundColor: const WidgetStatePropertyAll(
+                                      AppColors.white),
                                   controller: searchController,
                                   leading: const Icon(Icons.search),
                                   shape: const WidgetStatePropertyAll(
@@ -266,19 +271,31 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   )),
                                   onChanged: (value) {
-                                    if (value.isNotEmpty) {
-                                      viewModel.filterProducts(value);
-                                    } else {
-                                      viewModel.getProducts();
-                                    }
+                                    viewModel.filterProducts(value);
                                   },
                                 ),
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.add_circle),
+                              icon: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: AppColors.green,
+                                  ),
+                                  width: 50,
+                                  height: 50,
+                                  child: const Icon(
+                                    Icons.add_circle,
+                                    color: AppColors.white,
+                                  )),
                               onPressed: () {
-                                // Show filter options
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AddProductPage(),
+                                  ),
+                                );
                               },
                             ),
                           ],
@@ -310,9 +327,7 @@ class _HomePageState extends State<HomePage> {
                               viewModel.listCategories[index].id),
                         ), */
                         ProductsListWidget(
-                          listProducts: viewModel.listFilterProducts.isNotEmpty
-                              ? viewModel.listFilterProducts
-                              : viewModel.listProducts,
+                          listProducts: viewModel.listFilterProducts,
                           listProductsByCategory:
                               viewModel.listProductsByCategory,
                           onTap: (index) {
@@ -328,7 +343,8 @@ class _HomePageState extends State<HomePage> {
                               showFloatingMessage(
                                   context: context,
                                   message:
-                                      "¡¡¡Warning!!!. Please select a client",
+                                      "¡¡¡Adventencia!!!. Por favor seleccione un cliente",
+                                  //"¡¡¡Warning!!!. Please select a client",
                                   color: AppColors.red);
                               return;
                             }

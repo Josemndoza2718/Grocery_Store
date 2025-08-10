@@ -7,9 +7,7 @@ class GetProductsUseCases {
   final ProductRepositoryImpl repository;
 
   Future<List<Product>> call() async {
-    return await repository.getAllProducts();
+    var list = await repository.getAllProducts();
+    return list;
   }
-
-  
-
 }

@@ -35,7 +35,6 @@ class HomeViewModel extends ChangeNotifier {
   }) {
     getClients();
     getCategories();
-    getProducts();
   }
   //Cagories
   final GetCategoriesUseCases getCategoriesUseCases;
@@ -144,9 +143,14 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void initList() {
+    listFilterProducts.addAll(listProducts);
+    notifyListeners();
+  }
+
   void filterProducts(String query) {
     if (query.isEmpty) {
-      listFilterProducts = [];
+      listFilterProducts = listProducts;
     } else {
       listFilterProducts = listProducts
           .where((product) =>
@@ -190,10 +194,8 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> getProductsByCategory(int category) async {
     listProductsByCategory.clear();
     for (var element in listProducts) {
-      if (element.categoryId == category) {
-        if (!listProductsByCategory.contains(element)) {
-          listProductsByCategory.add(element);
-        }
+      if (!listProductsByCategory.contains(element)) {
+        listProductsByCategory.add(element);
       }
     }
     notifyListeners();

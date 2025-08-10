@@ -12,7 +12,7 @@ class AddProductViewModel extends ChangeNotifier {
 
   final CreateProductsUseCases createProductsUseCases;
 
-  late int _id;
+  int _id = 0;
 
   int get id => _id;
 
@@ -44,11 +44,8 @@ class AddProductViewModel extends ChangeNotifier {
   Future<void> getCategoryId(List<Product> listProducts, int index) async {
     if (index >= 0 && index <= listProducts.length) {
       for (var element in listProducts) {
-        if (element.id == listProducts[index].categoryId) {
-          _id = element.id;
-          notifyListeners();
-          break; // Stop further iterations once a match is found
-        }
+        _id = element.id;
+        notifyListeners(); //
       }
     }
   }
@@ -71,8 +68,6 @@ class AddProductViewModel extends ChangeNotifier {
           description: description,
           price: price,
           stockQuantity: stockQuantity,
-          categoryId: id,
-          category: category,
           idStock: selectedQuantity,
           image: galleryImage!.path,
           quantity: 0,

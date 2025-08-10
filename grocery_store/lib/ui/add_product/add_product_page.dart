@@ -42,10 +42,12 @@ class _AddProductPageState extends State<AddProductPage> {
     }
 
     nameEditController = TextEditingController(text: widget.product?.name);
-    descriptionEditController = TextEditingController(text: widget.product?.description);
-    priceEditController = TextEditingController(text: widget.product?.price.toString());
-    quantityEditController = TextEditingController(text: widget.product?.stockQuantity.toString());
-    editCategory = widget.product?.category ?? "";
+    descriptionEditController =
+        TextEditingController(text: widget.product?.description);
+    priceEditController =
+        TextEditingController(text: widget.product?.price.toString());
+    quantityEditController =
+        TextEditingController(text: widget.product?.stockQuantity.toString());
   }
 
   Future<void> _handleProductSubmission(
@@ -55,16 +57,15 @@ class _AddProductPageState extends State<AddProductPage> {
     if (widget.product != null) {
       await homeViewModel
           .updateProduct(
-            Product(
-              id: widget.product!.id,
-              name: nameEditController.text,
-              description: descriptionEditController.text,
-              price: double.parse(priceEditController.text),
-              image: viewModel.galleryImage?.path ?? widget.product!.image,
-              categoryId: int.parse(homeViewModel.selectedCategory),
-              category: editCategory,
-              stockQuantity: double.parse(quantityEditController.text),
-              ))
+        Product(
+          id: widget.product!.id,
+          name: nameEditController.text,
+          description: descriptionEditController.text,
+          price: double.parse(priceEditController.text),
+          image: viewModel.galleryImage?.path ?? widget.product!.image,
+          stockQuantity: double.parse(quantityEditController.text),
+        ),
+      )
           .then((_) {
         {
           Navigator.pop(context);
@@ -72,10 +73,13 @@ class _AddProductPageState extends State<AddProductPage> {
       });
     } else {
       if (nameController.text.isEmpty ||
-          descriptionController.text.isEmpty ||
           priceController.text.isEmpty ||
           quantityController.text.isEmpty) {
-        return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please fill all fields"),
+          ),
+        );
       } else {
         await viewModel
             .createProduct(
@@ -84,7 +88,8 @@ class _AddProductPageState extends State<AddProductPage> {
           price: double.parse(priceController.text),
           stockQuantity: double.parse(quantityController.text),
           category: homeViewModel.selectedCategory,
-        ).then((_) {
+        )
+            .then((_) {
           {
             Navigator.pop(context);
             homeViewModel.setSelectedCategory("");
@@ -98,9 +103,13 @@ class _AddProductPageState extends State<AddProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.darkgreen,
+      ),
       body: GestureDetector(
         onTap: () {
-          FocusScope.of(context).unfocus(); // Esto quita el foco de cualquier TextField
+          FocusScope.of(context)
+              .unfocus(); // Esto quita el foco de cualquier TextField
         },
         behavior: HitTestBehavior.opaque,
         child: SafeArea(child:
@@ -109,7 +118,7 @@ class _AddProductPageState extends State<AddProductPage> {
             child: Column(
               spacing: 16,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: 0),
                 Container(
                   height: 200,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -400,7 +409,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                   )
                                 ],
                               ),
-                              DropdownButtonFormField(
+                              /* DropdownButtonFormField(
                                 value: widget.product?.categoryId.toString(),
                                 decoration: const InputDecoration(
                                   hintText: 'Select category',
@@ -437,23 +446,27 @@ class _AddProductPageState extends State<AddProductPage> {
                                 }).toList(),
                                 onChanged: (String? newValue) {
                                   if (newValue != null) {
-                                    var addProductViewModel = context.read<AddProductViewModel>();
-                                    
+                                    var addProductViewModel =
+                                        context.read<AddProductViewModel>();
+
                                     homeViewModel.setSelectedCategory(newValue);
-                                    addProductViewModel.setID = int.parse(homeViewModel.selectedCategory);
+                                    addProductViewModel.setID = int.parse(
+                                        homeViewModel.selectedCategory);
                                   }
                                 },
-                              ),
+                              ), */
                               const SizedBox(height: 0),
                               GestureDetector(
                                 onTap: () async {
                                   _handleProductSubmission(
                                       viewModel, homeViewModel);
-                                      viewModel.selectedQuantity = 0;
+                                  viewModel.selectedQuantity = 0;
+                                  //Navigator.pop(context);
                                 },
                                 child: Container(
                                   width: double.infinity,
-                                  padding:const EdgeInsets.symmetric(vertical: 12),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
                                       color: AppColors.white,
                                       borderRadius: BorderRadius.circular(10)),

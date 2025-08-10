@@ -72,8 +72,6 @@ class CashProductRepositoryImpl implements CashProductRepository {
         description: product.description,
         price: product.price,
         image: product.image,
-        categoryId: product.categoryId,
-        category: product.category,
         idStock: product.idStock,
         stockQuantity: product.stockQuantity,
         quantity: product.quantity);

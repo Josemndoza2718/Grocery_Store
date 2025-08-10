@@ -63,11 +63,7 @@ class ProductsListWidget extends StatelessWidget {
             crossAxisCount: 2,
             childAspectRatio: isPayMode ? 1.2 : 0.75,
           ),
-          itemCount: isPayMode
-              ? listProducts!.length
-              : isFilterList
-                  ? listProductsByCategory!.length
-                  : listProducts!.length,
+          itemCount: listProducts!.length,
           itemBuilder: (context, index) {
             /* if (index == listProducts?.length) {
               return isPayMode
@@ -211,7 +207,7 @@ class ProductsListWidget extends StatelessWidget {
                   : Container(
                       margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(115, 184, 184, 184),
+                        color: AppColors.white,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
@@ -221,24 +217,25 @@ class ProductsListWidget extends StatelessWidget {
                             padding: const EdgeInsets.only(bottom: 8),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                color: AppColors.green),
+                                color: AppColors.transparent),
                             child: Container(
                               //height: 70,
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  color: AppColors.darkgreen),
+                                  //border: Border.all(color: AppColors.green, width: 4),
+                                  color: AppColors.white),
                               child: Center(
                                 child: Image.file(
                                   File(listProducts![index].image),
-                                  height: 80,
-                                  width: 80,
+                                  height: 100,
+                                  width: 100,
                                   //fit: BoxFit.cover,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          //const SizedBox(height: 10),
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
@@ -259,7 +256,9 @@ class ProductsListWidget extends StatelessWidget {
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
                               "${isFilterList ? listProductsByCategory![index].stockQuantity : "${listProducts![index].stockQuantity}"} ${setselectedMeasurements(listProducts![index].idStock)}",
-                              style: const TextStyle(fontSize: 14),
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                           Padding(

@@ -7,8 +7,6 @@ class ProductModel extends Product {
     required super.description,
     required super.price,
     required super.image,
-    required super.categoryId,
-    required super.category,
     required super.idStock,
     required super.stockQuantity,
     required super.quantity,
@@ -21,8 +19,6 @@ class ProductModel extends Product {
       description: json['description'],
       price: json['price'].toDouble(),
       image: json['imageUrl'],
-      categoryId: json['categoryId'],
-      category: json['category'],
       idStock: json['idStock'],
       stockQuantity: json['stockQuantity'].toDouble(),
       quantity: json['quantity'] ?? 0.0,
@@ -36,25 +32,19 @@ class ProductModel extends Product {
       'description': description,
       'price': price,
       'imageUrl': image,
-      'categoryId': categoryId,
-      'category': category,
       'idStock': idStock,
       'stockQuantity': stockQuantity,
       'quantity': quantity,
     };
   }
 
-  
-
-  toEntity(){
+  toEntity() {
     return Product(
       id: id,
       name: name,
       description: description,
       price: price,
       image: image,
-      categoryId: categoryId,
-      category: category,
       idStock: idStock,
       stockQuantity: stockQuantity,
       quantity: quantity,
