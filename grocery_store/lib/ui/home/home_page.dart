@@ -252,6 +252,7 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(10)),
                     child: Column(
                       children: [
+                        //Search Bar & AddProduct
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -300,36 +301,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ],
                         ),
-
                         //Text("Client ${viewModel.clientName}"),
-                        /* CategoriesWidget(
-                          pressedIndex: viewModel.pressedIndex,
-                          selectedIndexGrid: viewModel.selectedIndexGrid,
-                          listCategories: viewModel.listCategories,
-                          selectColor: AppColors.green,
-                          unSelectColor: AppColors.lightgrey,
-                          onTap: (index) {
-                            viewModel.setPressedIndex(index);
-                            viewModel.setSelectedCategory(
-                                viewModel.listCategories[index].name);
-                            viewModel.setIsFilterList(true);
-                            viewModel.getProductsByCategory(
-                                viewModel.listCategories[index].id);
-                          },
-                          onPressed: (index) {
-                            viewModel.setPressedIndex(index);
-                            viewModel.getProducts();
-                            viewModel.setIsFilterList(false);
-                          },
-                          onTapUp: viewModel.setSelectedIndexGrid,
-                          onClose: () => viewModel.getCategories(),
-                          onDeleteCategory: (index) => viewModel.deleteCategory(
-                              viewModel.listCategories[index].id),
-                        ), */
                         ProductsListWidget(
                           listProducts: viewModel.listFilterProducts,
-                          listProductsByCategory:
-                              viewModel.listProductsByCategory,
                           onTap: (index) {
                             var addProductViewModel =
                                 context.read<AddProductViewModel>();
@@ -356,7 +330,6 @@ class _HomePageState extends State<HomePage> {
                                   color: AppColors.red);
                               return;
                             }
-
                             // Check if a cart for the client already exists
                             final existingCart = carViewModel.listCarts
                                 .where(
@@ -391,8 +364,6 @@ class _HomePageState extends State<HomePage> {
                           },
                           onClose: () => viewModel.getProducts(),
                           moneyConversion: viewModel.moneyConversion,
-                          category: viewModel.selectedCategory,
-                          isFilterList: viewModel.isFilterList,
                           onDeleteProduct: (index) => viewModel
                               .deleteProduct(viewModel.listProducts[index].id),
                         ),

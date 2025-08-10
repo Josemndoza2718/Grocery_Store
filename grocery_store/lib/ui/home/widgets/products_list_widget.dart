@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/resource/custom_dialgos.dart';
+import 'package:grocery_store/core/resource/my_localizations.dart';
 import 'package:grocery_store/ui/add_product/add_product_page.dart';
 
 class ProductsListWidget extends StatelessWidget {
@@ -14,23 +16,17 @@ class ProductsListWidget extends StatelessWidget {
     required this.onTap,
     required this.onPressed,
     required this.onClose,
-    required this.isFilterList,
     this.moneyConversion,
-    this.category,
-    this.listProductsByCategory,
     required this.onDeleteProduct,
   });
 
   final bool isPayMode;
   final List<Product>? listProducts;
-  final List<Product>? listProductsByCategory;
   final Function(int) onTap;
   final Function(int) onPressed;
   final Function() onClose;
   final Function(int) onDeleteProduct;
   final double? moneyConversion;
-  final String? category;
-  final bool isFilterList;
 
   String setselectedMeasurements(int? value) {
     switch (value) {
@@ -65,43 +61,7 @@ class ProductsListWidget extends StatelessWidget {
           ),
           itemCount: listProducts!.length,
           itemBuilder: (context, index) {
-            /* if (index == listProducts?.length) {
-              return isPayMode
-                  ? null
-                  : GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => page,
-                          ),
-                        ).then((_) {
-                          onClose();
-                        });
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.all(10),
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(115, 184, 184, 184),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_circle,
-                              size: 40,
-                            ),
-                            Text(
-                              "Add Product",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-            } */
+            final localizations = MyLocalizations.of(context);
 
             return GestureDetector(
               onTap: isPayMode
@@ -112,9 +72,7 @@ class ProductsListWidget extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AddProductPage(
-                            product: isFilterList
-                                ? listProductsByCategory![index]
-                                : listProducts![index],
+                            product: listProducts![index],
                           ),
                         ),
                       ).then((_) {
@@ -125,7 +83,15 @@ class ProductsListWidget extends StatelessWidget {
                   ? null
                   : () {
                       HapticFeedback.mediumImpact();
-                      showDialog(
+                      CustomDialgos.showAlertDialog(
+                        context: context,
+                        title: localizations?.translate('title') ?? 'title',
+                        onConfirm: () {
+                          onDeleteProduct(index);
+                          Navigator.of(context).pop();
+                        },
+                      );
+                      /* showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
@@ -140,19 +106,13 @@ class ProductsListWidget extends StatelessWidget {
                                 child: const Text('Cancel'),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  onDeleteProduct(index);
-
-                                  /* viewModel
-                                    .deleteCategory(listCategories![index].id); */
-                                  Navigator.of(context).pop();
-                                },
+                                onPressed: () {},
                                 child: const Text('Delete'),
                               ),
                             ],
                           );
                         },
-                      );
+                      ); */
                     },
               child: isPayMode
                   ? Container(
@@ -240,9 +200,7 @@ class ProductsListWidget extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
-                              isFilterList
-                                  ? listProductsByCategory![index].name
-                                  : listProducts![index].name,
+                              listProducts![index].name,
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
@@ -255,7 +213,7 @@ class ProductsListWidget extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
-                              "${isFilterList ? listProductsByCategory![index].stockQuantity : "${listProducts![index].stockQuantity}"} ${setselectedMeasurements(listProducts![index].idStock)}",
+                              "${"${listProducts![index].stockQuantity}"} ${setselectedMeasurements(listProducts![index].idStock)}",
                               style: const TextStyle(
                                 fontSize: 14,
                               ),
@@ -271,13 +229,13 @@ class ProductsListWidget extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "${(isFilterList ? (listProductsByCategory![index].price.toStringAsFixed(2)) : (listProducts![index].price.toStringAsFixed(2)))}\$",
+                                      "${((listProducts![index].price.toStringAsFixed(2)))}\$",
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                      "${(isFilterList ? ((listProductsByCategory![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2) : ((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
+                                      "${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold),
