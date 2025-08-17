@@ -3,14 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/add_product/add_product_page.dart';
-import 'package:grocery_store/ui/home/widgets/decimal_widget.dart';
-import 'package:grocery_store/ui/home/widgets/products_list_widget.dart';
-import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
-import 'package:grocery_store/ui/view_model/home_view_model.dart';
-import 'package:grocery_store/ui/view_model/cart_view_model.dart';
-import 'package:grocery_store/ui/widgets/floatingMessage.dart';
-import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
+import 'package:grocery_store/view/ui/add_product/add_product_page.dart';
+import 'package:grocery_store/view/ui/home/widgets/decimal_widget.dart';
+import 'package:grocery_store/view/ui/home/widgets/products_list_widget.dart';
+import 'package:grocery_store/view/ui/view_model/add_product_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/home_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/cart_view_model.dart';
+import 'package:grocery_store/view/ui/widgets/FloatingMessage.dart';
+import 'package:grocery_store/view/ui/widgets/custom_textformfield.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {

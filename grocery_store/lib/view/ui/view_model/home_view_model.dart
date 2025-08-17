@@ -13,7 +13,8 @@ import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_ca
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -25,6 +26,7 @@ class HomeViewModel extends ChangeNotifier {
     required this.getCategoriesUseCases,
     //Products
     required this.getProductsUseCases,
+    required this.sendProductsToFirebaseUseCases,
     required this.createProductsUseCases,
     required this.deleteProductsUseCases,
     required this.updateProductsUseCases,
@@ -44,6 +46,7 @@ class HomeViewModel extends ChangeNotifier {
 
   //Products
   final GetProductsUseCases getProductsUseCases;
+  final SendProductFirebaseUseCases sendProductsToFirebaseUseCases;
   final CreateProductsUseCases createProductsUseCases;
   final DeleteProductsUseCases deleteProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases;
@@ -98,6 +101,11 @@ class HomeViewModel extends ChangeNotifier {
         print("ya existe");
       }
     }
+  }
+
+  Future<void> saveDataToFirebase() async {
+    await sendProductsToFirebaseUseCases.call();
+    notifyListeners();
   }
 
   Future<void> getClients() async {

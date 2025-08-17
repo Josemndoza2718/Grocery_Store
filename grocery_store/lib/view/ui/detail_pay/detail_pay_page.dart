@@ -4,9 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/detail_pay/widgets/products_list_widget.dart';
-import 'package:grocery_store/ui/view_model/home_view_model.dart';
-import 'package:grocery_store/ui/widgets/general_button.dart';
+import 'package:grocery_store/view/ui/detail_pay/widgets/products_list_widget.dart';
+import 'package:grocery_store/view/ui/view_model/home_view_model.dart';
+import 'package:grocery_store/view/ui/widgets/general_button.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -123,13 +123,14 @@ class DetailPayPageState extends State<DetailPayPage> {
                   height: 250,
                   padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
-                        color: AppColors.lightwhite,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                    color: AppColors.lightwhite,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: GridView.builder(
-                    scrollDirection: Axis.horizontal,
+                      scrollDirection: Axis.horizontal,
                       itemCount: viewModel.listProducts.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 1.18,
                       ),
@@ -139,7 +140,8 @@ class DetailPayPageState extends State<DetailPayPage> {
                             Container(
                               height: 90,
                               width: 90,
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
                                 child: Image.file(

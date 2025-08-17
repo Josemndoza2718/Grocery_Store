@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/phone_image.dart';
-import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
-import 'package:grocery_store/ui/view_model/home_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/add_category_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/home_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 

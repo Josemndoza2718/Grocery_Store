@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/detail_pay/detail_pay_page.dart';
-import 'package:grocery_store/ui/view_model/cart_view_model.dart';
-import 'package:grocery_store/ui/view_model/check_view_model.dart';
-import 'package:grocery_store/ui/widgets/general_list_widget.dart';
+import 'package:grocery_store/view/ui/detail_pay/detail_pay_page.dart';
+import 'package:grocery_store/view/ui/view_model/cart_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/check_view_model.dart';
+import 'package:grocery_store/view/ui/widgets/general_list_widget.dart';
 import 'package:provider/provider.dart';
 
 class CheckPage extends StatefulWidget {
@@ -66,8 +66,8 @@ class _CheckPageState extends State<CheckPage> {
                             ),
                           )
                         : Container(
-                          height: 250,
-                          child: GridView.builder(
+                            height: 250,
+                            child: GridView.builder(
                               scrollDirection: Axis.vertical,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
@@ -106,7 +106,8 @@ class _CheckPageState extends State<CheckPage> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         //Product Image
                                         Container(
@@ -166,7 +167,8 @@ class _CheckPageState extends State<CheckPage> {
                                                 //Description
                                                 const Text(
                                                   "product.description",
-                                                  style: TextStyle(fontSize: 14),
+                                                  style:
+                                                      TextStyle(fontSize: 14),
                                                 ),
                                                 const Text(
                                                   "price", //"${product.price.toStringAsFixed(2)}\$",
@@ -192,7 +194,7 @@ class _CheckPageState extends State<CheckPage> {
                                 );
                               },
                             ),
-                        ),
+                          ),
                   ]),
                 ),
               );

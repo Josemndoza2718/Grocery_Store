@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:grocery_store/core/data/repositories/local/car_client_repository_impl.dart';
@@ -20,22 +21,27 @@ import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_ca
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
 import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/core/resource/my_localizations.dart';
-import 'package:grocery_store/ui/view_model/add_category_view_model.dart';
-import 'package:grocery_store/ui/view_model/add_product_view_model.dart';
-import 'package:grocery_store/ui/view_model/check_view_model.dart';
-import 'package:grocery_store/ui/view_model/main_page_view_model.dart';
-import 'package:grocery_store/ui/view_model/home_view_model.dart';
-import 'package:grocery_store/ui/origin/main_page.dart';
-import 'package:grocery_store/ui/view_model/cart_view_model.dart';
+import 'package:grocery_store/firebase_options.dart';
+import 'package:grocery_store/view/ui/view_model/add_category_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/add_product_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/check_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/main_page_view_model.dart';
+import 'package:grocery_store/view/ui/view_model/home_view_model.dart';
+import 'package:grocery_store/view/ui/origin/main_page.dart';
+import 'package:grocery_store/view/ui/view_model/cart_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // ¡Esta es la más importante!
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterLocalization.instance.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(const MyApp());
 }
 
@@ -60,6 +66,8 @@ class MyApp extends StatelessWidget {
                     ),
                     //Products
                     createProductsUseCases: CreateProductsUseCases(
+                        repository: ProductRepositoryImpl()),
+                    sendProductsToFirebaseUseCases: SendProductFirebaseUseCases(
                         repository: ProductRepositoryImpl()),
                     getProductsUseCases: GetProductsUseCases(
                         repository: ProductRepositoryImpl()),

@@ -6,7 +6,7 @@ import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
 import 'package:grocery_store/core/resource/my_localizations.dart';
-import 'package:grocery_store/ui/add_product/add_product_page.dart';
+import 'package:grocery_store/view/ui/add_product/add_product_page.dart';
 
 class ProductsListWidget extends StatelessWidget {
   const ProductsListWidget({

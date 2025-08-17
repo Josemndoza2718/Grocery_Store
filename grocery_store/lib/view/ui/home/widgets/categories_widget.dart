@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/category.dart';
-import 'package:grocery_store/ui/add_category/add_category_page.dart';
+import 'package:grocery_store/view/ui/add_category/add_category_page.dart';
 
 class CategoriesWidget extends StatefulWidget {
   CategoriesWidget({
@@ -78,7 +78,9 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                 crossAxisCount: 1,
                 childAspectRatio: 1.18,
               ),
-              itemCount: (widget.listCategories?.length ?? 0) + 1 + (widget.listCategories!.length > 1 ? 1 : 0),
+              itemCount: (widget.listCategories?.length ?? 0) +
+                  1 +
+                  (widget.listCategories!.length > 1 ? 1 : 0),
               itemBuilder: (context, index) {
                 bool hasAllItemsButton = widget.listCategories!.length > 1;
 
@@ -99,7 +101,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
                           color: widget.selectedIndexGrid == realIndex
-                              ? widget.selectColor 
+                              ? widget.selectColor
                               : widget.unSelectColor,
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -126,8 +128,8 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
                       color: widget.selectedIndexGrid == realIndex
-                              ? widget.selectColor 
-                              : widget.unSelectColor,
+                          ? widget.selectColor
+                          : widget.unSelectColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(

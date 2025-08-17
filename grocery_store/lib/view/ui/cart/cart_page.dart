@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/cart/widgets/shop_list_widget.dart';
-import 'package:grocery_store/ui/view_model/cart_view_model.dart';
-import 'package:grocery_store/ui/widgets/floatingMessage.dart';
+import 'package:grocery_store/view/ui/cart/widgets/shop_list_widget.dart';
+import 'package:grocery_store/view/ui/view_model/cart_view_model.dart';
+import 'package:grocery_store/view/ui/widgets/FloatingMessage.dart';
 import 'package:provider/provider.dart';
 
 class CartPage extends StatefulWidget {
@@ -15,8 +15,6 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -39,9 +37,12 @@ class _CartPageState extends State<CartPage> {
                   onRemoveCart: (index) => viewModel.deletedCart(index),
                   //onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
                   onAddProduct: (value) => viewModel.addQuantityProduct(value),
-                  onRemoveProduct: (value) => viewModel.removeQuantityProduct(value),
-                  onSetQuantityProduct: (id, value) => viewModel.onSetQuantityProduct(id, value),
-                  onChanged: (value, productId) => viewModel.updateQuantityManually(value, productId),
+                  onRemoveProduct: (value) =>
+                      viewModel.removeQuantityProduct(value),
+                  onSetQuantityProduct: (id, value) =>
+                      viewModel.onSetQuantityProduct(id, value),
+                  onChanged: (value, productId) =>
+                      viewModel.updateQuantityManually(value, productId),
                   onDeleteProduct: (cartId, productId) {
                     viewModel.updateProductCart(cartId, productId);
                     showFloatingMessage(

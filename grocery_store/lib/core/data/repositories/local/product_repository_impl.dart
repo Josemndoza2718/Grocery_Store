@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_store/core/data/models/product_model.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/repositories/local/product_repository.dart';
@@ -8,12 +9,10 @@ import 'package:path/path.dart';
 class ProductRepositoryImpl implements ProductRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
-  //late final Database db;
   var store = intMapStoreFactory.store('products');
 
-  /* ProductRepositoryImpl() {
-    initDatabase();
-  } */
+  final productsFirebaseCollection =
+      FirebaseFirestore.instance.collection('products');
 
   Future<Database> initDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -23,6 +22,41 @@ class ProductRepositoryImpl implements ProductRepository {
     String path = join(dir.path, dbPath);
 
     return await dbFactory.openDatabase(path);
+  }
+
+  @override
+  Future<void> sendProductsToFirebase() async {
+    try {
+      final localProducts = await getAllProducts();
+
+      if (localProducts.isEmpty) {
+        print('No hay productos locales para sincronizar.');
+        return;
+      }
+
+      for (var product in localProducts) {
+        // Convierte el objeto Product a un Map
+        final productData = {
+          'id': product.id,
+          'name': product.name,
+          'description': product.description,
+          'price': product.price,
+          'image': product.image,
+          'idStock': product.idStock,
+          'stockQuantity': product.stockQuantity,
+          'quantity': product.quantity,
+        };
+
+        // Usa 'set' para asegurar que el ID del documento en Firestore sea el mismo que en Sembast.
+        // Esto evita duplicados si se vuelve a sincronizar.
+        await productsFirebaseCollection
+            .doc(product.id.toString())
+            .set(productData);
+      }
+      print('¡Sincronización de productos a Firebase completada con éxito!');
+    } catch (e) {
+      print('Error al sincronizar productos a Firebase: $e');
+    }
   }
 
   @override
