@@ -35,6 +35,7 @@ class HomeViewModel extends ChangeNotifier {
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
   }) {
+    getProducts();
     getClients();
     getCategories();
   }
@@ -152,6 +153,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void initList() {
+    listFilterProducts.clear();
     listFilterProducts.addAll(listProducts);
     notifyListeners();
   }

@@ -119,7 +119,7 @@ class _CheckPageState extends State<CheckPage> {
                                                 BorderRadius.circular(10),
                                             //color: AppColors.darkgreen,
                                           ),
-                                          child: ClipRRect(
+                                          /* child: ClipRRect(
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                             child: Image.network(
@@ -130,7 +130,7 @@ class _CheckPageState extends State<CheckPage> {
                                                           width: double.infinity,
                                                           fit: BoxFit.cover,
                                                         ), */
-                                          ),
+                                          ), */
                                         ),
                                         //Product Data
                                         Expanded(
@@ -257,7 +257,7 @@ class _CheckPageState extends State<CheckPage> {
                                   borderRadius: BorderRadius.circular(10),
                                   //color: AppColors.darkgreen,
                                 ),
-                                child: ClipRRect(
+                                /* child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
                                   child: Image.network(
                                       "https://www.iconpacks.net/icons/2/free-user-icon-3297-thumb.png"),
@@ -267,7 +267,7 @@ class _CheckPageState extends State<CheckPage> {
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,
                                                 ), */
-                                ),
+                                ), */
                               ),
                               //Product Data
                               Expanded(

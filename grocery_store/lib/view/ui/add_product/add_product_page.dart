@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/view/ui/origin/main_page.dart';
 import 'package:grocery_store/view/ui/view_model/add_product_view_model.dart';
 import 'package:grocery_store/view/ui/view_model/home_view_model.dart';
 import 'package:grocery_store/core/utils/phone_image.dart';
@@ -28,13 +29,10 @@ class _AddProductPageState extends State<AddProductPage> {
   late final TextEditingController descriptionEditController;
   late final TextEditingController priceEditController;
   late final TextEditingController quantityEditController;
-  late String editCategory;
 
   @override
   void initState() {
     super.initState();
-    // var viewModel = context.read<HomeViewModel>();
-    // viewModel.setSelectedCategory("");
 
     if (widget.product != null) {
       var viewModel = context.read<AddProductViewModel>();
@@ -91,7 +89,14 @@ class _AddProductPageState extends State<AddProductPage> {
         )
             .then((_) {
           {
-            Navigator.pop(context);
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MainPage(
+                    selectedIndex: 0,
+                  ),
+                ),
+                (route) => false);
             homeViewModel.setSelectedCategory("");
           }
         });

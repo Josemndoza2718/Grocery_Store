@@ -53,7 +53,7 @@ class DetailPayPageState extends State<DetailPayPage> {
                           borderRadius: BorderRadius.circular(10),
                           //color: AppColors.darkgreen,
                         ),
-                        child: ClipRRect(
+                        /* child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                               "https://www.iconpacks.net/icons/2/free-user-icon-3297-thumb.png"),
@@ -63,7 +63,7 @@ class DetailPayPageState extends State<DetailPayPage> {
                                         width: double.infinity,
                                         fit: BoxFit.cover,
                                       ), */
-                        ),
+                        ), */
                       ),
                       //Product Data
                       Container(
@@ -202,13 +202,13 @@ class DetailPayPageState extends State<DetailPayPage> {
                         height: 60,
                         width: 60,
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: ClipRRect(
+                        /* child: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                             "https://mundo-oriental.com/upload/3229.jpg",
                             fit: BoxFit.cover,
                           ),
-                        ),
+                        ), */
                       );
                     },
                   ),

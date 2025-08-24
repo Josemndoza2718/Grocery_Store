@@ -45,7 +45,18 @@ class MainPage extends StatelessWidget {
               icon: const Icon(
                 Icons.save,
                 color: AppColors.white,
-              ))
+              )),
+          IconButton(
+              onPressed: () async {
+                var viewModel =
+                    Provider.of<HomeViewModel>(context, listen: false);
+                await viewModel.getProducts();
+                viewModel.initList();
+              },
+              icon: const Icon(
+                Icons.restart_alt_rounded,
+                color: AppColors.white,
+              )),
         ],
       ),
       body: SafeArea(

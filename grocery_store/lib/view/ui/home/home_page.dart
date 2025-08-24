@@ -31,9 +31,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       initMoney();
-      var viewModel = context.read<HomeViewModel>();
+      var viewModel = Provider.of<HomeViewModel>(context, listen: false);
       await viewModel.getProducts();
       viewModel.initList();
     });
@@ -108,7 +109,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                //const SizedBox(height: 10),
                 //Client Menu
                 Row(
                   spacing: 8,
@@ -347,7 +347,7 @@ class _HomePageState extends State<HomePage> {
                               showFloatingMessage(
                                   context: context,
                                   message: "Product added to cart",
-                                  color: AppColors.green);
+                                  color: AppColors.darkgreen);
                             } else {
                               carViewModel.updateCart(
                                 cartId: existingCart.first.id,
@@ -359,7 +359,7 @@ class _HomePageState extends State<HomePage> {
                                   context: context,
                                   message:
                                       "Product added to ${viewModel.clientName}'s cart ",
-                                  color: AppColors.green);
+                                  color: AppColors.darkgreen);
                             }
                           },
                           onClose: () => viewModel.getProducts(),

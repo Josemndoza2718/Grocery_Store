@@ -88,31 +88,9 @@ class ProductsListWidget extends StatelessWidget {
                         title: localizations?.translate('title') ?? 'title',
                         onConfirm: () {
                           onDeleteProduct(index);
-                          Navigator.of(context).pop();
+                          Navigator.pop(context);
                         },
                       );
-                      /* showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Delete Category'),
-                            content: const Text(
-                                'Are you sure you want to delete this category?'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text('Delete'),
-                              ),
-                            ],
-                          );
-                        },
-                      ); */
                     },
               child: isPayMode
                   ? Container(

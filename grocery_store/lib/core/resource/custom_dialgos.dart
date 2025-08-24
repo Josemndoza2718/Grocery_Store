@@ -26,7 +26,6 @@ class CustomDialgos {
               child: const Text('alert_confirm'),
               onPressed: () {
                 onConfirm();
-                Navigator.of(context).pop();
               },
             ),
           ],

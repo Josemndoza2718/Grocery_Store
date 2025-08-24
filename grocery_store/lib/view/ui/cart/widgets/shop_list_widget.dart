@@ -9,7 +9,7 @@ import 'package:grocery_store/view/ui/view_model/cart_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ShopListWidget extends StatefulWidget {
-  ShopListWidget({
+  const ShopListWidget({
     super.key,
     this.isActivePanel = const [],
     this.moneyConversion,
