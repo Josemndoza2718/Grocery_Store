@@ -1,4 +1,4 @@
-// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
@@ -304,13 +304,8 @@ class _HomePageState extends State<HomePage> {
                         //Text("Client ${viewModel.clientName}"),
                         ProductsListWidget(
                           listProducts: viewModel.listFilterProducts,
-                          onTap: (index) {
-                            var addProductViewModel =
-                                context.read<AddProductViewModel>();
-                            addProductViewModel.getCategoryId(
-                                viewModel.listProducts, index);
-                          },
-                          onPressed: (index) {
+                          onTap: (index) {},
+                          onPressed: (index) async {
                             var carViewModel = context.read<CartViewModel>();
 
                             if (viewModel.clientName.isEmpty) {
@@ -339,7 +334,7 @@ class _HomePageState extends State<HomePage> {
                                 .toList();
 
                             if (existingCart.isEmpty) {
-                              carViewModel.createCart(
+                              await carViewModel.createCart(
                                 ownerId: viewModel.clientId,
                                 ownerCarName: viewModel.clientName,
                                 products: viewModel.listProducts[index],
@@ -349,18 +344,22 @@ class _HomePageState extends State<HomePage> {
                                   message: "Product added to cart",
                                   color: AppColors.darkgreen);
                             } else {
-                              carViewModel.updateCart(
+                              await carViewModel.updateCart(
                                 cartId: existingCart.first.id,
                                 ownerId: viewModel.clientId,
                                 ownerCarName: viewModel.clientName,
                                 products: viewModel.listProducts[index],
                               );
+
                               showFloatingMessage(
                                   context: context,
                                   message:
                                       "Product added to ${viewModel.clientName}'s cart ",
                                   color: AppColors.darkgreen);
                             }
+                            context.read<HomeViewModel>().getProducts();
+                            context.read<CartViewModel>().getAllCarts();
+                            context.read<CartViewModel>().getMoneyConversion();
                           },
                           onClose: () => viewModel.getProducts(),
                           moneyConversion: viewModel.moneyConversion,

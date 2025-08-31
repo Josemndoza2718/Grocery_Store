@@ -5,22 +5,19 @@ import 'package:grocery_store/view/ui/widgets/animated_button.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
+  final int selectedIndex;
+  final Function(int) setSelectedIndex;
+  final Function()? getProducts;
+  final Function()? getCarProducts;
+  final Function()? getMoneyConversion;
   const BottomNavigationBarWidget({
     super.key,
     required this.selectedIndex,
     required this.setSelectedIndex,
     this.getProducts,
-    this.getCategories,
     this.getCarProducts,
     this.getMoneyConversion,
   });
-
-  final int selectedIndex;
-  final Function(int) setSelectedIndex;
-  final Function()? getProducts;
-  final Function()? getCarProducts;
-  final Function()? getCategories;
-  final Function()? getMoneyConversion;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +44,6 @@ class BottomNavigationBarWidget extends StatelessWidget {
               onTap: () {
                 setSelectedIndex(0);
                 getProducts!();
-                getCategories!();
               },
             ),
             AnimatedButton(
@@ -60,9 +56,6 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(1);
-                getProducts!();
-                getCarProducts!();
-                getMoneyConversion!();
               },
             ),
             AnimatedButton(

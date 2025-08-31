@@ -41,21 +41,11 @@ class AddProductViewModel extends ChangeNotifier {
     galleryImage = image;
   }
 
-  Future<void> getCategoryId(List<Product> listProducts, int index) async {
-    if (index >= 0 && index <= listProducts.length) {
-      for (var element in listProducts) {
-        _id = element.id;
-        notifyListeners(); //
-      }
-    }
-  }
-
   Future<void> createProduct({
     required String name,
     required String description,
     required double price,
     required double stockQuantity,
-    required String category,
   }) async {
     Random random = Random();
     int randomNumber = random.nextInt(100000000);

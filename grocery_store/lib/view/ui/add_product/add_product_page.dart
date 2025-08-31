@@ -85,7 +85,6 @@ class _AddProductPageState extends State<AddProductPage> {
           description: descriptionController.text,
           price: double.parse(priceController.text),
           stockQuantity: double.parse(quantityController.text),
-          category: homeViewModel.selectedCategory,
         )
             .then((_) {
           {
