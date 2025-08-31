@@ -204,9 +204,10 @@ class CartViewModel extends ChangeNotifier {
   }) async {
     //listProductsAddCart.clear();
 
-    if (!listProductsAddCart.contains(products)) {
-      listProductsAddCart.add(products);
-      if (ownerCarName.isNotEmpty) {
+    for (var element in listCarts) {
+      if (element.id == cartId) {
+        listProductsAddCart = List<Product>.from(element.products);
+        listProductsAddCart.add(products);
         await updateCarProductsUseCases.updateProduct(
           Cart(
             id: cartId,
@@ -217,35 +218,13 @@ class CartViewModel extends ChangeNotifier {
           ),
         );
         getAllCarts();
+      } else {
+        print("No Agregado");
       }
-    } else {
-      print("No Agregado");
     }
+
     notifyListeners();
   }
-
-  /* Future<void> updateCart({
-    required int cartId,
-    required int ownerId,
-    required String ownerCarName,
-    required Product products,
-  }) async {
-    List<Product> listProductsInCart = [];
-    listProductsInCart.add(products);
-
-    if (ownerCarName.isNotEmpty) {
-      await updateCarProductsUseCases.updateProduct(
-        Cart(
-          id: cartId,
-          ownerId: ownerId,
-          ownerCarName: ownerCarName,
-          status: 'pending',
-          products: listProductsInCart,
-        ),
-      );
-      getAllCarts();
-    }
-  } */
 
   Future<void> getAllCarts() async {
     listCarts = await getCarProductsUseCases.call();

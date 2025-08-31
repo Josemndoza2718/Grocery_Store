@@ -12,8 +12,6 @@ class CartRepositoryImpl implements CarProductRepository {
   DatabaseFactory dbFactory = databaseFactoryIo;
   var store = intMapStoreFactory.store('car_products');
 
-
-
   Future<Database> initDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
 
@@ -33,31 +31,11 @@ class CartRepositoryImpl implements CarProductRepository {
         ownerId: cart.ownerId,
         ownerCarName: cart.ownerCarName,
         status: cart.status,
-        products: cart.products
-        );
+        products: cart.products);
 
     await store.record(cart.id).add(db, (cartModel.toJson()));
     //await store.addAll(db, cart.products.map((e) => cartModel.toJson()).toList());
   }
-
-  /* @override
-  Future<void> addCarProduct(Product product) async {
-    final db = await initDatabase();
-
-    ProductModel productModel = ProductModel(
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        image: product.image,
-        categoryId: product.categoryId,
-        category: product.category,
-        idStock: product.idStock,
-        stockQuantity: product.stockQuantity,
-        quantity: product.quantity);
-
-    await store.record(product.id).add(db, (productModel.toJson()));
-  } */
 
   @override
   Future<void> deleteCarProduct(int id) async {
@@ -98,8 +76,7 @@ class CartRepositoryImpl implements CarProductRepository {
         ownerId: cart.ownerId,
         ownerCarName: cart.ownerCarName,
         status: cart.status,
-        products: cart.products
-        );
+        products: cart.products);
 
     store.record(cart.id).put(db, (cartModel.toJson()));
   }

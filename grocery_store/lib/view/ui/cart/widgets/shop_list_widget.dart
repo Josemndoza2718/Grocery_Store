@@ -49,6 +49,7 @@ class ShopListWidget extends StatefulWidget {
 class _ShopListWidgetState extends State<ShopListWidget> {
   final Map<String, TextEditingController> _quantityControllers = {};
   bool isPayment = false;
+  late CartViewModel viewModel;
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
     // Accede al provider en initState, pero asegúrate de que esté disponible en el contexto.
     // Esto se hace con un pequeño truco de post-frame callback.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewModel = Provider.of<CartViewModel>(context, listen: false);
+      viewModel = Provider.of<CartViewModel>(context, listen: false);
       for (Cart element in widget.listCarts ?? []) {
         for (var product in element.products) {
           _quantityControllers[product.id.toString()] =
@@ -116,7 +117,6 @@ class _ShopListWidgetState extends State<ShopListWidget> {
   @override
   void dispose() {
     // Es importante liberar los controladores y remover el listener
-    final viewModel = Provider.of<CartViewModel>(context, listen: false);
     viewModel.removeListener(_onProductProviderChanged);
     _quantityControllers.forEach((key, controller) => controller.dispose());
     super.dispose();

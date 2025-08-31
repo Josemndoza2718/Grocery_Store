@@ -29,7 +29,7 @@ class _CartPageState extends State<CartPage> {
               // ignore: unnecessary_null_comparison
               if (viewModel.listCarts != null && viewModel.listCarts.isNotEmpty)
                 ShopListWidget(
-                  listCarts: viewModel.listCarts,
+                  listCarts: viewModel.listCarts.reversed.toList(),
                   listProducts: viewModel.listProducts,
                   isActivePanel: viewModel.isActivePanel,
                   moneyConversion: viewModel.moneyConversion,
