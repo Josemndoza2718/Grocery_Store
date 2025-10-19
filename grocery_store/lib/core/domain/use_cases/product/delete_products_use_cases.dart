@@ -1,4 +1,3 @@
-
 import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
 
 class DeleteProductsUseCases {
@@ -6,7 +5,7 @@ class DeleteProductsUseCases {
 
   final ProductRepositoryImpl repository;
 
-  Future<void> deleteProduct(int id) async {
+  Future<void> deleteProduct(String id) async {
     await repository.deleteProduct(id);
   }
 }

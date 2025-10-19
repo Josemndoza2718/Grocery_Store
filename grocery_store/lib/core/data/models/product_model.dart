@@ -9,7 +9,7 @@ class ProductModel extends Product {
     required super.image,
     required super.idStock,
     required super.stockQuantity,
-    required super.quantity,
+    required super.quantityToBuy,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -21,7 +21,7 @@ class ProductModel extends Product {
       image: json['imageUrl'],
       idStock: json['idStock'],
       stockQuantity: json['stockQuantity'].toDouble(),
-      quantity: json['quantity'] ?? 0.0,
+      quantityToBuy: json['quantity'] ?? 0.0,
     );
   }
 
@@ -34,7 +34,7 @@ class ProductModel extends Product {
       'imageUrl': image,
       'idStock': idStock,
       'stockQuantity': stockQuantity,
-      'quantity': quantity,
+      'quantity': quantityToBuy,
     };
   }
 
@@ -47,7 +47,7 @@ class ProductModel extends Product {
       image: image,
       idStock: idStock,
       stockQuantity: stockQuantity,
-      quantity: quantity,
+      quantityToBuy: quantityToBuy,
     );
   }
 }

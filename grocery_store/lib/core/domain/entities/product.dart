@@ -1,12 +1,12 @@
 class Product {
-  final int id;
+  final String id;
   final String name;
   final String description;
   final double price;
   final String image;
-  final int? idStock;
-  final double stockQuantity;
-  double quantity;
+  final String idStock;
+  final int stockQuantity;
+  int quantityToBuy;
 
   Product({
     required this.id,
@@ -15,8 +15,8 @@ class Product {
     required this.price,
     required this.image,
     required this.stockQuantity,
-    this.idStock,
-    this.quantity = 0,
+    required this.idStock,
+    this.quantityToBuy = 0,
   });
 
   @override
@@ -36,7 +36,7 @@ class Product {
       'imageUrl': image,
       'idStock': idStock,
       'stockQuantity': stockQuantity,
-      'quantity': quantity,
+      'quantity': quantityToBuy,
     };
   }
 
@@ -49,7 +49,29 @@ class Product {
       image: json['imageUrl'],
       idStock: json['idStock'],
       stockQuantity: json['stockQuantity'],
-      quantity: json['quantity'] ?? 0,
+      quantityToBuy: json['quantity'] ?? 0,
+    );
+  }
+
+  Product copyWith({
+    String? id,
+    String? image,
+    String? name,
+    String? description,
+    double? price,
+    String? idStock,
+    int? stockQuantity,
+    int? quantity,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      image: image ?? this.image,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      idStock: idStock ?? this.idStock,
+      stockQuantity: stockQuantity ?? this.stockQuantity,
+      quantityToBuy: quantity ?? this.quantityToBuy,
     );
   }
 }

@@ -74,8 +74,8 @@ class CashProductRepositoryImpl implements CashProductRepository {
         image: product.image,
         idStock: product.idStock,
         stockQuantity: product.stockQuantity,
-        quantity: product.quantity);
+        quantityToBuy: product.quantityToBuy);
 
-    store.record(product.id).put(db, (productModel.toJson()));
+    store.record(int.parse(product.id)).put(db, (productModel.toJson()));
   }
 }

@@ -1,44 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localization/flutter_localization.dart';
-import 'package:grocery_store/core/data/repositories/local/car_client_repository_impl.dart';
-import 'package:grocery_store/core/data/repositories/local/car_product_repository_impl.dart';
-import 'package:grocery_store/core/data/repositories/local/cash_product_repository_impl.dart';
-import 'package:grocery_store/core/data/repositories/local/category_repository_impl.dart';
-import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
-import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
-import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/cash/create_cash_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/cash/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/category/delete_categories_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/category/update_categories_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/category/get_categories_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
-import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/core/resource/my_localizations.dart';
+import 'package:grocery_store/dependencies/di.dart';
 import 'package:grocery_store/firebase_options.dart';
-import 'package:grocery_store/view/ui/view_model/add_category_view_model.dart';
-import 'package:grocery_store/view/ui/view_model/add_product_view_model.dart';
-import 'package:grocery_store/view/ui/view_model/check_view_model.dart';
-import 'package:grocery_store/view/ui/view_model/main_page_view_model.dart';
-import 'package:grocery_store/view/ui/view_model/home_view_model.dart';
-import 'package:grocery_store/view/ui/origin/main_page.dart';
-import 'package:grocery_store/view/ui/view_model/cart_view_model.dart';
+import 'package:grocery_store/ui/view/auth/login_page.dart';
+import 'package:grocery_store/ui/view/origin/main_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // ¡Esta es la más importante!
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FlutterLocalization.instance.ensureInitialized();
+  //await FlutterLocalization.instance.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -52,6 +25,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
+          ...di,
+          /* ChangeNotifierProvider(
+            create: (context) => LoginProvider(),
+            child: const MyApp(),
+          ),
           ChangeNotifierProvider(
               create: (context) => HomeViewModel(
                     //Categories
@@ -119,23 +97,45 @@ class MyApp extends StatelessWidget {
                         GetAllCartsUseCases(repository: CartRepositoryImpl()),
                     deleteCashProductsUseCases: DeleteCashProductsUseCases(
                         repository: CashProductRepositoryImpl()),
-                  )),
+                  )), */
         ],
-        child: const MaterialApp(
-            localizationsDelegates: [
-              MyLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: [
-              Locale('en', ''), // Inglés
-              Locale('es', ''), // Español
-            ],
-            title: 'Material App',
-            debugShowCheckedModeBanner: false,
-            home: MainPage(
-              selectedIndex: 0,
-            )));
+        child: MaterialApp(
+          localizationsDelegates: const [
+            MyLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', ''), // Inglés
+            Locale('es', ''), // Español
+          ],
+          title: 'Material App',
+          debugShowCheckedModeBanner: false,
+          home: StreamBuilder<User?>(
+            // Escuchamos el estado de autenticación de Firebase
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              // Muestra un indicador de carga mientras verifica el estado
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              // Si hay un usuario autenticado, muestra el HomeScreen
+              if (snapshot.hasData) {
+                return const MainPage(
+                  selectedIndex: 0,
+                );
+              }
+
+              // Si no hay usuario, muestra el LoginScreen
+              return const LoginScreen();
+            },
+          ),
+        ));
   }
 }

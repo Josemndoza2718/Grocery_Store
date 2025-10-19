@@ -44,7 +44,7 @@ class ProductRepositoryImpl implements ProductRepository {
           'image': product.image,
           'idStock': product.idStock,
           'stockQuantity': product.stockQuantity,
-          'quantity': product.quantity,
+          'quantity': product.quantityToBuy,
         };
 
         // Usa 'set' para asegurar que el ID del documento en Firestore sea el mismo que en Sembast.
@@ -71,15 +71,15 @@ class ProductRepositoryImpl implements ProductRepository {
         image: product.image,
         idStock: product.idStock,
         stockQuantity: product.stockQuantity,
-        quantity: product.quantity);
+        quantityToBuy: product.quantityToBuy);
 
-    await store.record(product.id).add(db, (productModel.toJson()));
+    await store.record(int.parse(product.id)).add(db, (productModel.toJson()));
   }
 
   @override
-  Future<void> deleteProduct(int id) async {
+  Future<void> deleteProduct(String id) async {
     final db = await initDatabase();
-    await store.record(id).delete(db);
+    await store.record(int.parse(id)).delete(db);
   }
 
   @override
@@ -113,8 +113,8 @@ class ProductRepositoryImpl implements ProductRepository {
         image: product.image,
         idStock: product.idStock,
         stockQuantity: product.stockQuantity,
-        quantity: product.quantity);
+        quantityToBuy: product.quantityToBuy);
 
-    store.record(product.id).put(db, (productModel.toJson()));
+    store.record(int.parse(product.id)).put(db, (productModel.toJson()));
   }
 }
