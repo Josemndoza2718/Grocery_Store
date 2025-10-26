@@ -196,7 +196,7 @@ class ProductsListWidget extends StatelessWidget {
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ),
-                          Padding(
+                          /* Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
@@ -206,12 +206,12 @@ class ProductsListWidget extends StatelessWidget {
                               style: const TextStyle(
                                   fontSize: 12, fontWeight: FontWeight.bold),
                             ),
-                          ),
+                          ), */
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
-                              "${listProducts![index].stockQuantity}",
+                              "Cantidad: ${listProducts![index].stockQuantity}",
                               style: const TextStyle(
                                   fontSize: 14, fontWeight: FontWeight.bold),
                             ),
@@ -236,13 +236,13 @@ class ProductsListWidget extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "${((listProducts![index].price.toStringAsFixed(2)))}\$",
+                                      "Precio: ${((listProducts![index].price.toStringAsFixed(2)))}\$",
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                      "${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
+                                      "Precio: ${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
                                       style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold),

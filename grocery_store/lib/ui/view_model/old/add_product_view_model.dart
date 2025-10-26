@@ -26,97 +26,66 @@ class AddProductViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  //SETTERS
-  set setID(int value) {
+  /* //SETTERS
+/*   set setID(int value) {
     _id = value;
     notifyListeners();
-  }
+  } */
 
-  set selectedQuantity(int value) {
+  /* set selectedQuantity(int value) {
     _selectedQuantity = value;
     notifyListeners();
-  }
+  } */
 
-  void setLoading(bool loading) {
+  /* void setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
-  }
+  } */
 
-  void setError(String? message) {
+  /* void setError(String? message) {
     _errorMessage = message;
     notifyListeners();
-  }
+  } */ */
 
   //METHODS
   void initImage(File? image) {
     galleryImage = image;
   }
 
-  void setGalleryImage(File? image) {
+  /* void setGalleryImage(File? image) {
     galleryImage = image;
     notifyListeners();
-  }
-
-  //SERVICES
-  /*  Future<Database> _getSembastDb() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final dbPath = join(dir.path, _dbName);
-    return await databaseFactoryIo.openDatabase(dbPath);
   } */
 
+  //SERVICES
+
   Future<void> createProduct(Product product) async {
-    setLoading(true);
-    setError(null);
+    _isLoading = true;
+    //setError(null);
 
     try {
       await createProductsUseCases.call(product);
-      setLoading(false);
+      _isLoading = false;
     } on Exception catch (e) {
-      setError('Error al crear el producto: ${e.toString()}');
+      //setError('Error al crear el producto: ${e.toString()}');
       log('Error al crear el producto: ${e.toString()}');
-      setLoading(false);
+      _isLoading = false;
       rethrow;
     }
   }
 
   Future<void> getAllProducts() async {
-    setLoading(true);
-    setError(null);
+    _isLoading = true;
+    //setError(null);
 
     try {
       await getProductsUseCases.call();
-      setLoading(false);
+      _isLoading = false;
     } on Exception catch (e) {
-      setError('Error al crear el producto: ${e.toString()}');
+      //setError('Error al crear el producto: ${e.toString()}');
       log('Error al crear el producto: ${e.toString()}');
-      setLoading(false);
+      _isLoading = false;
       rethrow;
     }
   }
-
-  /*  Future<void> createProduct({
-    required String name,
-    required String description,
-    required double price,
-    required int stockQuantity,
-  }) async {
-    Random random = Random();
-    int randomNumber = random.nextInt(100000000);
-
-    if (galleryImage != null) {
-      await createProductsUseCases.call(
-        Product(
-          id: randomNumber.toString(),
-          name: name,
-          description: description,
-          price: price,
-          stockQuantity: stockQuantity,
-          idStock: randomNumber.toString(),
-          image: galleryImage!.path,
-          quantity: 0,
-        ),
-      );
-    }
-    galleryImage = null;
-  } */
 }

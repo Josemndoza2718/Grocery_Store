@@ -29,7 +29,7 @@ class _GeneralButtonState extends State<GeneralButton> {
         setState(() {
           isTapped = true;
         });
-        widget.onTap;
+        widget.onTap?.call();
       },
       onTapUp: (_) {
         setState(() {

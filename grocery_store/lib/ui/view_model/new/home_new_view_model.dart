@@ -5,22 +5,14 @@ import 'package:grocery_store/core/domain/use_cases/product/new/new_create_produ
 class HomeNewViewModel extends ChangeNotifier {
   //Products
   final NewCreateProductsUseCases newCreateProductsUseCases;
+  //final DeleteProductsUseCases deleteProductsUseCases;
 
   HomeNewViewModel({
     required this.newCreateProductsUseCases,
   });
 
-  Future<void> createProduct() async {
-    await newCreateProductsUseCases.call(
-      Product(
-        id: '1',
-        image: 'image',
-        name: 'name',
-        description: 'description',
-        price: 1.0,
-        idStock: '1',
-        stockQuantity: 1,
-      ),
-    );
-  }
+  /* Future<void> deleteProduct(String id) async {
+    await deleteProductsUseCases.deleteProduct(id);
+    getProducts();
+  } */
 }

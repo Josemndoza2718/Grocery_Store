@@ -17,13 +17,13 @@ class CustomDialgos {
           content: content,
           actions: <Widget>[
             TextButton(
-              child: const Text('alert_cancel'),
+              child: const Text('cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('alert_confirm'),
+              child: const Text('aceptar'),
               onPressed: () {
                 onConfirm();
               },

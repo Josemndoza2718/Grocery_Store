@@ -9,11 +9,11 @@ import 'package:grocery_store/ui/view/origin/main_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // ¡Esta es la más importante!
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //await FlutterLocalization.instance.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp();
 
   runApp(const MyApp());
 }

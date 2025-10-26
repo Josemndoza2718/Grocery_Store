@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/ui/view/widgets/general_button.dart';
 import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
-import 'package:grocery_store/ui/view_model/old/add_product_view_model.dart';
+import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
 import 'package:grocery_store/core/utils/phone_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -42,8 +43,9 @@ class _AddProductPageState extends State<AddProductPage> {
     super.initState();
 
     if (widget.product != null) {
-      var viewModel = context.read<AddProductViewModel>();
-      viewModel.initImage(File(widget.product!.image));
+      var viewModel = context.read<AddNewProductViewModel>();
+      viewModel.setGalleryImage(File(widget.product!.image));
+      //viewModel.initImage(File(widget.product!.image));
     }
 
     nameEditController = TextEditingController(text: widget.product?.name);
@@ -130,12 +132,12 @@ class _AddProductPageState extends State<AddProductPage> {
     _idStockController.clear();
   }
 
-  Future<void> _submitForm() async {
-    final provider = Provider.of<AddProductViewModel>(context, listen: false);
+  Future<void> _submitForm({required Product product}) async {
+    final provider =
+        Provider.of<AddNewProductViewModel>(context, listen: false);
 
     if (_formKey.currentState!.validate()) {
-      final newProduct = Product(
-        // Generar un ID único localmente. Firestore le pondrá un ID definitivo si es necesario.
+      /* final newProduct = Product(
         id: _uuid.v4(),
         name: _nameController.text,
         description: _descriptionController.text,
@@ -144,10 +146,10 @@ class _AddProductPageState extends State<AddProductPage> {
         idStock: _idStockController.text,
         stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
         quantityToBuy: 0,
-      );
+      ); */
 
       try {
-        await provider.createProduct(newProduct);
+        await provider.createProduct(product);
 
         // 1. Mostrar feedback de éxito
         if (mounted) {
@@ -166,8 +168,7 @@ class _AddProductPageState extends State<AddProductPage> {
             context: context,
             builder: (ctx) => AlertDialog(
               title: const Text('Error al crear'),
-              content:
-                  Text(provider.errorMessage ?? 'Ocurrió un error inesperado.'),
+              content: Text(provider.errorMessage),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
@@ -195,7 +196,7 @@ class _AddProductPageState extends State<AddProductPage> {
         },
         behavior: HitTestBehavior.opaque,
         child: SafeArea(child:
-            Consumer<AddProductViewModel>(builder: (context, viewModel, _) {
+            Consumer<AddNewProductViewModel>(builder: (context, viewModel, _) {
           return Expanded(
             child: Form(
               key: _formKey,
@@ -449,9 +450,54 @@ class _AddProductPageState extends State<AddProductPage> {
                                   ],
                                 ),
                                 const SizedBox(height: 0),
-                                GestureDetector(
+                                GeneralButton(
                                   onTap: () async {
-                                    _submitForm();
+                                    _submitForm(
+                                        product: Product(
+                                      id: _uuid.v4(),
+                                      name: _nameController.text,
+                                      description: _descriptionController.text,
+                                      price: double.tryParse(
+                                              _priceController.text) ??
+                                          0.0,
+                                      image: viewModel.galleryImage?.path ?? '',
+                                      idStock: _idStockController.text,
+                                      stockQuantity: int.tryParse(
+                                              _stockQuantityController.text) ??
+                                          0,
+                                      quantityToBuy: 0,
+                                    ));
+                                    /* _handleProductSubmission(
+                                        viewModel, homeViewModel);
+                                    viewModel.selectedQuantity = 0; */
+                                  },
+                                  child: const Text(
+                                    "Save",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: AppColors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )
+                                /* GestureDetector(
+                                  onTap: () async {
+                                    _submitForm(
+                                        product: Product(
+                                      id: _uuid.v4(),
+                                      name: _nameController.text,
+                                      description: _descriptionController.text,
+                                      price: double.tryParse(
+                                              _priceController.text) ??
+                                          0.0,
+                                      image: viewModel.galleryImage?.path ?? '',
+                                      idStock: _idStockController.text,
+                                      stockQuantity: int.tryParse(
+                                              _stockQuantityController.text) ??
+                                          0,
+                                      quantityToBuy: 0,
+                                    ));
                                     /* _handleProductSubmission(
                                         viewModel, homeViewModel);
                                     viewModel.selectedQuantity = 0; */
@@ -474,7 +520,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                       ),
                                     ),
                                   ),
-                                ),
+                                ), */
                               ],
                             ),
                           ),

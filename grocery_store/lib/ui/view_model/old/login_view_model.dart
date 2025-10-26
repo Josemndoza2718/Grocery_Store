@@ -116,6 +116,7 @@ class LoginProvider with ChangeNotifier {
       if (user != null) {
         // 2. Guardar los metadatos en Cloud Firestore
         // La colección será 'users' y el ID del documento será el UID de Firebase Auth.
+
         await _firestore.collection('users').doc(user.uid).set({
           'name': name,
           'email': email,
@@ -148,6 +149,11 @@ class LoginProvider with ChangeNotifier {
       _isLoading = false;
       _errorMessage = 'Ocurrió un error inesperado: ${e.toString()}';
       notifyListeners();
+
+      // 🚨 PASO CRÍTICO: Si la escritura en Firestore falla, elimina el usuario de AUTH.
+      if (FirebaseAuth.instance.currentUser != null) {
+        await FirebaseAuth.instance.currentUser!.delete();
+      }
       userCredential = null;
     }
 

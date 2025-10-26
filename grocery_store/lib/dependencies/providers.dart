@@ -21,6 +21,7 @@ import 'package:grocery_store/core/domain/use_cases/product/new/new_create_produ
 import 'package:grocery_store/core/domain/use_cases/product/new/new_get_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/add_category_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
@@ -85,6 +86,11 @@ final List<SingleChildWidget> providers = [
               NewCreateProductsUseCases(NewProductRepositoryImpl()),
           getProductsUseCases:
               NewGetProductsUseCases(NewProductRepositoryImpl()))),
+  ChangeNotifierProvider(
+      create: (context) => AddNewProductViewModel(
+            newCreateProductsUseCases:
+                NewCreateProductsUseCases(NewProductRepositoryImpl()),
+          )),
   ChangeNotifierProvider(create: (context) => MainPageViewModel()),
   ChangeNotifierProvider(
       create: (context) => CheckViewModel(
