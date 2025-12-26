@@ -72,8 +72,8 @@ class BottomNavigationBarWidget extends StatelessWidget {
               },
             ),
             AnimatedButton(
-              icon: Icons.car_repair,
-              label: "Car",
+              icon: Icons.settings,
+              label: "Settings",
               isSelected: selectedIndex == 3,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,

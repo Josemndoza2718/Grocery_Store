@@ -19,6 +19,7 @@ class NewProductRepositoryImpl implements NewProductRepository {
     return await databaseFactoryIo.openDatabase(dbPath);
   }
 
+  @override
   Stream<List<Product>> getAllProductsStream() {
     // 1. Escuchar la colección 'products' en tiempo real
     return _db
@@ -71,7 +72,30 @@ class NewProductRepositoryImpl implements NewProductRepository {
     await _store.record(newProductId).put(sembastDb, productMap);
   }
 
+  @override
+  Future<void> deleteProduct(String id) async {
+    // 1. Eliminar de Firestore
+    await _db.collection('products').doc(id).delete();
+
+    // 2. Eliminar de Sembast
+    final sembastDb = await _getSembastDb();
+    await _store.record(id).delete(sembastDb);
+  }
+
+  @override
+  Future<void> updateProduct(Product product) async {
+    final productMap = product.toJson();
+
+    // 1. Actualizar en Firestore
+    await _db.collection('products').doc(product.id).update(productMap);
+
+    // 2. Actualizar en Sembast
+    final sembastDb = await _getSembastDb();
+    await _store.record(product.id).put(sembastDb, productMap);
+  }
+
   // --- LECTURA SIN CONEXIÓN (Sembast) ---
+  @override
   Future<List<Product>> getLocalProducts() async {
     final sembastDb = await _getSembastDb();
     final records = await _store.find(sembastDb);

@@ -6,20 +6,20 @@ import 'package:grocery_store/core/domain/entities/client.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
-import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/new/new_create_product_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/new/new_delete_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/new/new_get_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/new/new_update_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 
 class HomeViewModel extends ChangeNotifier {
   //Products
-  final GetProductsUseCases getProductsUseCases;
+  final NewGetProductsUseCases getProductsUseCases;
   final SendProductFirebaseUseCases sendProductsToFirebaseUseCases;
-  final CreateProductsUseCases createProductsUseCases;
-  final DeleteProductsUseCases deleteProductsUseCases;
-  final UpdateProductsUseCases updateProductsUseCases;
+  final NewCreateProductsUseCases createProductsUseCases;
+  final NewDeleteProductsUseCases deleteProductsUseCases;
+  final NewUpdateProductsUseCases updateProductsUseCases;
 
   //Clients
   final CreateClientUseCases createClientUseCases;
@@ -182,8 +182,20 @@ class HomeViewModel extends ChangeNotifier {
 
   //Products
   Future<void> getProducts() async {
-    listProducts = await getProductsUseCases();
-    notifyListeners();
+    getProductsUseCases.callStream().listen((products) {
+      listProducts = products;
+      // Re-apply filter if needed
+      if (_isFilterList && listFilterProducts.length != listProducts.length) {
+        // Optionally maintain filter state here, but for now just init list
+        // or re-run filter if query is stored.
+        // Simpler approach: update filter list if it's currently showing all (initList logic)
+        // or if we decide to just reset filter on update.
+        // Let's just update lists and notify.
+        initList();
+      } else {
+        initList();
+      }
+    });
   }
 
   Future<void> getProductsByCategory(int category) async {
@@ -198,11 +210,11 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     await deleteProductsUseCases.deleteProduct(id);
-    getProducts();
+    // getProducts() is stream-based now, so it updates automatically
   }
 
   Future<void> updateProduct(Product product) async {
     await updateProductsUseCases.updateProduct(product);
-    getProducts();
+    // getProducts() is stream-based now, so it updates automatically
   }
 }

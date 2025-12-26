@@ -10,4 +10,8 @@ class NewGetProductsUseCases {
     var list = await _repository.getLocalProducts();
     return list;
   }
+
+  Stream<List<Product>> callStream() {
+    return _repository.getAllProductsStream();
+  }
 }

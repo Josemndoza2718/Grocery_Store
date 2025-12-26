@@ -13,7 +13,7 @@ import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cas
 import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases%20copy.dart';
+import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
 
 class CartViewModel extends ChangeNotifier {
