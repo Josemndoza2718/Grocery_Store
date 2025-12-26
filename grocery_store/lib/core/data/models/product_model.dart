@@ -20,7 +20,7 @@ class ProductModel extends Product {
       price: json['price'].toDouble(),
       image: json['imageUrl'],
       idStock: json['idStock'],
-      stockQuantity: json['stockQuantity'].toDouble(),
+      stockQuantity: json['stockQuantity'],
       quantityToBuy: json['quantity'] ?? 0.0,
     );
   }

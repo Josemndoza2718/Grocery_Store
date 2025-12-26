@@ -32,7 +32,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   //Products
-  final GetProductsUseCases getProductsUseCases;
+  final NewGetProductsUseCases getProductsUseCases;
   /* final DeleteProductsUseCases deleteProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases; */
 

@@ -34,13 +34,13 @@ class MainPage extends StatelessWidget {
         backgroundColor: AppColors.white,
         appBar: AppBar(
           backgroundColor: AppColors.green,
-          leading: IconButton(
+          /* leading: IconButton(
             onPressed: () {
               Provider.of<LoginProvider>(context, listen: false).signOut();
             },
             icon: const Icon(Icons.logout),
             color: AppColors.white,
-          ),
+          ), */
           centerTitle: true,
           title: const Text("Grocery Store",
               style: TextStyle(fontSize: 20, color: AppColors.white)),

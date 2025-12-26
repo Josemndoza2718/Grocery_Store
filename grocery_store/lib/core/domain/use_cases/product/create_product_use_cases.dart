@@ -1,13 +1,11 @@
-/* import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/repositories/local/product_repository.dart';
+import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/repositories/local/new/new_product_repository.dart';
 
 class CreateProductsUseCases {
-  const CreateProductsUseCases({required this.repository});
-
-  final ProductRepository repository;
+  final NewProductRepository _repository;
+  const CreateProductsUseCases(this._repository);
 
   Future<void> call(Product product) async {
-    await repository.addProduct(product);
+    await _repository.createProduct(product);
   }
 }
- */

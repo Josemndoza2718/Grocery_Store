@@ -156,6 +156,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                       ),
                     ),
                     subtitle: Text("#${cart.id}"),
+                    trailing: Text("Total: ${cart.products.length}")
                   );
                 },
                 body: Padding(
@@ -305,221 +306,182 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                               return Container(
                                 padding: const EdgeInsets.all(8),
                                 child: Flexible(
-                                  child: Column(spacing: 8, children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                          border: const Border(
-                                            bottom: BorderSide(
-                                              width: 6,
-                                              color: AppColors.ultralightgrey,
-                                            ),
-                                            right: BorderSide(
-                                              width: 6,
-                                              color: AppColors.ultralightgrey,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                        color: AppColors.white,
+                                        border: const Border(
+                                          bottom: BorderSide(
+                                            width: 6,
+                                            color: AppColors.ultralightgrey,
+                                          ),
+                                          right: BorderSide(
+                                            width: 6,
+                                            color: AppColors.ultralightgrey,
+                                          ),
+                                        ),
+                                        borderRadius:BorderRadius.circular(10),
+                                        ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        //Product Image
+                                        Container(
+                                          height: 150,
+                                          width: 150, //double.infinity,
+                                          //padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            //color: AppColors.darkgreen,
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            child: Image.file(
+                                              File(product.image),
+                                              height: double.infinity,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
                                             ),
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          color: AppColors.white),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          //Product Image
-                                          Container(
-                                            height: 100,
-                                            width: 90,
-                                            //padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              //color: AppColors.darkgreen,
-                                            ),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Image.file(
-                                                File(product.image),
-                                                height: double.infinity,
-                                                width: double.infinity,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                          //Product Data
-                                          Expanded(
-                                            child: Container(
-                                              padding: const EdgeInsets.all(8),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  //Title
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        product.name,
-                                                        style: const TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
+                                        ),
+                                        //Product Data
+                                        Expanded(
+                                          child: Container(
+                                            height: 150,
+                                            padding: const EdgeInsets.all(8),
+                                            //color: AppColors.orange,
+                                            child: Column(
+                                              crossAxisAlignment:CrossAxisAlignment.start,
+                                              children: [
+                                                //Title
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      product.name,
+                                                      style: const TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight: FontWeight.bold,
                                                       ),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          widget
-                                                              .onDeleteProduct(
-                                                                  cart.id,
-                                                                  product.id);
-                                                        },
-                                                        child: const Icon(
-                                                          Icons.delete_forever,
-                                                          color: AppColors.red,
-                                                          //size: 30,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  //Description
-                                                  Text(
-                                                    product.description,
-                                                    style: const TextStyle(
-                                                        fontSize: 14),
-                                                  ),
-                                                  Text(
-                                                    "${product.id}",
-                                                    style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.normal),
-                                                  ),
-                                                  Text(
-                                                    "${product.price.toStringAsFixed(2)}\$",
-                                                    style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  Text(
-                                                    "${((product.price) * (widget.moneyConversion ?? 0)).toStringAsFixed(2)}bs",
-                                                    style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  const SizedBox(height: 8),
-                                                  Row(
-                                                    spacing: 8,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () => widget
-                                                            .onRemoveProduct(
-                                                                product.id
-                                                                    .toString()),
-                                                        child: const Icon(
-                                                          Icons.remove_circle,
-                                                          color: AppColors
-                                                              .darkgreen,
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        width: 50,
-                                                        child: TextFormField(
-                                                          controller:
-                                                              _quantityControllers[
-                                                                  product.id
-                                                                      .toString()],
-                                                          keyboardType:
-                                                              TextInputType
-                                                                  .number,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          decoration:
-                                                              InputDecoration(
-                                                            //hintText: "0.0",
-                                                            enabled: true,
-                                                            isCollapsed: true,
-                                                            filled: true,
-                                                            fillColor: Colors
-                                                                .transparent, //AppColors.lightgrey,
-                                                            focusedBorder:
-                                                                OutlineInputBorder(
-                                                              borderSide:
-                                                                  const BorderSide(
-                                                                width: 2,
-                                                                color: AppColors
-                                                                    .green,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                            ),
-                                                            disabledBorder:
-                                                                OutlineInputBorder(
-                                                              borderSide:
-                                                                  BorderSide
-                                                                      .none,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                            ),
-                                                            border:
-                                                                OutlineInputBorder(
-                                                              borderSide:
-                                                                  BorderSide
-                                                                      .none,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                            ),
-                                                          ),
-                                                          /* onFieldSubmitted:
-                                                              (value) {
-                                                            if (value != "0.0" && value !="") {
-                                                              widget.onSetQuantityProduct(cart.products[index].id, double.parse(value));
-                                                            }
-                                                          }, */
-                                                          onChanged: (value) {
-                                                            widget.onChanged(
-                                                              value,
-                                                              product.id
-                                                                  .toString(),
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        widget.onDeleteProduct(
+                                                            cart.id,
+                                                            product.id,
                                                             );
-                                                          },
-                                                        ),
+                                                      },
+                                                      child: const Icon(
+                                                        Icons.delete_forever,
+                                                        color: AppColors.red,
+                                                        //size: 30,
                                                       ),
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          widget.onAddProduct(
-                                                              product.id
-                                                                  .toString());
-                                                          //_quantityControllers[product.id]?.text = product.quantity.toString();
-                                                        },
-                                                        child: const Icon(
-                                                          Icons.add_circle,
-                                                          color: AppColors
-                                                              .darkgreen,
+                                                    ),
+                                                  ],
+                                                ),
+                                                //Description
+                                                if (product.description.isNotEmpty)
+                                                Text(
+                                                  product.description,
+                                                  style: const TextStyle(fontSize: 14),
+                                                ),
+                                                /* Text(
+                                                  "${product.id}",
+                                                  style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.normal),
+                                                ), */
+                                                Text(
+                                                  "Precio: ${product.price.toStringAsFixed(2)}\$",
+                                                  style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  "Precio: ${((product.price) * (widget.moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                                  style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const Spacer(),
+                                                //Quantity
+                                                Row(
+                                                  spacing: 8,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () => widget.onRemoveProduct(product.id.toString()),
+                                                      child: const Icon(
+                                                        Icons.remove_circle,
+                                                        color: AppColors
+                                                            .darkgreen,
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width: 50,
+                                                      child: TextFormField(
+                                                        controller: _quantityControllers[product.id.toString()],
+                                                        keyboardType: TextInputType.number,
+                                                        textAlign: TextAlign.center,
+                                                        decoration: InputDecoration(
+                                                          enabled: true,
+                                                          isCollapsed: true,
+                                                          filled: true,
+                                                          fillColor: Colors.transparent,
+                                                          focusedBorder: OutlineInputBorder(
+                                                            borderSide: const BorderSide(
+                                                              width: 2,
+                                                              color: AppColors.green,
+                                                            ),
+                                                            borderRadius: BorderRadius.circular(10),
+                                                          ),
+                                                          disabledBorder: OutlineInputBorder(
+                                                            borderSide: BorderSide.none,
+                                                            borderRadius: BorderRadius.circular(10),
+                                                          ),
+                                                          border: OutlineInputBorder(
+                                                            borderSide: BorderSide.none,
+                                                            borderRadius: BorderRadius.circular(10),
+                                                          ),
                                                         ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
+                                                        /* onFieldSubmitted:
+                                                            (value) {
+                                                          if (value != "0.0" && value !="") {
+                                                            widget.onSetQuantityProduct(cart.products[index].id, double.parse(value));
+                                                          }
+                                                        }, */
+                                                        onChanged: (value) {
+                                                          widget.onChanged(
+                                                            value,
+                                                            product.id.toString(),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        widget.onAddProduct(product.id.toString());
+                                                      },
+                                                      child: const Icon(
+                                                        Icons.add_circle,
+                                                        color: AppColors
+                                                            .darkgreen,
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    )
-                                  ]),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               );
                             },

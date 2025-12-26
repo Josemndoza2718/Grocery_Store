@@ -1,12 +1,11 @@
-/* import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
+import 'package:grocery_store/core/domain/repositories/local/new/new_product_repository.dart';
 
-class DeleteProductsUseCases {
-  const DeleteProductsUseCases({required this.repository});
+class NewDeleteProductsUseCases {
+  final NewProductRepository _repository;
 
-  final ProductRepositoryImpl repository;
+  NewDeleteProductsUseCases(this._repository);
 
   Future<void> deleteProduct(String id) async {
-    await repository.deleteProduct(id);
+    await _repository.deleteProduct(id);
   }
 }
- */
