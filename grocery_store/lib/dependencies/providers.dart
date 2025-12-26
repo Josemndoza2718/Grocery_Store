@@ -1,7 +1,6 @@
 import 'package:grocery_store/core/data/repositories/local/car_client_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/car_product_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/cash_product_repository_impl.dart';
-import 'package:grocery_store/core/data/repositories/local/category_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/new/new_product_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
 import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
@@ -10,7 +9,6 @@ import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cas
 import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/create_cash_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/category/create_categories_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
@@ -21,8 +19,6 @@ import 'package:grocery_store/core/domain/use_cases/product/new/new_get_products
 import 'package:grocery_store/core/domain/use_cases/product/new/new_update_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/add_category_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/check_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
@@ -39,7 +35,7 @@ final List<SingleChildWidget> providers = [
       create: (context) => HomeViewModel(
             //Products
             createProductsUseCases:
-                NewCreateProductsUseCases(NewProductRepositoryImpl()),
+                CreateProductsUseCases(NewProductRepositoryImpl()),
             sendProductsToFirebaseUseCases: SendProductFirebaseUseCases(
                 repository: ProductRepositoryImpl()),
             getProductsUseCases:
@@ -47,7 +43,7 @@ final List<SingleChildWidget> providers = [
             deleteProductsUseCases:
                 NewDeleteProductsUseCases(NewProductRepositoryImpl()),
             updateProductsUseCases:
-                NewUpdateProductsUseCases(NewProductRepositoryImpl()),
+                UpdateProductsUseCases(NewProductRepositoryImpl()),
             //Clients
             createClientUseCases:
                 CreateClientUseCases(repository: ClientRepositoryImpl()),
@@ -76,19 +72,11 @@ final List<SingleChildWidget> providers = [
                 DeleteClientsUseCases(repository: ClientRepositoryImpl()),
           )),
   ChangeNotifierProvider(
-      create: (context) => AddCategoryViewModel(
-          createCategoriesUseCases:
-              CreateCategoriesUseCases(repository: CategoryRepositoryImpl()))),
-  ChangeNotifierProvider(
       create: (context) => AddProductViewModel(
-          createProductsUseCases:
-              NewCreateProductsUseCases(NewProductRepositoryImpl()),
-          getProductsUseCases:
-              NewGetProductsUseCases(NewProductRepositoryImpl()))),
-  ChangeNotifierProvider(
-      create: (context) => AddNewProductViewModel(
-            newCreateProductsUseCases:
-                NewCreateProductsUseCases(NewProductRepositoryImpl()),
+            createProductsUseCases:
+                CreateProductsUseCases(NewProductRepositoryImpl()),
+            updateProductsUseCases:
+                UpdateProductsUseCases(NewProductRepositoryImpl()),
           )),
   ChangeNotifierProvider(create: (context) => MainPageViewModel()),
   ChangeNotifierProvider(

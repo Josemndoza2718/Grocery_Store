@@ -38,7 +38,7 @@ class FakeSendProductFirebaseUseCases implements SendProductFirebaseUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class FakeCreateProductsUseCases implements NewCreateProductsUseCases {
+class FakeCreateProductsUseCases implements CreateProductsUseCases {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -49,10 +49,10 @@ class FakeDeleteProductsUseCases implements NewDeleteProductsUseCases {
   Future<void> deleteProduct(String id) async {}
 }
 
-class FakeUpdateProductsUseCases implements NewUpdateProductsUseCases {
+class FakeUpdateProductsUseCases implements UpdateProductsUseCases {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-  Future<void> updateProduct(Product product) async {}
+  Future<void> call(Product product) async {}
 }
 
 class FakeCreateClientUseCases implements CreateClientUseCases {

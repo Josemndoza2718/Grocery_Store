@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
+import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/core/resource/my_localizations.dart';
 import 'package:grocery_store/ui/view/add_product/add_product_page.dart';
 
@@ -57,7 +58,7 @@ class ProductsListWidget extends StatelessWidget {
           scrollDirection: isPayMode ? Axis.horizontal : Axis.vertical,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            childAspectRatio: isPayMode ? 1.2 : 0.75,
+            childAspectRatio: isPayMode ? 1.2 : 0.60,
           ),
           itemCount: listProducts!.length,
           itemBuilder: (context, index) {
@@ -123,6 +124,14 @@ class ProductsListWidget extends StatelessWidget {
                                       // height: 80,
                                       // width: 80,
                                       fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return const Icon(
+                                          Icons.image_not_supported_outlined,
+                                          size: 50,
+                                          color: AppColors.green,
+                                        );
+                                      },
                                     ),
                             ),
                           ),
@@ -148,6 +157,7 @@ class ProductsListWidget extends StatelessWidget {
                         ],
                       ),
                     )
+                    //Products List
                   : Container(
                       margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -158,32 +168,28 @@ class ProductsListWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.only(bottom: 8),
+                            height: 150,
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
+                                //border: Border.all(color: AppColors.green, width: 4),
                                 color: AppColors.transparent),
-                            child: Container(
-                              //height: 70,
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  //border: Border.all(color: AppColors.green, width: 4),
-                                  color: AppColors.white),
-                              child: Center(
-                                //TODO: REVISAR ESTO
-                                child: listProducts![index].image.isNotEmpty
-                                    ? const Icon(
-                                        Icons.image_not_supported_outlined,
-                                        size: 50,
-                                        color: AppColors.green,
-                                      )
-                                    : Image.file(
-                                        File(listProducts![index].image),
-                                        height: 100,
-                                        width: 100,
-                                        //fit: BoxFit.cover,
-                                      ),
-                              ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child:  Image.file(
+                                      File(listProducts![index].image),
+                                      // height: 100,
+                                      // width: 100,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          AppImages.imageNotFound,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    ),
                             ),
                           ),
                           //const SizedBox(height: 10),
@@ -227,36 +233,38 @@ class ProductsListWidget extends StatelessWidget {
                             ),
                           ), */
                           Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Precio: ${((listProducts![index].price.toStringAsFixed(2)))}\$",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      "Precio: ${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
+                                Text(
+                                  "Precio: ${((listProducts![index].price.toStringAsFixed(2)))}\$",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
                                 ),
+                                Text(
+                                  "Precio: ${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 10),
                                 GestureDetector(
                                   onTap: () {
                                     onPressed(index);
                                   },
-                                  child: const Icon(
-                                    (Icons.add_box),
-                                    color: Colors.black,
-                                    size: 40,
+                                  child: Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.green,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      (Icons.add),
+                                      color: AppColors.white,
+                                      size: 40,
+                                    ),
                                   ),
                                 ),
                               ],

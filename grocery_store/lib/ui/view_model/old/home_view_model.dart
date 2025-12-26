@@ -17,9 +17,9 @@ class HomeViewModel extends ChangeNotifier {
   //Products
   final NewGetProductsUseCases getProductsUseCases;
   final SendProductFirebaseUseCases sendProductsToFirebaseUseCases;
-  final NewCreateProductsUseCases createProductsUseCases;
+  final CreateProductsUseCases createProductsUseCases;
   final NewDeleteProductsUseCases deleteProductsUseCases;
-  final NewUpdateProductsUseCases updateProductsUseCases;
+  final UpdateProductsUseCases updateProductsUseCases;
 
   //Clients
   final CreateClientUseCases createClientUseCases;
@@ -214,7 +214,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> updateProduct(Product product) async {
-    await updateProductsUseCases.updateProduct(product);
+    await updateProductsUseCases.call(product);
     // getProducts() is stream-based now, so it updates automatically
   }
 }

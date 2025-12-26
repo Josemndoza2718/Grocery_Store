@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,9 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class AddProductPage extends StatefulWidget {
-  const AddProductPage({super.key, this.product});
-
   final Product? product;
+  const AddProductPage({super.key, this.product});
 
   @override
   State<AddProductPage> createState() => _AddProductPageState();
@@ -43,8 +43,10 @@ class _AddProductPageState extends State<AddProductPage> {
     super.initState();
 
     if (widget.product != null) {
-      var viewModel = context.read<AddNewProductViewModel>();
-      viewModel.setGalleryImage(File(widget.product!.image));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        var viewModel = context.read<AddProductViewModel>();
+        viewModel.setGalleryImage(File(widget.product!.image));
+      });
       //viewModel.initImage(File(widget.product!.image));
     }
 
@@ -56,62 +58,6 @@ class _AddProductPageState extends State<AddProductPage> {
     _stockEditQuantityController =
         TextEditingController(text: widget.product?.stockQuantity.toString());
   }
-
-  /* Future<void> _handleProductSubmission(
-    AddProductViewModel viewModel,
-    HomeViewModel homeViewModel,
-  ) async {
-    if (widget.product != null) {
-      await homeViewModel
-          .updateProduct(
-        Product(
-          id: widget.product!.id,
-          name: nameEditController.text,
-          description: descriptionEditController.text,
-          price: double.parse(priceEditController.text),
-          image: viewModel.galleryImage?.path ?? widget.product!.image,
-          idStock: widget.product!.idStock,
-          stockQuantity: int.parse(quantityEditController.text),
-        ),
-      )
-          .then((_) {
-        {
-          Navigator.pop(context);
-        }
-      });
-    } else {
-      if (nameController.text.isEmpty ||
-          priceController.text.isEmpty ||
-          quantityController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please fill all fields"),
-          ),
-        );
-      } else {
-        await viewModel
-            .createProduct(
-          name: nameController.text,
-          description: descriptionController.text,
-          price: double.parse(priceController.text),
-          stockQuantity: int.parse(quantityController.text),
-        )
-            .then((_) {
-          {
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MainPage(
-                    selectedIndex: 0,
-                  ),
-                ),
-                (route) => false);
-            homeViewModel.setSelectedCategory("");
-          }
-        });
-      }
-    }
-  } */
 
   @override
   void dispose() {
@@ -132,30 +78,60 @@ class _AddProductPageState extends State<AddProductPage> {
     _idStockController.clear();
   }
 
-  Future<void> _submitForm({required Product product}) async {
-    final provider =
-        Provider.of<AddNewProductViewModel>(context, listen: false);
+  Future<void> _createProduct({required Product product}) async {
+    final provider = Provider.of<AddProductViewModel>(context, listen: false);
 
     if (_formKey.currentState!.validate()) {
-      /* final newProduct = Product(
-        id: _uuid.v4(),
-        name: _nameController.text,
-        description: _descriptionController.text,
-        price: double.tryParse(_priceController.text) ?? 0.0,
-        image: provider.galleryImage?.path ?? '',
-        idStock: _idStockController.text,
-        stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
-        quantityToBuy: 0,
-      ); */
-
       try {
         await provider.createProduct(product);
 
         // 1. Mostrar feedback de éxito
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          /* ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('✅ Producto creado exitosamente.')),
+          ); */
+
+          log('✅ Producto creado exitosamente.');
+
+          // 2. Resetear el formulario y navegar de vuelta
+          _resetForm();
+          Navigator.pop(context); // Volver a AdminHomeScreen
+        }
+      } catch (e) {
+        // 3. Mostrar diálogo de error
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Error al crear'),
+              content: Text(provider.errorMessage),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Ok'),
+                ),
+              ],
+            ),
           );
+        }
+      }
+    }
+  }
+
+  Future<void> _updateProduct({required Product product}) async {
+    final provider = Provider.of<AddProductViewModel>(context, listen: false);
+
+    if (_formKey.currentState!.validate()) {
+      try {
+        await provider.updateProduct(product);
+
+        // 1. Mostrar feedback de éxito
+        if (mounted) {
+          /* ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('✅ Producto creado exitosamente.')),
+          ); */
+
+          log('✅ Producto actualizado exitosamente.');
 
           // 2. Resetear el formulario y navegar de vuelta
           _resetForm();
@@ -196,7 +172,7 @@ class _AddProductPageState extends State<AddProductPage> {
         },
         behavior: HitTestBehavior.opaque,
         child: SafeArea(child:
-            Consumer<AddNewProductViewModel>(builder: (context, viewModel, _) {
+            Consumer<AddProductViewModel>(builder: (context, viewModel, _) {
           return Expanded(
             child: Form(
               key: _formKey,
@@ -451,76 +427,45 @@ class _AddProductPageState extends State<AddProductPage> {
                                 ),
                                 const SizedBox(height: 0),
                                 GeneralButton(
-                                  onTap: () async {
-                                    _submitForm(
-                                        product: Product(
-                                      id: _uuid.v4(),
-                                      name: _nameController.text,
-                                      description: _descriptionController.text,
-                                      price: double.tryParse(
-                                              _priceController.text) ??
-                                          0.0,
-                                      image: viewModel.galleryImage?.path ?? '',
-                                      idStock: _idStockController.text,
-                                      stockQuantity: int.tryParse(
-                                              _stockQuantityController.text) ??
-                                          0,
-                                      quantityToBuy: 0,
-                                    ));
-                                    /* _handleProductSubmission(
-                                        viewModel, homeViewModel);
-                                    viewModel.selectedQuantity = 0; */
-                                  },
-                                  child: const Text(
-                                    "Save",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: AppColors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )
-                                /* GestureDetector(
-                                  onTap: () async {
-                                    _submitForm(
-                                        product: Product(
-                                      id: _uuid.v4(),
-                                      name: _nameController.text,
-                                      description: _descriptionController.text,
-                                      price: double.tryParse(
-                                              _priceController.text) ??
-                                          0.0,
-                                      image: viewModel.galleryImage?.path ?? '',
-                                      idStock: _idStockController.text,
-                                      stockQuantity: int.tryParse(
-                                              _stockQuantityController.text) ??
-                                          0,
-                                      quantityToBuy: 0,
-                                    ));
-                                    /* _handleProductSubmission(
-                                        viewModel, homeViewModel);
-                                    viewModel.selectedQuantity = 0; */
-                                  },
-                                  child: Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 12),
-                                    decoration: BoxDecoration(
-                                        color: AppColors.darkgreen,
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: const Text(
-                                      "Save",
+                                  onTap: widget.product != null
+                                      ? () async {
+                                          _updateProduct(
+                                            product: Product(
+                                            id: widget.product!.id,
+                                            name: nameEditController.text,
+                                            description: descriptionEditController.text,
+                                            price: double.tryParse(priceEditController.text) ?? 0.0,
+                                            image: viewModel.galleryImage?.path ?? '',
+                                            idStock: _idStockController.text,
+                                            stockQuantity: int.tryParse(_stockEditQuantityController.text) ?? 0,
+                                            quantityToBuy: 0,
+                                          ));
+                                        }
+                                      : () async {
+                                          _createProduct(
+                                            product: Product(
+                                            id: _uuid.v4(),
+                                            name: _nameController.text,
+                                            description: _descriptionController.text,
+                                            price: double.tryParse(_priceController.text) ?? 0.0,
+                                            image: viewModel.galleryImage?.path ?? '',
+                                            idStock: _idStockController.text,
+                                            stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
+                                            quantityToBuy: 0,
+                                          ));
+                                        },
+                                  child: Center(
+                                    child: Text(
+                                      widget.product != null ? "Update" : "Save",
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: AppColors.white,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                ), */
+                                )
                               ],
                             ),
                           ),

@@ -105,9 +105,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    //final uid = FirebaseAuth.instance.currentUser!.uid;
-    //final provider = Provider.of<AddProductViewModel>(context);
-
     return GestureDetector(
       onTap: () => FocusScope.of(context)
           .unfocus(), // Esto quita el foco de cualquier TextField
@@ -140,52 +137,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     moneyconversionController.clear();
                   },
                 ),
-                /* Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      "Tasa en uso: ${viewModel.moneyConversion}"),
-                                  CustomTextFormField(
-                                    isButtonActive: true,
-                                    controller: moneyconversionController,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      DecimalInputFormatter(),
-                                    ],
-                                    decoration: InputDecoration(
-                                      hintText: "Money Conversion",
-                                      filled: true,
-                                      fillColor: AppColors.lightwhite,
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                          color: AppColors.green,
-                                          width: 4,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      disabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide.none,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide.none,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      double value = parseFormattedCurrency(
-                                          moneyconversionController.value.text);
-
-                                      viewModel.setMoneyConversion(value);
-
-                                      Prefs.setMoneyConversion(value);
-
-                                      moneyconversionController.clear();
-                                    },
-                                  ),
-                                ],
-                              ) */
-                //: Container(),
                 //Client Menu
                 Row(
                   spacing: 8,
@@ -382,12 +333,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ProductsListWidget(
                           listProducts: provider.listFilterProducts,
                           onTap: (index) {}, //TODO: VER SI SE DEJA
-                          onPressed: (index) async =>
-                              await onAddItemProduct(provider, index),
+                          onPressed: (index) async => await onAddItemProduct(provider, index),
                           onClose: () => provider.getProducts(),
                           moneyConversion: provider.moneyConversion,
                           onDeleteProduct: (index) => provider.deleteProduct(
-                              provider.listFilterProducts[index].id),
+                              provider.listFilterProducts[index].id)
                         ),
                       ],
                     ),

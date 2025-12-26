@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/use_cases/product/new/new_create_product_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/new/new_update_products_use_cases.dart';
 
-class AddNewProductViewModel extends ChangeNotifier {
-  final NewCreateProductsUseCases newCreateProductsUseCases;
+class AddProductViewModel extends ChangeNotifier {
+  final CreateProductsUseCases createProductsUseCases;
+  final UpdateProductsUseCases updateProductsUseCases;
 
-  AddNewProductViewModel({
-    required this.newCreateProductsUseCases,
+  AddProductViewModel({
+    required this.createProductsUseCases,
+    required this.updateProductsUseCases,
   });
 
   File? galleryImage;
@@ -24,6 +27,10 @@ class AddNewProductViewModel extends ChangeNotifier {
 
   //SERVICES
   Future<void> createProduct(Product product) async {
-    await newCreateProductsUseCases.call(product);
+    await createProductsUseCases.call(product);
+  }
+
+  Future<void> updateProduct(Product product) async {
+    await updateProductsUseCases.call(product);
   }
 }

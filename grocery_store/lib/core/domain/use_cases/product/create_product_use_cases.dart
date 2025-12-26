@@ -1,4 +1,4 @@
-import 'package:grocery_store/core/domain/entities/product.dart';
+/* import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/domain/repositories/local/product_repository.dart';
 
 class CreateProductsUseCases {
@@ -10,3 +10,4 @@ class CreateProductsUseCases {
     await repository.addProduct(product);
   }
 }
+ */

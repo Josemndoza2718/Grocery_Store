@@ -3,7 +3,7 @@ import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/view/cash/check_page.dart';
 import 'package:grocery_store/ui/view/home/home_page.dart';
 import 'package:grocery_store/ui/view/cart/cart_page.dart';
-import 'package:grocery_store/ui/view/last_page/last.dart';
+import 'package:grocery_store/ui/view/settings/settings_page.dart';
 import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/main_page_view_model.dart';
@@ -23,7 +23,7 @@ class MainPage extends StatelessWidget {
     const HomePage(),
     const CartPage(),
     const CheckPage(),
-    const LastPage(),
+    const SettingsPage(),
   ];
 
   @override
