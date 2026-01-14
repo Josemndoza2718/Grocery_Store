@@ -5,14 +5,32 @@ import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ShopListWidget extends StatefulWidget {
+  final List<Cart>? listCarts;
+  final List<Product>? listProducts;
+  final Function(String, String) onDeleteProduct;
+  final double moneyConversion;
+  final int payProduct;
+  final Function(String) onAddProduct;
+  final Function(String) onRemoveProduct;
+  final Function(int) onTapPanel;
+  final Function(String) onRemoveCart;
+  final Function(String) onPaymentCart;
+  final Function(int, int) onSetQuantityProduct;
+  //final Function(int, String?) onSetTap;
+  final Function(String, String) onChanged;
+  final Function(String, int) onSetPayProduct;
+  final List<bool> isActivePanel;
+
   const ShopListWidget({
     super.key,
     this.isActivePanel = const [],
-    this.moneyConversion,
+    this.moneyConversion = 0,
     this.payProduct = 0,
     required this.listCarts,
     required this.listProducts,
@@ -21,26 +39,12 @@ class ShopListWidget extends StatefulWidget {
     required this.onRemoveProduct,
     required this.onTapPanel,
     required this.onRemoveCart,
+    required this.onPaymentCart,
     required this.onSetQuantityProduct,
     //required this.onSetTap,
     required this.onChanged,
     required this.onSetPayProduct,
   });
-
-  final List<Cart>? listCarts;
-  final List<Product>? listProducts;
-  final Function(int, String) onDeleteProduct;
-  final double? moneyConversion;
-  final int payProduct;
-  final Function(String) onAddProduct;
-  final Function(String) onRemoveProduct;
-  final Function(int) onTapPanel;
-  final Function(int) onRemoveCart;
-  final Function(int, int) onSetQuantityProduct;
-  //final Function(int, String?) onSetTap;
-  final Function(String, String) onChanged;
-  final Function(int, int) onSetPayProduct;
-  final List<bool> isActivePanel;
 
   @override
   State<ShopListWidget> createState() => _ShopListWidgetState();
@@ -48,7 +52,7 @@ class ShopListWidget extends StatefulWidget {
 
 class _ShopListWidgetState extends State<ShopListWidget> {
   final Map<String, TextEditingController> _quantityControllers = {};
-  bool isPayment = false;
+  //bool isPayment = false;
   late CartViewModel viewModel;
 
   @override
@@ -62,8 +66,8 @@ class _ShopListWidgetState extends State<ShopListWidget> {
       viewModel = Provider.of<CartViewModel>(context, listen: false);
       for (Cart element in widget.listCarts ?? []) {
         for (var product in element.products) {
-          _quantityControllers[product.id.toString()] =
-              TextEditingController(text: product.quantityToBuy.toString());
+          _quantityControllers[product.id.toString()] = TextEditingController(
+              text: (product.quantityToBuy).toString());
         }
       }
       viewModel.addListener(_onProductProviderChanged);
@@ -82,14 +86,14 @@ class _ShopListWidgetState extends State<ShopListWidget> {
           // Solo crea el controlador si no existe
           if (!_quantityControllers.containsKey(key)) {
             _quantityControllers[key] = TextEditingController(
-              text: product.quantityToBuy.toString(),
+              text: (product.quantityToBuy).toString(),
             );
           } else {
             // Actualiza el texto si es diferente
             if (_quantityControllers[key]?.text !=
-                product.quantityToBuy.toString()) {
+                (product.quantityToBuy).toString()) {
               _quantityControllers[key]?.text =
-                  product.quantityToBuy.toString();
+                  (product.quantityToBuy).toString();
             }
           }
         }
@@ -113,6 +117,35 @@ class _ShopListWidgetState extends State<ShopListWidget> {
         }
       }
     }
+  }
+
+  String _getTotalPriceCart(String cartId) {
+    double totalPrice = 0;
+
+    for (Cart cart in widget.listCarts ?? []) {
+      if (cart.id == cartId) {
+        totalPrice += cart.products
+            .map((product) =>
+                product.price *
+                double.parse(
+                    _quantityControllers[product.id.toString()]?.text ?? "0"))
+            .reduce((a, b) => a + b);
+      }
+    }
+    return (totalPrice * widget.moneyConversion).toStringAsFixed(2);
+  }
+
+  int _getTotalItemsCart(String cartId) {
+    int totalItems = 0;
+    for (Cart cart in widget.listCarts ?? []) {
+      if (cart.id == cartId) {
+        totalItems += cart.products
+            .map((product) => int.parse(
+                _quantityControllers[product.id.toString()]?.text ?? "0"))
+            .reduce((a, b) => a + b);
+      }
+    }
+    return totalItems;
   }
 
   @override
@@ -143,25 +176,33 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                     : false,
                 headerBuilder: (context, isExpanded) {
                   return ListTile(
-                    leading: const Icon(
-                      Icons.shopping_cart_outlined,
-                      size: 50,
-                      color: Colors.black,
-                    ),
-                    title: Text(
-                      cart.ownerCarName ?? "",
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      leading: const Icon(
+                        Icons.shopping_cart_outlined,
+                        size: 50,
+                        color: Colors.black,
                       ),
-                    ),
-                    subtitle: Text("#${cart.id}"),
-                    trailing: Text("Total: ${cart.products.length}")
-                  );
+                      title: Text(
+                        cart.ownerCarName ?? "",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                          "#${DateFormat('yyyyMMdd').format(cart.createdAt)}"),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Total Items: ${_getTotalItemsCart(cart.id)}",
+                          ),
+                          Text("Total: ${_getTotalPriceCart(cart.id)} Bs"),
+                        ],
+                      ));
                 },
                 body: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 16),
+                    padding: const EdgeInsets.all(16.0),
                     child: Expanded(
                       child: Column(
                         children: [
@@ -172,9 +213,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                             children: [
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    widget.onRemoveCart(cart.id);
-                                  },
+                                  onPressed: () => widget.onRemoveCart(cart.id),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.red,
                                     shape: RoundedRectangleBorder(
@@ -189,11 +228,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                               ),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      isPayment = !isPayment;
-                                    });
-                                  },
+                                  onPressed: () => widget.onPaymentCart(cart.id),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.green,
                                     shape: RoundedRectangleBorder(
@@ -210,7 +245,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                           ),
                           const SizedBox(height: 8),
                           //Payment Options
-                          if (isPayment)
+                          /* if (isPayment)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -263,9 +298,9 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                   ),
                                 ),
                               ],
-                            ),
-                          if (isPayment) const SizedBox(height: 8),
-                          if (isPayment)
+                            ), */
+                          //if (isPayment) const SizedBox(height: 8),
+                          /* if (isPayment)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -285,16 +320,28 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                   ),
                                   child: const Text("12 parts"),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.yellow,
-                                    borderRadius: BorderRadius.circular(10),
+                                GestureDetector(
+                                  onTap: () =>
+                                      widget.onSetPayProduct(cart.id, 0),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.green,
+                                      border: Border.all(
+                                          color: AppColors.lightgrey, width: 4),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: const Text(
+                                      "Direct Payment",
+                                      style: TextStyle(
+                                        color: AppColors.white,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                    ),
                                   ),
-                                  child: const Text("Direct Payment"),
                                 ),
                               ],
-                            ),
+                            ), */
                           //Cards Products
                           ListView.builder(
                             shrinkWrap: true,
@@ -304,26 +351,28 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                               final product = cart.products[index];
 
                               return Container(
-                                padding: const EdgeInsets.all(8),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
                                 child: Flexible(
                                   child: Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                        color: AppColors.white,
-                                        border: const Border(
-                                          bottom: BorderSide(
-                                            width: 6,
-                                            color: AppColors.ultralightgrey,
-                                          ),
-                                          right: BorderSide(
-                                            width: 6,
-                                            color: AppColors.ultralightgrey,
-                                          ),
+                                      color: AppColors.white,
+                                      border: const Border(
+                                        bottom: BorderSide(
+                                          width: 6,
+                                          color: AppColors.ultralightgrey,
                                         ),
-                                        borderRadius:BorderRadius.circular(10),
+                                        right: BorderSide(
+                                          width: 6,
+                                          color: AppColors.ultralightgrey,
                                         ),
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         //Product Image
                                         Container(
@@ -343,17 +392,23 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                               height: double.infinity,
                                               width: double.infinity,
                                               fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return Image.asset(
+                                                  AppImages.imageNotFound,
+                                                  fit: BoxFit.cover,
+                                                );
+                                              },
                                             ),
                                           ),
                                         ),
                                         //Product Data
                                         Expanded(
                                           child: Container(
-                                            height: 150,
+                                            height: 160,
                                             padding: const EdgeInsets.all(8),
                                             //color: AppColors.orange,
                                             child: Column(
-                                              crossAxisAlignment:CrossAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 //Title
                                                 Row(
@@ -363,15 +418,16 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                       product.name,
                                                       style: const TextStyle(
                                                         fontSize: 18,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                       ),
                                                     ),
                                                     GestureDetector(
                                                       onTap: () {
                                                         widget.onDeleteProduct(
-                                                            cart.id,
-                                                            product.id,
-                                                            );
+                                                          cart.id,
+                                                          product.id,
+                                                        );
                                                       },
                                                       child: const Icon(
                                                         Icons.delete_forever,
@@ -382,11 +438,12 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                   ],
                                                 ),
                                                 //Description
-                                                if (product.description.isNotEmpty)
-                                                Text(
-                                                  product.description,
-                                                  style: const TextStyle(fontSize: 14),
-                                                ),
+                                                /* if (product.description.isNotEmpty)
+                                                  Text(
+                                                    product.description,
+                                                    style: const TextStyle(
+                                                        fontSize: 14),
+                                                  ), */
                                                 /* Text(
                                                   "${product.id}",
                                                   style: const TextStyle(
@@ -395,14 +452,26 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                           FontWeight.normal),
                                                 ), */
                                                 Text(
-                                                  "Precio: ${product.price.toStringAsFixed(2)}\$",
+                                                  "\$ c/uni: ${product.price.toStringAsFixed(2)}\$",
                                                   style: const TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.bold),
+                                                          FontWeight.normal),
                                                 ),
                                                 Text(
-                                                  "Precio: ${((product.price) * (widget.moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                                  "Bs c/uni: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                                                  style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.normal),
+                                                ),
+                                                const Divider(
+                                                  height: 8,
+                                                  color: AppColors.grey,
+                                                  thickness: 1,
+                                                ),
+                                                Text(
+                                                  "Total: ${((product.price * int.parse(_quantityControllers[product.id.toString()]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
                                                   style: const TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -418,8 +487,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                       onTap: () => widget.onRemoveProduct(product.id.toString()),
                                                       child: const Icon(
                                                         Icons.remove_circle,
-                                                        color: AppColors
-                                                            .darkgreen,
+                                                        color: AppColors.darkgreen,
                                                       ),
                                                     ),
                                                     SizedBox(
@@ -449,28 +517,15 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                             borderRadius: BorderRadius.circular(10),
                                                           ),
                                                         ),
-                                                        /* onFieldSubmitted:
-                                                            (value) {
-                                                          if (value != "0.0" && value !="") {
-                                                            widget.onSetQuantityProduct(cart.products[index].id, double.parse(value));
-                                                          }
-                                                        }, */
-                                                        onChanged: (value) {
-                                                          widget.onChanged(
-                                                            value,
-                                                            product.id.toString(),
-                                                          );
-                                                        },
+                                                        onChanged: (value) => widget.onChanged(value, product.id.toString()),
                                                       ),
                                                     ),
                                                     GestureDetector(
-                                                      onTap: () {
-                                                        widget.onAddProduct(product.id.toString());
-                                                      },
+                                                      onTap: () => widget.onAddProduct(product.id.toString()),
                                                       child: const Icon(
                                                         Icons.add_circle,
-                                                        color: AppColors
-                                                            .darkgreen,
+                                                        color:
+                                                            AppColors.darkgreen,
                                                       ),
                                                     )
                                                   ],

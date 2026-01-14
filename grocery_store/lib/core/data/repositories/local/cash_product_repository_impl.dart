@@ -34,7 +34,7 @@ class CashProductRepositoryImpl implements CashProductRepository {
       status: check.status,
     );
 
-    await store.record(check.id).add(db, (carModel.toJson()));
+    await store.record(int.parse(check.id)).add(db, (carModel.toJson()));
   }
 
   @override

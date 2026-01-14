@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -7,9 +8,7 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
-      body: ListView(
+    return ListView(
         padding: const EdgeInsets.symmetric(vertical: 16),
         children: [
           // CUENTA Section
@@ -120,8 +119,8 @@ class SettingsPage extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
+      );
+    
   }
 
   Widget _buildSectionHeader(String title) {
@@ -296,7 +295,7 @@ class _AnimatedSettingsTileState extends State<_AnimatedSettingsTile>
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF2A2A2A),
+            color: AppColors.lightgrey,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -304,7 +303,7 @@ class _AnimatedSettingsTileState extends State<_AnimatedSettingsTile>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: AppColors.green, //Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(widget.icon, color: Colors.white, size: 20),
@@ -314,7 +313,7 @@ class _AnimatedSettingsTileState extends State<_AnimatedSettingsTile>
                 child: Text(
                   widget.title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),

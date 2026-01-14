@@ -29,20 +29,7 @@ class ProductsListWidget extends StatelessWidget {
   final Function(int) onDeleteProduct;
   final double? moneyConversion;
 
-  String setselectedMeasurements(int? value) {
-    switch (value) {
-      case 0:
-        return 'other';
-      case 1:
-        return 'lt';
-      case 2:
-        return 'item';
-      case 3:
-        return 'kg';
-      default:
-        return "other";
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +137,7 @@ class ProductsListWidget extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Text(
-                              "${"${listProducts![index].quantityToBuy}"} ${setselectedMeasurements(int.parse(listProducts![index].idStock))}",
+                              "${listProducts![index].quantityToBuy}",
                               style: const TextStyle(fontSize: 12),
                             ),
                           ),
@@ -219,7 +206,7 @@ class ProductsListWidget extends StatelessWidget {
                             child: Text(
                               "Cantidad: ${listProducts![index].stockQuantity}",
                               style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
+                                  fontSize: 14, fontWeight: FontWeight.normal),
                             ),
                           ),
                           /* Padding(
@@ -241,13 +228,13 @@ class ProductsListWidget extends StatelessWidget {
                                   "Precio: ${((listProducts![index].price.toStringAsFixed(2)))}\$",
                                   style: const TextStyle(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.normal),
                                 ),
                                 Text(
                                   "Precio: ${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
                                   style: const TextStyle(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.bold),
+                                      fontWeight: FontWeight.normal),
                                 ),
                                 const SizedBox(height: 10),
                                 GestureDetector(

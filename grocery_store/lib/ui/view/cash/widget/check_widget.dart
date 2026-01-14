@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 
 class CheckWidget extends StatelessWidget {
-  CheckWidget({
+  final Cart? cart;
+  final double subToTal;
+  final double iva;
+  final double discount;
+  final double delivery;
+  final double total;
+  final double? moneyConversion;
+  
+  const CheckWidget({
     super.key,
     this.moneyConversion,
-    required this.listProducts,
+    required this.cart,
     required this.subToTal,
     this.iva = 0,
     this.discount = 0,
@@ -15,13 +22,7 @@ class CheckWidget extends StatelessWidget {
     this.total = 0,
   });
 
-  final List<Product>? listProducts;
-  final double subToTal;
-  final double iva;
-  final double discount;
-  final double delivery;
-  final double total;
-  final double? moneyConversion;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -45,63 +46,50 @@ class CheckWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Name: Abelardo Mendoza",
-                style: TextStyle(
+              Text(
+                "Name: ${cart?.ownerCarName ?? 'N/A'}",
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               Flexible(
-                child: Container(
-                  //color: Colors.amber,
-                  child: GridView.builder(
-                    scrollDirection: Axis.vertical,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1,
-                      childAspectRatio: 8.2,
-                    ),
-                    itemCount: listProducts!.length,
-                    itemBuilder: (context, index) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              //color: Colors.green,
-                              //padding: const EdgeInsets.all(8),
-                              //margin: EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                child: ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: cart?.products.length ?? 0,
+                  itemBuilder: (context, index) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "${listProducts![index].name} X${listProducts![index].quantityToBuy.toStringAsFixed(0)}",
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Text(
-                                        "${listProducts![index].price.toStringAsFixed(2)}\$ / ${((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    cart!.products[index].name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  Text(
+                                    "${cart!.products[index].quantityToBuy.toStringAsFixed(0)} X ${((cart!.products[index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      );
-                    },
-                  ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               Row(
@@ -115,7 +103,7 @@ class CheckWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "$subToTal\$ / bs",
+                    "${(subToTal * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
                     style: const TextStyle(
                       fontSize: 16,
                     ),
@@ -133,7 +121,7 @@ class CheckWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "${(subToTal * (iva / 100))}",
+                    "${((subToTal * (moneyConversion ?? 0)) * (iva / 100)).toStringAsFixed(2)}bs",
                     style: const TextStyle(
                       fontSize: 16,
                     ),
@@ -151,17 +139,17 @@ class CheckWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "${subToTal * (discount / 100)}",
+                    "${((subToTal * (moneyConversion ?? 0)) * (discount / 100)).toStringAsFixed(2)}bs",
                     style: const TextStyle(
                       fontSize: 16,
                     ),
                   ),
                 ],
               ),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     "Delivery Charges",
                     style: TextStyle(
                       fontSize: 16,
@@ -169,8 +157,8 @@ class CheckWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "120.000bs",
-                    style: TextStyle(
+                    "${delivery.toStringAsFixed(2)}bs",
+                    style: const TextStyle(
                       fontSize: 16,
                     ),
                   ),
@@ -188,7 +176,7 @@ class CheckWidget extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "${subToTal + iva + discount + delivery}",
+                    "${((subToTal * (moneyConversion ?? 0)) + (((subToTal * (moneyConversion ?? 0)) * (iva / 100))) + discount + delivery).toStringAsFixed(2)}bs",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

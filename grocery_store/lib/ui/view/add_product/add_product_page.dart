@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/ui/view/widgets/general_button.dart';
 import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
@@ -294,6 +295,13 @@ class _AddProductPageState extends State<AddProductPage> {
                                     child: Image.file(
                                       viewModel.galleryImage!,
                                       fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          AppImages.imageNotFound,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
                                     ),
                                   ),
                           ),

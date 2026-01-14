@@ -1,28 +1,29 @@
-// ignore_for_file: unnecessary_null_comparison
-
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/client.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
-import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_get_carts_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:uuid/uuid.dart';
 
 class CartViewModel extends ChangeNotifier {
+  StreamSubscription<List<Cart>>? _cartsSubscription;
+
   CartViewModel({
     required this.getProductsUseCases,
-    required this.getCarProductsUseCases,
-    required this.addCarProductsUseCases,
-    required this.deleteCarProductsUseCases,
-    required this.updateCarProductsUseCases,
+    required this.getCartsUseCases,
+    required this.createCartUseCases,
+    required this.deleteCartUseCases,
+    required this.updateCartUseCases,
     required this.createClientUseCases,
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
@@ -33,14 +34,12 @@ class CartViewModel extends ChangeNotifier {
 
   //Products
   final NewGetProductsUseCases getProductsUseCases;
-  /* final DeleteProductsUseCases deleteProductsUseCases;
-  final UpdateProductsUseCases updateProductsUseCases; */
 
   //Carts
-  final GetAllCartsUseCases getCarProductsUseCases;
-  final CreateCarProductsUseCases addCarProductsUseCases;
-  final DeleteCarProductsUseCases deleteCarProductsUseCases;
-  final UpdateCarProductsUseCases updateCarProductsUseCases;
+  final NewGetCartsUseCases getCartsUseCases;
+  final NewCreateCartUseCases createCartUseCases;
+  final NewDeleteCartUseCases deleteCartUseCases;
+  final NewUpdateCartUseCases updateCartUseCases;
 
   //Clients
   final CreateClientUseCases createClientUseCases;
@@ -50,8 +49,10 @@ class CartViewModel extends ChangeNotifier {
   List<Product> listProducts = [];
   List<Cart> listCarts = [];
   List<Cart> filterlistCarts = [];
+  List<Cart> paymentlistCarts = [];
   List<Client> listClients = [];
   List<Product> listProductsAddCart = [];
+  double _subTotal = 0;
 
   List<bool> _isActivePanel = [];
 
@@ -62,6 +63,7 @@ class CartViewModel extends ChangeNotifier {
   int get payPart => _payPart;
   List<bool> get isActivePanel => _isActivePanel;
   List<Product> get listProductsByCar => listProducts;
+  double get subTotal => _subTotal;
 
   void isActiveListPanel(int index) {
     _isActivePanel[index] = !_isActivePanel[index];
@@ -119,8 +121,7 @@ class CartViewModel extends ChangeNotifier {
             if (newQuantity >= 0 && newQuantity <= product.stockQuantity) {
               product.quantityToBuy = newQuantity;
             } else if (newQuantity > product.stockQuantity) {
-              product.quantityToBuy =
-                  product.stockQuantity; // Limitar al stock máximo
+              product.quantityToBuy = product.stockQuantity; // Limitar al stock máximo
             } else {
               product.quantityToBuy = 0; // Si es negativo o no válido
             }
@@ -142,26 +143,73 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onSetPayProduct(int id, int value) {
+  void onSetPayProduct(String id, int value) {
     for (var element in listCarts) {
-      if (element.id == id) {
-        element.status = "paypart";
-        element.payPart = value;
-        notifyListeners();
+      if (value > 0) {
+        if (element.id == id) {
+          element.status = "paypart";
+          element.payPart = value;
+          element.updatedAt = DateTime.now();
+        }
       }
-    }
-  }
-
-  void setListPayProduct() {
-    //filterlistCarts.clear();
-    for (var element in listCarts) {
-      if (element.status != 'pending') {
-        filterlistCarts.add(element);
+      else{
+        if (element.id == id) {
+          element.status = "buying";
+          element.payAt = null; // Reset payment date if changing back to buying
+          element.updatedAt = DateTime.now();
+        }
       }
     }
     notifyListeners();
   }
 
+  void setListPayProduct() {
+    //filterlistCarts.clear();
+    for (var element in listCarts) {
+      if (element.status == 'paypart') {
+        filterlistCarts.add(element);
+      }
+      if (element.status != 'buying') {
+        paymentlistCarts.add(element);
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Prepara un carrito específico para el checkout
+  Cart? selectedCartForCheckout;
+  
+  void prepareCartForCheckout(String cartId) {
+    selectedCartForCheckout = null;
+    
+    for (var cart in listCarts) {
+      if (cart.id == cartId) {
+        // Actualizar el stock de los productos (restar quantityToBuy)
+        List<Product> updatedProducts = [];
+        for (var product in cart.products) {
+          int newStock = product.stockQuantity - product.quantityToBuy;
+          updatedProducts.add(product.copyWith(stockQuantity: newStock));
+        }
+        
+        // Crear copia del carrito con los productos actualizados
+        selectedCartForCheckout = cart.copyWith(products: updatedProducts);
+        break;
+      }
+    }
+    notifyListeners();
+  }
+
+  void getSubTotal() {
+    
+    for (var element in listCarts) {
+      _subTotal += element.products
+          .where((product) => product.quantityToBuy > 0)
+          .map((product) => product.price * product.quantityToBuy)
+          .reduce((a, b) => a + b);
+    }
+    notifyListeners();
+  }
+  
   void getMoneyConversion() async {
     double money = await Prefs.getMoneyConversion();
     _moneyConversion = money;
@@ -177,27 +225,24 @@ class CartViewModel extends ChangeNotifier {
     List<Product> listProductsInCart = [];
     listProductsInCart.add(products);
 
-    if (ownerId != null &&
-        listProductsInCart.isNotEmpty &&
-        ownerCarName.isNotEmpty) {
-      Random random = Random();
-      int randomNumber = random.nextInt(100000000);
+    if (listProductsInCart.isNotEmpty && ownerCarName.isNotEmpty) {
+      final cartId = const Uuid().v4();
 
-      await addCarProductsUseCases.call(
+      await createCartUseCases.call(
         Cart(
-          id: randomNumber,
+          id: cartId,
           ownerId: ownerId,
           ownerCarName: ownerCarName,
           status: 'pending',
           products: listProductsInCart,
         ),
       );
-      getAllCarts();
+      // No need to call getAllCarts() - stream updates automatically
     }
   }
 
   Future<void> updateCart({
-    required int cartId,
+    required String cartId,
     required int ownerId,
     required String ownerCarName,
     required Product products,
@@ -208,16 +253,13 @@ class CartViewModel extends ChangeNotifier {
       if (element.id == cartId) {
         listProductsAddCart = List<Product>.from(element.products);
         listProductsAddCart.add(products);
-        await updateCarProductsUseCases.updateProduct(
-          Cart(
-            id: cartId,
-            ownerId: ownerId,
-            ownerCarName: ownerCarName,
-            status: 'pending',
+        await updateCartUseCases.call(
+          element.copyWith(
             products: listProductsAddCart,
+            updatedAt: DateTime.now(),
           ),
         );
-        getAllCarts();
+        // No need to call getAllCarts() - stream updates automatically
       } else {
         print("No Agregado");
       }
@@ -227,27 +269,40 @@ class CartViewModel extends ChangeNotifier {
   }
 
   Future<void> getAllCarts() async {
-    listCarts = await getCarProductsUseCases.call();
+    // Subscribe to carts stream for real-time updates
+    _cartsSubscription?.cancel();
+    _cartsSubscription = getCartsUseCases.callStream().listen((carts) {
+      listCarts = carts;
+      _isActivePanel = List.filled(listCarts.length, false);
+      notifyListeners();
+    });
+
+    // Get products
     listProducts = await getProductsUseCases.call();
-    _isActivePanel = List.filled(listCarts.length, false);
     notifyListeners();
   }
 
-  Future<void> deletedCart(int id) async {
-    await deleteCarProductsUseCases.deleteCarProduct(id);
-    getAllCarts();
+  Future<void> deletedCart(String id) async {
+    await deleteCartUseCases.call(id);
+    // No need to call getAllCarts() - stream updates automatically
   }
 
-  Future<void> updateProductCart(int cartId, String productId) async {
+  Future<void> updateProductCart(String cartId, String productId) async {
     for (var element in listCarts) {
       if (element.id == cartId) {
         element.products.removeWhere((product) => product.id == productId);
-        await updateCarProductsUseCases.updateProduct(element);
+        element.updatedAt = DateTime.now();
+        await updateCartUseCases.call(element);
+        // No need to call getAllCarts() - stream updates automatically
         notifyListeners();
         break;
       }
     }
-    //await deleteProductCartUseCases.deleteProductCart(cartId, productId);
-    getAllCarts();
+  }
+
+  @override
+  void dispose() {
+    _cartsSubscription?.cancel();
+    super.dispose();
   }
 }

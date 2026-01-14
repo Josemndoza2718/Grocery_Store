@@ -68,6 +68,7 @@ class HomeViewModel extends ChangeNotifier {
   bool get isFilterList => _isFilterList;
   bool get isActive => _isActive;
 
+  //Create Client
   Future<void> createClient({
     required String name,
   }) async {
@@ -114,7 +115,7 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  String getRandomString(int length) {
+/*   String getRandomString(int length) {
     const characters =
         'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random();
@@ -125,7 +126,7 @@ class HomeViewModel extends ChangeNotifier {
         (_) => characters.codeUnitAt(random.nextInt(characters.length)),
       ),
     );
-  }
+  } */
 
   void toggleIsActive() {
     _isActive = !_isActive;

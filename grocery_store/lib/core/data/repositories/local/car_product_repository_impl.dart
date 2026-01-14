@@ -33,7 +33,7 @@ class CartRepositoryImpl implements CarProductRepository {
         status: cart.status,
         products: cart.products);
 
-    await store.record(cart.id).add(db, (cartModel.toJson()));
+    await store.record(int.parse(cart.id)).add(db, (cartModel.toJson()));
     //await store.addAll(db, cart.products.map((e) => cartModel.toJson()).toList());
   }
 
@@ -78,6 +78,6 @@ class CartRepositoryImpl implements CarProductRepository {
         status: cart.status,
         products: cart.products);
 
-    store.record(cart.id).put(db, (cartModel.toJson()));
+    store.record(int.parse(cart.id)).put(db, (cartModel.toJson()));
   }
 }

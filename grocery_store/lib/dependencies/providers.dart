@@ -1,12 +1,12 @@
 import 'package:grocery_store/core/data/repositories/local/car_client_repository_impl.dart';
-import 'package:grocery_store/core/data/repositories/local/car_product_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/cash_product_repository_impl.dart';
+import 'package:grocery_store/core/data/repositories/local/new/new_cart_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/new/new_product_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/product_repository_impl.dart';
-import 'package:grocery_store/core/domain/use_cases/car/create_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/delete_car_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/car/get_car_products_use_cases%20copy.dart';
-import 'package:grocery_store/core/domain/use_cases/car/update_car_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_get_carts_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/create_cash_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/cash/delete_car_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
@@ -55,14 +55,14 @@ final List<SingleChildWidget> providers = [
       create: (context) => CartViewModel(
             getProductsUseCases:
                 NewGetProductsUseCases(NewProductRepositoryImpl()),
-            getCarProductsUseCases:
-                GetAllCartsUseCases(repository: CartRepositoryImpl()),
-            addCarProductsUseCases:
-                CreateCarProductsUseCases(repository: CartRepositoryImpl()),
-            deleteCarProductsUseCases:
-                DeleteCarProductsUseCases(repository: CartRepositoryImpl()),
-            updateCarProductsUseCases:
-                UpdateCarProductsUseCases(repository: CartRepositoryImpl()),
+            getCartsUseCases:
+                NewGetCartsUseCases(repository: NewCartRepositoryImpl()),
+            createCartUseCases:
+                NewCreateCartUseCases(repository: NewCartRepositoryImpl()),
+            deleteCartUseCases:
+                NewDeleteCartUseCases(repository: NewCartRepositoryImpl()),
+            updateCartUseCases:
+                NewUpdateCartUseCases(repository: NewCartRepositoryImpl()),
             createClientUseCases:
                 CreateClientUseCases(repository: ClientRepositoryImpl()),
             getClientsUseCases:
@@ -82,8 +82,8 @@ final List<SingleChildWidget> providers = [
       create: (context) => CheckViewModel(
             createCashProductsUseCases: CreateCashProductsUseCases(
                 repository: CashProductRepositoryImpl()),
-            getCarProductsUseCases:
-                GetAllCartsUseCases(repository: CartRepositoryImpl()),
+            getCartsUseCases:
+                NewGetCartsUseCases(repository: NewCartRepositoryImpl()),
             deleteCashProductsUseCases: DeleteCashProductsUseCases(
                 repository: CashProductRepositoryImpl()),
           )),
