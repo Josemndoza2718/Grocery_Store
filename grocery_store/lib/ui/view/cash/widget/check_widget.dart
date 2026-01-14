@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 
 class CheckWidget extends StatelessWidget {
   final Cart? cart;
@@ -10,6 +11,7 @@ class CheckWidget extends StatelessWidget {
   final double delivery;
   final double total;
   final double? moneyConversion;
+  final Function() onTap;
   
   const CheckWidget({
     super.key,
@@ -20,9 +22,22 @@ class CheckWidget extends StatelessWidget {
     this.discount = 0,
     this.delivery = 0,
     this.total = 0,
+    required this.onTap,
   });
 
-  
+  double getTotal() {
+    double total = 0;
+    double subTotal = subToTal * moneyConversion!;
+    double ivaTotal = subTotal * (iva / 100);
+    double deliveryTotal = delivery * moneyConversion!;
+    double preDiscountTotal = discount/100;
+    double discountTotal = (preDiscountTotal * subTotal);
+
+    
+    total = subTotal + ivaTotal + deliveryTotal - discountTotal;
+
+    return total;
+  }  
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +53,31 @@ class CheckWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                "Order Resume",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "lbl_check_resume".translate,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => onTap(),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.red,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: const Icon(Icons.clear_rounded, color: AppColors.white),
+                    ),
+                  )
+                ],
               ),
               const SizedBox(height: 8),
               Text(
-                "Name: ${cart?.ownerCarName ?? 'N/A'}",
+                "${"lbl_name".translate}: ${cart?.ownerCarName ?? 'N/A'}",
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -95,9 +125,9 @@ class CheckWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Subtotal",
-                    style: TextStyle(
+                  Text(
+                    "lbl_subtotal".translate,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -114,7 +144,7 @@ class CheckWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "IVA ($iva%)",
+                    "${"lbl_iva".translate}($iva%)",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -132,7 +162,7 @@ class CheckWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Discount ($discount%)",
+                    "${"lbl_discount".translate} ($discount%)",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -149,15 +179,15 @@ class CheckWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Delivery Charges",
-                    style: TextStyle(
+                  Text(
+                    "lbl_delivery".translate,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    "${delivery.toStringAsFixed(2)}bs",
+                    "${(delivery * moneyConversion!).toStringAsFixed(2)}bs",
                     style: const TextStyle(
                       fontSize: 16,
                     ),
@@ -168,15 +198,15 @@ class CheckWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Total",
-                    style: TextStyle(
+                  Text(
+                    "lbl_total".translate,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    "${((subToTal * (moneyConversion ?? 0)) + (((subToTal * (moneyConversion ?? 0)) * (iva / 100))) + discount + delivery).toStringAsFixed(2)}bs",
+                    "${getTotal().toStringAsFixed(2)}bs",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

@@ -1,16 +1,18 @@
 // ignore_for_file: must_be_immutable
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/core/resource/images.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/view/cash/widget/check_widget.dart';
-import 'package:grocery_store/ui/view/detail_pay/detail_pay_page.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/check_view_model.dart';
-import 'package:grocery_store/ui/view/widgets/general_list_widget.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 class CheckPage extends StatefulWidget {
   const CheckPage({super.key});
@@ -21,14 +23,37 @@ class CheckPage extends StatefulWidget {
 
 class _CheckPageState extends State<CheckPage> {
   TextEditingController clientController = TextEditingController();
-  TextEditingController ivaController = TextEditingController(text: "0");
   TextEditingController discountController = TextEditingController(text: "0");
   TextEditingController deliveryController = TextEditingController(text: "0");
-  double sliderValue = 2;
+  ScreenshotController screenshotController = ScreenshotController();
+  
+
+  /* Future<dynamic> ShowCapturedWidget(
+      BuildContext context, Uint8List capturedImage) {
+    return showDialog(
+      useSafeArea: false,
+      context: context,
+      builder: (context) => Scaffold(
+        appBar: AppBar(
+          title: Text("Captured widget screenshot"),
+        ),
+        body: Center(child: Image.memory(capturedImage)),
+      ),
+    );
+  } */
+
+  Future<void> saveAndShareImage(Uint8List image) async {
+    final time = DateTime.now().toIso8601String().replaceAll(".", "_");
+    final directory = await getExternalStorageDirectory();
+    final imagePath = File('${directory?.path}/$time.png');
+
+    await imagePath.writeAsBytes(image);
+    await Share.shareXFiles([XFile(imagePath.path)]);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartViewModel>(builder: (context, viewModel, _) {
+    return Consumer<CartViewModel>(builder: (context, provider, _) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
@@ -381,52 +406,60 @@ class _CheckPageState extends State<CheckPage> {
               );
             }),
  */
-            TextFormField(
-              controller: discountController,
-              decoration: const InputDecoration(
-                labelText: "Descuento",
-                border: OutlineInputBorder(),
+            Row(
+              spacing: 8,
+              //mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: discountController,
+                    decoration: const InputDecoration(
+                      labelText: "Descuento",
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        discountController.text = value;
+                      });
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: TextFormField(
+                    controller: deliveryController,
+                    decoration: const InputDecoration(
+                      labelText: "Delivery",
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        deliveryController.text = value;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            Flexible(
+              child: Screenshot(
+                controller: screenshotController,
+                child: CheckWidget(
+                  cart: provider.selectedCartForCheckout,
+                  subToTal: provider.subTotal,
+                  moneyConversion: provider.moneyConversion,
+                  iva: double.parse(Prefs.getString(PrefKeys.iva) ?? "0"),
+                  discount: double.parse(discountController.text),
+                  delivery: double.parse(deliveryController.text),
+                  onTap: () {
+                    discountController.text = "0";
+                    deliveryController.text = "0";
+                    provider.clearData();
+                  },
+                ),
               ),
-              onChanged: (value) {
-                setState(() {
-                  discountController.text = value;
-                });
-              },
             ),
-            TextFormField(
-              controller: deliveryController,
-              decoration: const InputDecoration(
-                labelText: "Delivery",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  deliveryController.text = value;
-                });
-              },
-            ),
-            TextFormField(
-              controller: ivaController,
-              decoration: const InputDecoration(
-                labelText: "IVA",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  ivaController.text = value;
-                });
-              },
-            ),
-            CheckWidget(
-              cart: viewModel.selectedCartForCheckout,
-              subToTal: viewModel.subTotal,
-              moneyConversion: viewModel.moneyConversion,
-              iva: double.parse(ivaController.text),
-              discount: double.parse(discountController.text),
-              delivery: double.parse(deliveryController.text),
-            ),
-            if (viewModel.selectedCartForCheckout != null &&
-                viewModel.selectedCartForCheckout!.products.isNotEmpty)
+            if (provider.selectedCartForCheckout != null &&
+                provider.selectedCartForCheckout!.products.isNotEmpty)
               const Text(
                 "Metodos de Pago",
                 textAlign: TextAlign.center,
@@ -437,6 +470,8 @@ class _CheckPageState extends State<CheckPage> {
                 ),
               ),
             // Métodos de pago
+            if (provider.selectedCartForCheckout != null &&
+                provider.selectedCartForCheckout!.products.isNotEmpty)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -527,7 +562,18 @@ class _CheckPageState extends State<CheckPage> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    screenshotController.capture().then((image) async {
+                      if (image != null) {
+                        final directory = await getApplicationDocumentsDirectory();
+                        final imagePath = await File('${directory.path}/image.png').create();
+                        await imagePath.writeAsBytes(image);
+                        saveAndShareImage(image);
+                      }
+                    }).catchError((onError) {
+                      print(onError);
+                    });
+                  },
                   child: Container(
                     height: 60,
                     width: 60,
@@ -544,12 +590,7 @@ class _CheckPageState extends State<CheckPage> {
                           borderRadius: BorderRadius.circular(10)),
                       child: const Align(
                         alignment: Alignment.center,
-                        child: Image(
-                          image: AssetImage(AppImages.imageWhatsappOutline),
-                          color: AppColors.white,
-                          height: 32,
-                          width: 32,
-                        ),
+                        child: Icon(Icons.share, color: AppColors.white, size: 32),
                       ),
                     ),
                   ),

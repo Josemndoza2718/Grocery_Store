@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/my_localizations.dart';
 import 'package:grocery_store/dependencies/di.dart';
 import 'package:grocery_store/ui/view/auth/login_page.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_localizations/flutter_localizations.dart'; // ¡Esta es 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Prefs.init();
   //await FlutterLocalization.instance.ensureInitialized();
 
   await Firebase.initializeApp();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 
 class GeneralTextformfield extends StatelessWidget {
@@ -7,8 +8,9 @@ class GeneralTextformfield extends StatelessWidget {
   final int? maxLines;
   final String? labelText;
   final String? hintText;
-  //final IconData? icon;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
+
   const GeneralTextformfield(
       {super.key,
       this.controller,
@@ -16,7 +18,7 @@ class GeneralTextformfield extends StatelessWidget {
       this.maxLines,
       this.labelText,
       this.hintText,
-      //this.icon,
+      this.inputFormatters,
       this.validator});
 
   @override
@@ -24,14 +26,14 @@ class GeneralTextformfield extends StatelessWidget {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       maxLines: maxLines,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
         //prefixIcon: Icon(icon),
         //border: const OutlineInputBorder(),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
         filled: true,
         fillColor: AppColors.lightwhite,
         border: OutlineInputBorder(

@@ -1,126 +1,158 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/resource/custom_dialgos.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
+import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  SettingsPage({super.key});
+
+  final TextEditingController _ivaController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        children: [
-          // CUENTA Section
-          _buildSectionHeader('CUENTA'),
-          _buildSettingsTile(
-            context,
-            icon: Icons.person_outline,
-            title: 'Información Personal',
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Próximamente')));
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            icon: Icons.lock_outline,
-            title: 'Cambiar Contraseña',
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Próximamente')));
-            },
-          ),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      children: [
+        // CUENTA Section
+        _buildSectionHeader('CUENTA'),
+        _buildSettingsTile(
+          context,
+          icon: Icons.person_outline,
+          title: 'Información Personal',
+          onTap: () {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Próximamente')));
+          },
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.lock_outline,
+          title: 'Cambiar Contraseña',
+          onTap: () {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Próximamente')));
+          },
+        ),
 
-          const SizedBox(height: 24),
+        const SizedBox(height: 24),
 
-          // PREFERENCIAS Section
-          _buildSectionHeader('PREFERENCIAS'),
-          _buildSettingsTile(
-            context,
-            icon: Icons.notifications_outlined,
-            title: 'Notificaciones',
-            onTap: () {
-              /* Navigator.of(context).push(
+        // PREFERENCIAS Section
+        _buildSectionHeader('PREFERENCIAS'),
+        _buildSettingsTile(
+          context,
+          icon: Icons.notifications_outlined,
+          title: 'Notificaciones',
+          onTap: () {
+            /* Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const NotificationSettingsScreen(),
                 ),
               ); */
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            icon: Icons.category_outlined,
-            title: 'Categorias',
-            onTap: () {
-              /*  Navigator.of(context).push(
+          },
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.category_outlined,
+          title: 'Categorias',
+          onTap: () {
+            /*  Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const CategoryManagementScreen(),
                 ),
               ); */
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            icon: Icons.straighten_outlined,
-            title: 'Unidades de Medida',
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Próximamente')));
-            },
-          ),
+          },
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.percent_outlined,
+          title: 'Definir Impuestos',
+          onTap: () {
+            CustomDialgos.showAlertDialog(
+              context: context,
+              title: 'Definir Impuestos',
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GeneralTextformfield(
+                    controller: _ivaController,
+                    hintText: 'IVA',
+                    keyboardType: const TextInputType.numberWithOptions(signed: false),
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Por favor, ingresa un valor';
+                      }
+                      return null;
+                    },
+                  )
+                ],
+              ),
+              onConfirm: () {
+                Prefs.setString(PrefKeys.iva, _ivaController.text).then((value) {
+                  Navigator.pop(context);
+                  if (value) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Impuestos guardados')));
+                  }
+                });
+              },
+            );
+          },
+        ),
 
-          const SizedBox(height: 24),
+        const SizedBox(height: 24),
 
-          // PRIVACIDAD Y SEGURIDAD Section
-          _buildSectionHeader('PRIVACIDAD Y SEGURIDAD'),
-          _buildSettingsTile(
-            context,
-            icon: Icons.storage_outlined,
-            title: 'Gestionar Datos',
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Próximamente')));
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            icon: Icons.link_outlined,
-            title: 'Cuentas Vinculadas',
-            onTap: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Próximamente')));
-            },
-          ),
+        // PRIVACIDAD Y SEGURIDAD Section
+        _buildSectionHeader('PRIVACIDAD Y SEGURIDAD'),
+        _buildSettingsTile(
+          context,
+          icon: Icons.storage_outlined,
+          title: 'Gestionar Datos',
+          onTap: () {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Próximamente')));
+          },
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.link_outlined,
+          title: 'Cuentas Vinculadas',
+          onTap: () {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Próximamente')));
+          },
+        ),
 
-          const SizedBox(height: 32),
+        const SizedBox(height: 32),
 
-          // Action Buttons
-          _buildActionButton(
-            context,
-            label: 'Cerrar Sesión',
-            color: Colors.redAccent,
-            onTap: () {
-              _showLogoutDialog(context);
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildActionButton(
-            context,
-            label: 'Eliminar Cuenta',
-            color: Colors.red.shade700,
-            onTap: () {
-              _showDeleteAccountDialog(context);
-            },
-          ),
-        ],
-      );
-    
+        // Action Buttons
+        _buildActionButton(
+          context,
+          label: 'Cerrar Sesión',
+          color: Colors.redAccent,
+          onTap: () {
+            _showLogoutDialog(context);
+          },
+        ),
+        const SizedBox(height: 12),
+        _buildActionButton(
+          context,
+          label: 'Eliminar Cuenta',
+          color: Colors.red.shade700,
+          onTap: () {
+            _showDeleteAccountDialog(context);
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildSectionHeader(String title) {

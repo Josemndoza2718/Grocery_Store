@@ -52,6 +52,7 @@ class CartViewModel extends ChangeNotifier {
   List<Cart> paymentlistCarts = [];
   List<Client> listClients = [];
   List<Product> listProductsAddCart = [];
+  Cart? _selectedCartForCheckout;
   double _subTotal = 0;
 
   List<bool> _isActivePanel = [];
@@ -63,6 +64,7 @@ class CartViewModel extends ChangeNotifier {
   int get payPart => _payPart;
   List<bool> get isActivePanel => _isActivePanel;
   List<Product> get listProductsByCar => listProducts;
+  Cart? get selectedCartForCheckout => _selectedCartForCheckout;
   double get subTotal => _subTotal;
 
   void isActiveListPanel(int index) {
@@ -177,10 +179,10 @@ class CartViewModel extends ChangeNotifier {
   }
 
   /// Prepara un carrito específico para el checkout
-  Cart? selectedCartForCheckout;
+  
   
   void prepareCartForCheckout(String cartId) {
-    selectedCartForCheckout = null;
+    _selectedCartForCheckout = null;
     
     for (var cart in listCarts) {
       if (cart.id == cartId) {
@@ -192,7 +194,7 @@ class CartViewModel extends ChangeNotifier {
         }
         
         // Crear copia del carrito con los productos actualizados
-        selectedCartForCheckout = cart.copyWith(products: updatedProducts);
+        _selectedCartForCheckout = cart.copyWith(products: updatedProducts);
         break;
       }
     }
@@ -304,5 +306,11 @@ class CartViewModel extends ChangeNotifier {
   void dispose() {
     _cartsSubscription?.cancel();
     super.dispose();
+  }
+
+  void clearData() {
+    _selectedCartForCheckout = null;
+    _subTotal = 0;
+    notifyListeners();
   }
 }

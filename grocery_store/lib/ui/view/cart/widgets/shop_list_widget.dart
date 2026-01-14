@@ -22,7 +22,6 @@ class ShopListWidget extends StatefulWidget {
   final Function(String) onRemoveCart;
   final Function(String) onPaymentCart;
   final Function(int, int) onSetQuantityProduct;
-  //final Function(int, String?) onSetTap;
   final Function(String, String) onChanged;
   final Function(String, int) onSetPayProduct;
   final List<bool> isActivePanel;
@@ -41,7 +40,6 @@ class ShopListWidget extends StatefulWidget {
     required this.onRemoveCart,
     required this.onPaymentCart,
     required this.onSetQuantityProduct,
-    //required this.onSetTap,
     required this.onChanged,
     required this.onSetPayProduct,
   });
@@ -52,7 +50,6 @@ class ShopListWidget extends StatefulWidget {
 
 class _ShopListWidgetState extends State<ShopListWidget> {
   final Map<String, TextEditingController> _quantityControllers = {};
-  //bool isPayment = false;
   late CartViewModel viewModel;
 
   @override

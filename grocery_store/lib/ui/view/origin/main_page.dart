@@ -5,7 +5,6 @@ import 'package:grocery_store/ui/view/home/home_page.dart';
 import 'package:grocery_store/ui/view/cart/cart_page.dart';
 import 'package:grocery_store/ui/view/settings/settings_page.dart';
 import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/main_page_view_model.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
 import 'package:grocery_store/ui/view/widgets/bottom_navigation_bar.dart';
@@ -23,7 +22,7 @@ class MainPage extends StatelessWidget {
     const HomePage(),
     const CartPage(),
     const CheckPage(),
-    const SettingsPage(),
+    SettingsPage(),
   ];
 
   @override

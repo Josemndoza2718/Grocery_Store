@@ -8,7 +8,7 @@ class CustomDialgos {
       {required BuildContext context,
       required String title,
       Widget? content,
-      required VoidCallback onConfirm}) {
+      required Function onConfirm}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -24,9 +24,7 @@ class CustomDialgos {
             ),
             TextButton(
               child: const Text('aceptar'),
-              onPressed: () {
-                onConfirm();
-              },
+              onPressed: () => onConfirm()
             ),
           ],
           backgroundColor: AppColors.white,

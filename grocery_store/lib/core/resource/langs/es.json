@@ -2,5 +2,16 @@
     "title": "¿Estás seguro de eliminar este producto?",
     "content": "¿Estás seguro de que deseas continuar?",
     "confirm": "Ok",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+
+    "--CHECK PAGE--":"-----------------------------------",
+    "lbl_check_resume": "Resumen de la orden",
+    "lbl_name": "Nombre",
+    "lbl_products": "Productos",
+    "lbl_subtotal": "Subtotal",
+    "lbl_iva": "IVA",
+    "lbl_discount": "Descuento",
+    "lbl_delivery": "Envio",
+    "lbl_total": "Total",
+    "lbl_money_conversion": "Conversion de moneda"
 }
