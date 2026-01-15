@@ -30,11 +30,10 @@ class CartPage extends StatelessWidget {
                   moneyConversion: provider.moneyConversion,
                   onTapPanel: (index) => provider.isActiveListPanel(index),
                   onRemoveCart: (index) => provider.deletedCart(index),
-                  //onSetTap: (index, value) => viewModel.setQuantityProductForm(index, double.parse("$value")),
-                  onAddProduct: (value) => provider.addQuantityProduct(value),
-                  onRemoveProduct: (value) =>provider.removeQuantityProduct(value),
+                  onAddProduct: (value, cartId) => provider.addQuantityProduct(value, cartId),
+                  onRemoveProduct: (value, cartId) =>provider.removeQuantityProduct(value, cartId),
                   onSetQuantityProduct: (id, value) =>provider.onSetQuantityProduct(id, value),
-                  onChanged: (value, productId) =>provider.updateQuantityManually(value, productId),
+                  onChanged: (value, productId, cartId) =>provider.updateQuantityManually(value, productId, cartId),
                   onDeleteProduct: (cartId, productId) {
                     provider.updateProductCart(cartId, productId.toString());
                     showFloatingMessage(
@@ -46,7 +45,7 @@ class CartPage extends StatelessWidget {
                   onPaymentCart: (cartId) {
                     // Preparar los productos del carrito para checkout
                     provider.prepareCartForCheckout(cartId);
-                    provider.getSubTotal();
+                    provider.getSubTotal(cartId);
                     
       
                   },

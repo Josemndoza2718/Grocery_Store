@@ -4,10 +4,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/view/cash/widget/check_widget.dart';
+import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -49,6 +51,14 @@ class _CheckPageState extends State<CheckPage> {
 
     await imagePath.writeAsBytes(image);
     await Share.shareXFiles([XFile(imagePath.path)]);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CartViewModel>().setListPayProduct();
+    });
   }
 
   @override
@@ -411,30 +421,27 @@ class _CheckPageState extends State<CheckPage> {
               //mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Expanded(
-                  child: TextFormField(
+                  child: GeneralTextformfield(
                     controller: discountController,
-                    decoration: const InputDecoration(
-                      labelText: "Descuento",
-                      border: OutlineInputBorder(),
-                    ),
+                    labelText: "Discount",
+                    hintText: "Discount",
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (value) {
-                      setState(() {
-                        discountController.text = value;
-                      });
+                      context.read<CartViewModel>().setDiscount(double.parse(value));
                     },
+
                   ),
                 ),
                 Expanded(
-                  child: TextFormField(
+                  child: GeneralTextformfield(
                     controller: deliveryController,
-                    decoration: const InputDecoration(
-                      labelText: "Delivery",
-                      border: OutlineInputBorder(),
-                    ),
+                    labelText: "Delivery",
+                    hintText: "Delivery",
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
                     onChanged: (value) {
-                      setState(() {
-                        deliveryController.text = value;
-                      });
+                      context.read<CartViewModel>().setDelivery(double.tryParse(value) ?? 0);
                     },
                   ),
                 ),
@@ -448,8 +455,8 @@ class _CheckPageState extends State<CheckPage> {
                   subToTal: provider.subTotal,
                   moneyConversion: provider.moneyConversion,
                   iva: double.parse(Prefs.getString(PrefKeys.iva) ?? "0"),
-                  discount: double.parse(discountController.text),
-                  delivery: double.parse(deliveryController.text),
+                  discount: provider.discount,
+                  delivery: provider.delivery,
                   onTap: () {
                     discountController.text = "0";
                     deliveryController.text = "0";

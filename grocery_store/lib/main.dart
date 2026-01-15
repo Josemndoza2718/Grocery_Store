@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,12 +12,22 @@ import 'package:flutter_localizations/flutter_localizations.dart'; // ¡Esta es 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   await Prefs.init();
   //await FlutterLocalization.instance.ensureInitialized();
 
   await Firebase.initializeApp();
 
-  runApp(const MyApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('es'), Locale('en'),],
+      path: 'lib/core/resource/langs',
+      useFallbackTranslations: true,
+      fallbackLocale: Locale('es'),
+      startLocale: Locale('es'),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -29,16 +40,9 @@ class MyApp extends StatelessWidget {
           ...di,
         ],
         child: MaterialApp(
-          localizationsDelegates: const [
-            MyLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en', ''), // Inglés
-            Locale('es', ''), // Español
-          ],
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
           title: 'Material App',
           debugShowCheckedModeBanner: false,
           home: StreamBuilder<User?>(

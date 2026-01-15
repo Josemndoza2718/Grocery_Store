@@ -6,6 +6,7 @@ import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -16,13 +17,13 @@ class ShopListWidget extends StatefulWidget {
   final Function(String, String) onDeleteProduct;
   final double moneyConversion;
   final int payProduct;
-  final Function(String) onAddProduct;
-  final Function(String) onRemoveProduct;
+  final Function(String, String) onAddProduct;
+  final Function(String, String) onRemoveProduct;
   final Function(int) onTapPanel;
   final Function(String) onRemoveCart;
   final Function(String) onPaymentCart;
   final Function(int, int) onSetQuantityProduct;
-  final Function(String, String) onChanged;
+  final Function(String, String, String) onChanged;
   final Function(String, int) onSetPayProduct;
   final List<bool> isActivePanel;
 
@@ -63,7 +64,8 @@ class _ShopListWidgetState extends State<ShopListWidget> {
       viewModel = Provider.of<CartViewModel>(context, listen: false);
       for (Cart element in widget.listCarts ?? []) {
         for (var product in element.products) {
-          _quantityControllers[product.id.toString()] = TextEditingController(
+          final key = "${element.id}_${product.id}";
+          _quantityControllers[key] = TextEditingController(
               text: (product.quantityToBuy).toString());
         }
       }
@@ -79,7 +81,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
     if (widget.listCarts != oldWidget.listCarts) {
       for (Cart cart in widget.listCarts ?? []) {
         for (Product product in cart.products) {
-          final key = product.id.toString();
+          final key = "${cart.id}_${product.id}";
           // Solo crea el controlador si no existe
           if (!_quantityControllers.containsKey(key)) {
             _quantityControllers[key] = TextEditingController(
@@ -102,13 +104,14 @@ class _ShopListWidgetState extends State<ShopListWidget> {
     // Este método se llamará cada vez que notifyListeners() sea invocado en ProductProvider
     for (Cart element in widget.listCarts ?? []) {
       for (Product product in element.products) {
+        final key = "${element.id}_${product.id}";
         // Solo actualiza el controlador si el valor del modelo es diferente para evitar loops infinitos
-        if (_quantityControllers[product.id.toString()]?.text !=
+        if (_quantityControllers[key]?.text !=
             product.quantityToBuy.toString()) {
-          _quantityControllers[product.id.toString()]?.text =
+          _quantityControllers[key]?.text =
               product.quantityToBuy.toString();
           // Mueve el cursor al final para mejor UX si el valor cambia
-          _quantityControllers[product.id.toString()]?.selection =
+          _quantityControllers[key]?.selection =
               TextSelection.fromPosition(TextPosition(
                   offset: product.quantityToBuy.toString().length));
         }
@@ -125,7 +128,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
             .map((product) =>
                 product.price *
                 double.parse(
-                    _quantityControllers[product.id.toString()]?.text ?? "0"))
+                    _quantityControllers["${cart.id}_${product.id}"]?.text ?? "0"))
             .reduce((a, b) => a + b);
       }
     }
@@ -138,7 +141,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
       if (cart.id == cartId) {
         totalItems += cart.products
             .map((product) => int.parse(
-                _quantityControllers[product.id.toString()]?.text ?? "0"))
+                _quantityControllers["${cart.id}_${product.id}"]?.text ?? "0"))
             .reduce((a, b) => a + b);
       }
     }
@@ -185,16 +188,15 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      subtitle: Text(
-                          "#${DateFormat('yyyyMMdd').format(cart.createdAt)}"),
+                      subtitle: Text("#${DateFormat('yyyyMMdd').format(cart.createdAt)}"),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Total Items: ${_getTotalItemsCart(cart.id)}",
+                            "${'lbl_total_items'.translate}: ${_getTotalItemsCart(cart.id)}",
                           ),
-                          Text("Total: ${_getTotalPriceCart(cart.id)} Bs"),
+                          Text("${'lbl_total'.translate}: ${_getTotalPriceCart(cart.id)} Bs"),
                         ],
                       ));
                 },
@@ -217,9 +219,9 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  child: const Text(
-                                    "Delete",
-                                    style: TextStyle(color: AppColors.white),
+                                  child: Text(
+                                    "lbl_delete_cart".translate,
+                                    style: const TextStyle(color: AppColors.white),
                                   ),
                                 ),
                               ),
@@ -232,12 +234,23 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  child: const Text(
-                                    "Payment",
-                                    style: TextStyle(color: AppColors.white),
+                                  child: Text(
+                                    "lbl_pay_cart".translate,
+                                    style: const TextStyle(color: AppColors.white),
                                   ),
                                 ),
                               ),
+                              /* GestureDetector(
+                                onTap: () => widget.onPaymentCart(cart.id),
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.grey,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(Icons.share, color: AppColors.white),
+                                ),
+                              ) */
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -449,14 +462,14 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                           FontWeight.normal),
                                                 ), */
                                                 Text(
-                                                  "\$ c/uni: ${product.price.toStringAsFixed(2)}\$",
+                                                  "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
                                                   style: const TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.normal),
                                                 ),
                                                 Text(
-                                                  "Bs c/uni: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                                                  "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
                                                   style: const TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -468,7 +481,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                   thickness: 1,
                                                 ),
                                                 Text(
-                                                  "Total: ${((product.price * int.parse(_quantityControllers[product.id.toString()]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                                                  "${'lbl_total'.translate}: ${((product.price * int.parse(_quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
                                                   style: const TextStyle(
                                                       fontSize: 14,
                                                       fontWeight:
@@ -481,7 +494,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                   children: [
                                                     GestureDetector(
-                                                      onTap: () => widget.onRemoveProduct(product.id.toString()),
+                                                      onTap: () => widget.onRemoveProduct(product.id.toString(), cart.id),
                                                       child: const Icon(
                                                         Icons.remove_circle,
                                                         color: AppColors.darkgreen,
@@ -490,7 +503,7 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                     SizedBox(
                                                       width: 50,
                                                       child: TextFormField(
-                                                        controller: _quantityControllers[product.id.toString()],
+                                                        controller: _quantityControllers["${cart.id}_${product.id}"],
                                                         keyboardType: TextInputType.number,
                                                         textAlign: TextAlign.center,
                                                         decoration: InputDecoration(
@@ -514,11 +527,11 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                                             borderRadius: BorderRadius.circular(10),
                                                           ),
                                                         ),
-                                                        onChanged: (value) => widget.onChanged(value, product.id.toString()),
+                                                        onChanged: (value) => widget.onChanged(value, product.id.toString(), cart.id),
                                                       ),
                                                     ),
                                                     GestureDetector(
-                                                      onTap: () => widget.onAddProduct(product.id.toString()),
+                                                      onTap: () => widget.onAddProduct(product.id.toString(), cart.id),
                                                       child: const Icon(
                                                         Icons.add_circle,
                                                         color:

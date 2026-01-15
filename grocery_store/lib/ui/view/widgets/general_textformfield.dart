@@ -9,6 +9,7 @@ class GeneralTextformfield extends StatelessWidget {
   final String? labelText;
   final String? hintText;
   final String? Function(String?)? validator;
+  final Function(String)? onChanged;
   final List<TextInputFormatter>? inputFormatters;
 
   const GeneralTextformfield(
@@ -19,6 +20,7 @@ class GeneralTextformfield extends StatelessWidget {
       this.labelText,
       this.hintText,
       this.inputFormatters,
+      this.onChanged,
       this.validator});
 
   @override
@@ -52,6 +54,7 @@ class GeneralTextformfield extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
+      onChanged: onChanged,
       validator: validator,
     );
   }

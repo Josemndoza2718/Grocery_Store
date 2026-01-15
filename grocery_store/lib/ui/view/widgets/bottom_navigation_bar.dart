@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view/widgets/animated_button.dart';
-import 'package:provider/provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
   final int selectedIndex;
   final Function(int) setSelectedIndex;
-  final Function()? getProducts;
-  final Function()? getCarProducts;
-  final Function()? getMoneyConversion;
   const BottomNavigationBarWidget({
     super.key,
     required this.selectedIndex,
     required this.setSelectedIndex,
-    this.getProducts,
-    this.getCarProducts,
-    this.getMoneyConversion,
   });
 
   @override
@@ -35,7 +28,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
           children: [
             AnimatedButton(
               icon: Icons.home,
-              label: "Home",
+              label: "lbl_home".translate,
               isSelected: selectedIndex == 0,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
@@ -43,12 +36,11 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(0);
-                getProducts!();
               },
             ),
             AnimatedButton(
               icon: Icons.shopping_cart,
-              label: "Car",
+              label: "lbl_carts".translate,
               isSelected: selectedIndex == 1,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
@@ -60,7 +52,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
             ),
             AnimatedButton(
               icon: Icons.attach_money,
-              label: "Sales",
+              label: "lbl_sales".translate,
               isSelected: selectedIndex == 2,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
@@ -68,12 +60,12 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(2);
-                context.read<CartViewModel>().setListPayProduct();
+                //context.read<CartViewModel>().setListPayProduct();
               },
             ),
             AnimatedButton(
               icon: Icons.settings,
-              label: "Settings",
+              label: "lbl_settings".translate,
               isSelected: selectedIndex == 3,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,

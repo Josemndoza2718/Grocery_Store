@@ -2,9 +2,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view/widgets/general_button.dart';
 import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
@@ -165,6 +167,22 @@ class _AddProductPageState extends State<AddProductPage> {
       backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: AppColors.darkgreen,
+        title: Text(
+          widget.product != null
+              ? "lbl_update_product".translate
+              : "lbl_add_product".translate,
+          style: const TextStyle(
+            color: AppColors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: GestureDetector(
         onTap: () {
@@ -212,17 +230,17 @@ class _AddProductPageState extends State<AddProductPage> {
                                   color: AppColors.darkgreen,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Column(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.image,
                                       color: AppColors.lightwhite,
                                       size: 40,
                                     ),
                                     Text(
-                                      "gallery",
-                                      style: TextStyle(
+                                      "lbl_gallery".translate,
+                                      style: const TextStyle(
                                           color: AppColors.lightwhite,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -245,17 +263,17 @@ class _AddProductPageState extends State<AddProductPage> {
                                 decoration: BoxDecoration(
                                     color: AppColors.darkgreen,
                                     borderRadius: BorderRadius.circular(10)),
-                                child: const Column(
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.camera_alt,
                                       color: AppColors.lightwhite,
                                       size: 40,
                                     ),
                                     Text(
-                                      "photo",
-                                      style: TextStyle(
+                                      "lbl_photo".translate,
+                                      style: const TextStyle(
                                           color: AppColors.lightwhite,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -274,19 +292,19 @@ class _AddProductPageState extends State<AddProductPage> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: viewModel.galleryImage == null
-                                ? const Column(
+                                ? Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     spacing: 16,
                                     children: [
-                                      Icon(
+                                      const Icon(
                                         Icons.image_not_supported,
                                         size: 60,
                                         color: AppColors.darkgreen,
                                       ),
                                       Text(
-                                        "No image selected",
-                                        style:
-                                            TextStyle(color: AppColors.black),
+                                        "lbl_no_image_selected".translate,
+                                        style: const TextStyle(
+                                            color: AppColors.black),
                                       ),
                                     ],
                                   )
@@ -332,36 +350,39 @@ class _AddProductPageState extends State<AddProductPage> {
                                   controller: widget.product == null
                                       ? _nameController
                                       : nameEditController,
-                                  labelText: 'Nombre *',
-                                  hintText: 'Nombre único del producto',
+                                  labelText: 'lbl_name'.translate,
+                                  hintText: 'lbl_product_name'.translate,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'El nombre es obligatorio.';
+                                      return 'lbl_product_name_required'
+                                          .translate;
                                     }
                                     if (value.length < 3) {
-                                      return 'El nombre debe tener al menos 3 caracteres.';
+                                      return 'lbl_product_name_>_3'.translate;
                                     }
                                     return null;
                                   },
                                 ),
                                 GeneralTextformfield(
-                                    controller: widget.product == null
-                                        ? _descriptionController
-                                        : descriptionEditController,
-                                    labelText: 'Descripción',
-                                    hintText: 'Detalles del producto',
-                                    maxLines: 2),
+                                  controller: widget.product == null
+                                      ? _descriptionController
+                                      : descriptionEditController,
+                                  labelText: 'lbl_description'.translate,
+                                  hintText: 'lbl_product_detail'.translate,
+                                  maxLines: 2,
+                                ),
                                 GeneralTextformfield(
                                   controller: widget.product == null
                                       ? _priceController
                                       : priceEditController,
-                                  labelText: 'Precio',
-                                  hintText: 'Precio del producto',
+                                  labelText: 'lbl_product_price'.translate,
+                                  hintText: 'lbl_product_price'.translate,
                                   keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[0-9]*\.?[0-9]*$'))],
                                   validator: (value) {
                                     final price = double.tryParse(value ?? '');
                                     if (price == null || price <= 0) {
-                                      return 'Ingrese un precio válido y positivo.';
+                                      return 'lbl_product_price_>_0'.translate;
                                     }
                                     return null;
                                   },
@@ -374,15 +395,14 @@ class _AddProductPageState extends State<AddProductPage> {
                                         controller: widget.product == null
                                             ? _stockQuantityController
                                             : _stockEditQuantityController,
-                                        labelText: 'Cantidad en Stock *',
-                                        hintText: 'Ej: 100',
+                                        labelText: 'lbl_quantity_in_stock'.translate,
+                                        hintText: 'lbl_quantity_example'.translate,
                                         keyboardType: TextInputType.number,
+                                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                         validator: (value) {
-                                          final quantity =
-                                              int.tryParse(value ?? '');
-                                          if (quantity == null ||
-                                              quantity < 0) {
-                                            return 'Ingrese una cantidad entera no negativa.';
+                                          final quantity = int.tryParse(value ?? '');
+                                          if (quantity == null || quantity < 0) {
+                                            return 'lbl_quantity_>_0'.translate;
                                           }
                                           return null;
                                         },
@@ -438,7 +458,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                   onTap: widget.product != null
                                       ? () async {
                                           _updateProduct(
-                                            product: Product(
+                                              product: Product(
                                             id: widget.product!.id,
                                             name: nameEditController.text,
                                             description: descriptionEditController.text,
@@ -451,7 +471,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                         }
                                       : () async {
                                           _createProduct(
-                                            product: Product(
+                                              product: Product(
                                             id: _uuid.v4(),
                                             name: _nameController.text,
                                             description: _descriptionController.text,
@@ -464,7 +484,9 @@ class _AddProductPageState extends State<AddProductPage> {
                                         },
                                   child: Center(
                                     child: Text(
-                                      widget.product != null ? "Update" : "Save",
+                                      widget.product != null
+                                          ? "lbl_update".translate
+                                          : "lbl_save".translate,
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: AppColors.white,

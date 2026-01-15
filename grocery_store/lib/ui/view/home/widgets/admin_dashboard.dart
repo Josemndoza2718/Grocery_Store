@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/view/home/widgets/asig_price_widget.dart';
 import 'package:grocery_store/ui/view/home/widgets/products_list_widget.dart';
@@ -55,8 +56,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     if (viewModel.clientName.isEmpty) {
       showFloatingMessage(
           context: context,
-          message: "¡¡¡Adventencia!!!. Por favor seleccione un cliente",
-          //"¡¡¡Warning!!!. Please select a client",
+          message: "lbl_warning_select_client".translate,
           color: AppColors.red);
       return;
     }
@@ -64,7 +64,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     if (viewModel.listProducts.isEmpty) {
       showFloatingMessage(
           context: context,
-          message: "No products to add to cart",
+          message: "lbl_warning_no_products".translate,
           color: AppColors.red);
       return;
     }
@@ -83,20 +83,29 @@ class _AdminDashboardState extends State<AdminDashboard> {
       );
       showFloatingMessage(
           context: context,
-          message: "Product added to cart",
+          message: "lbl_product_added_to_cart".translate,
           color: AppColors.darkgreen);
     } else {
-      await carViewModel.updateCart(
+      final added = await carViewModel.updateCart(
         cartId: existingCart.first.id,
         ownerId: viewModel.clientId,
         ownerCarName: viewModel.clientName,
         products: viewModel.listProducts[index],
       );
 
-      showFloatingMessage(
-          context: context,
-          message: "Product added to ${viewModel.clientName}'s cart ",
-          color: AppColors.darkgreen);
+      if (added) {
+        showFloatingMessage(
+            context: context,
+            message: "lbl_product_added_to_client_cart"
+                .translate
+                .replaceAll("{client}", viewModel.clientName),
+            color: AppColors.darkgreen);
+      } else {
+        showFloatingMessage(
+            context: context,
+            message: "lbl_product_exists_in_cart".translate,
+            color: AppColors.red);
+      }
     }
     context.read<HomeViewModel>().getProducts();
     context.read<CartViewModel>().getAllCarts();
@@ -106,8 +115,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context)
-          .unfocus(), // Esto quita el foco de cualquier TextField
+      onTap: () => FocusScope.of(context).unfocus(), // Esto quita el foco de cualquier TextField
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, provider, _) {
@@ -118,14 +126,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
               children: [
                 const SizedBox(height: 8),
                 Text(
-                  "Welcome, ${provider.clientName.isNotEmpty ? provider.clientName : 'Guest'}",
+                  "${"lbl_welcome".translate}, ${provider.clientName.isNotEmpty ? provider.clientName : 'lbl_guest'.translate}",
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 //Money Conversion
                 AsignPriceWidget(
-                  //TODO: CAMBIAR EL TEXTO POR UN LABEL
-                  label: 'Tasa en Uso',
+                  label: 'lbl_money_rate'.translate,
                   price: provider.moneyConversion,
                   controller: moneyconversionController,
                   onTap: () {
@@ -172,7 +179,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           enableSearch: true,
                           enableFilter: true,
                           requestFocusOnTap: true,
-                          hintText: 'Select client',
+                          hintText: 'lbl_select_client'.translate,
                           textStyle: const TextStyle(
                             color: AppColors.white,
                             fontSize: 16,
@@ -226,7 +233,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     isButtonActive: true,
                     controller: clientController,
                     decoration: InputDecoration(
-                      hintText: "Name or Id",
+                      hintText: 'lbl_name_or_id'.translate,
                       filled: true,
                       fillColor: AppColors.lightwhite,
                       focusedBorder: OutlineInputBorder(
@@ -261,12 +268,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           provider.toggleIsActive();
                           showFloatingMessage(
                               context: context,
-                              message: "User added",
+                              message: "lbl_user_add".translate,
                               color: AppColors.green);
                         } else {
                           showFloatingMessage(
                               context: context,
-                              message: "Username already exists",
+                              message: "lbl_user_exists".translate,
                               color: AppColors.red);
                         }
                       }

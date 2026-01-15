@@ -59,13 +59,27 @@ class CartViewModel extends ChangeNotifier {
 
   double _moneyConversion = 0;
   int _payPart = 0;
+  double _discount = 0;
+  double _delivery = 0;
 
   double get moneyConversion => _moneyConversion;
+  double get subTotal => _subTotal;
   int get payPart => _payPart;
   List<bool> get isActivePanel => _isActivePanel;
   List<Product> get listProductsByCar => listProducts;
   Cart? get selectedCartForCheckout => _selectedCartForCheckout;
-  double get subTotal => _subTotal;
+  double get discount => _discount;
+  double get delivery => _delivery;
+
+  setDiscount(double value) {
+    _discount = value;
+    notifyListeners();
+  }
+
+  setDelivery(double value) {
+    _delivery = value;
+    notifyListeners();
+  }
 
   void isActiveListPanel(int index) {
     _isActivePanel[index] = !_isActivePanel[index];
@@ -85,9 +99,10 @@ class CartViewModel extends ChangeNotifier {
     }
   }
 
-  void addQuantityProduct(String productId) {
+  void addQuantityProduct(String productId, String cartId) {
     // Buscar el producto en todas las categorías
     for (var category in listCarts) {
+      if (category.id == cartId) {
       for (var product in category.products) {
         if (product.id.toString() == productId) {
           if (product.quantityToBuy < product.stockQuantity) {
@@ -96,13 +111,15 @@ class CartViewModel extends ChangeNotifier {
           } // Salir una vez encontrado y actualizado
         }
       }
+      }
     }
     notifyListeners();
   }
 
-  void removeQuantityProduct(String productId) {
+  void removeQuantityProduct(String productId, String cartId) {
     // Buscar el producto en todas las categorías
     for (var category in listCarts) {
+      if (category.id == cartId) {
       for (var product in category.products) {
         if (product.id.toString() == productId) {
           if (product.quantityToBuy > 0) {
@@ -110,29 +127,32 @@ class CartViewModel extends ChangeNotifier {
           }
         }
       }
+      }
     }
     notifyListeners(); // Notifica a los oyentes
   }
 
-  void updateQuantityManually(String value, String productId) {
+  void updateQuantityManually(String value, String productId, String cartId) {
     int? newQuantity = int.tryParse(value);
     if (newQuantity != null) {
-      for (var category in listCarts) {
-        for (var product in category.products) {
-          if (product.id.toString() == productId) {
-            if (newQuantity >= 0 && newQuantity <= product.stockQuantity) {
-              product.quantityToBuy = newQuantity;
-            } else if (newQuantity > product.stockQuantity) {
-              product.quantityToBuy = product.stockQuantity; // Limitar al stock máximo
-            } else {
-              product.quantityToBuy = 0; // Si es negativo o no válido
+      for (var cart in listCarts) {
+        if (cart.id == cartId) {
+          for (var product in cart.products) {
+            if (product.id.toString() == productId) {
+              if (newQuantity >= 0 && newQuantity <= product.stockQuantity) {
+                product.quantityToBuy = newQuantity;
+              } else if (newQuantity > product.stockQuantity) {
+                product.quantityToBuy =
+                    product.stockQuantity; // Limitar al stock máximo
+              } else {
+                product.quantityToBuy = 0; // Si es negativo o no válido
+              }
             }
           }
         }
       }
     }
     notifyListeners();
-    // Si el valor no es un número o está vacío, no hacemos nada (o podríamos reiniciar a 0)
   }
 
   void setQuantityProductForm(int index, int value) {
@@ -201,13 +221,16 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void getSubTotal() {
-    
+  void getSubTotal(String cartId) {
+    _subTotal = 0; // Reiniciar subtotal
     for (var element in listCarts) {
-      _subTotal += element.products
-          .where((product) => product.quantityToBuy > 0)
-          .map((product) => product.price * product.quantityToBuy)
-          .reduce((a, b) => a + b);
+      if (element.id == cartId) {
+        _subTotal += element.products
+            .where((product) => product.quantityToBuy > 0)
+            .map((product) => product.price * product.quantityToBuy)
+            .fold(0.0, (previousValue, element) => previousValue + element);
+        break; 
+      }
     }
     notifyListeners();
   }
@@ -243,7 +266,7 @@ class CartViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updateCart({
+  Future<bool> updateCart({
     required String cartId,
     required int ownerId,
     required String ownerCarName,
@@ -253,6 +276,11 @@ class CartViewModel extends ChangeNotifier {
 
     for (var element in listCarts) {
       if (element.id == cartId) {
+        // Validación: Verificar si el producto ya existe
+        if (element.products.any((p) => p.id == products.id)) {
+          return false; // Ya existe en el carrito
+        }
+
         listProductsAddCart = List<Product>.from(element.products);
         listProductsAddCart.add(products);
         await updateCartUseCases.call(
@@ -262,12 +290,15 @@ class CartViewModel extends ChangeNotifier {
           ),
         );
         // No need to call getAllCarts() - stream updates automatically
+        notifyListeners();
+        return true; // Agregado exitosamente
       } else {
-        print("No Agregado");
+        //print("No Agregado al carrito ${element.id}");
       }
     }
 
     notifyListeners();
+    return false; // No se encontró el carrito o fallo
   }
 
   Future<void> getAllCarts() async {

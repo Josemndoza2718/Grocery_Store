@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view/home/widgets/decimal_widget.dart';
 import 'package:grocery_store/ui/view/widgets/custom_textformfield.dart';
 
@@ -29,7 +30,7 @@ class AsignPriceWidget extends StatelessWidget {
             DecimalInputFormatter(),
           ],
           decoration: InputDecoration(
-            hintText: "Money Conversion",
+            hintText: "lbl_money_conversion".translate,
             filled: true,
             fillColor: AppColors.lightwhite,
             focusedBorder: OutlineInputBorder(
