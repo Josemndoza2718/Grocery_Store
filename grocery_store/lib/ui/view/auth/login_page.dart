@@ -25,26 +25,37 @@ class _LoginScreenState extends State<LoginScreen> {
       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]).{8,}$');
 
   // Aquí agregamos el listener
+  late LoginProvider _loginProvider;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final loginProvider = Provider.of<LoginProvider>(context, listen: false);
-      loginProvider.addListener(() {
-        if (loginProvider.isLoggedIn) {
-          Navigator.pushReplacement(
-            //TODO: REVISAR ESTO EN EL FUTURO
-            context,
-            MaterialPageRoute(
-                builder: (context) => const MainPage(selectedIndex: 0)),
-          );
-        }
-      });
+      _loginProvider = Provider.of<LoginProvider>(context, listen: false);
+      _loginProvider.addListener(_onLoginChanged);
     });
+  }
+
+  void _onLoginChanged() {
+    if (!mounted) return;
+    if (_loginProvider.isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const MainPage(selectedIndex: 0)),
+      );
+    }
   }
 
   @override
   void dispose() {
+    // Verificar si _loginProvider fue inicializado antes de intentar remover el listener
+    // Dado que se inicializa en postFrameCallback, podría ser nulo si se hace dispose muy rápido
+    try {
+      _loginProvider.removeListener(_onLoginChanged);
+    } catch (e) {
+      // Ignorar si falla por no estar inicializado
+    }
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();

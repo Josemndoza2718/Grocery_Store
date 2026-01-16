@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view/cash/check_page.dart';
 import 'package:grocery_store/ui/view/home/home_page.dart';
 import 'package:grocery_store/ui/view/cart/cart_page.dart';
@@ -30,17 +31,13 @@ class MainPage extends StatelessWidget {
       backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: AppColors.green,
-        /* leading: IconButton(
-          onPressed: () {
-            Provider.of<LoginProvider>(context, listen: false).signOut();
-          },
-          icon: const Icon(Icons.logout),
-          color: AppColors.white,
-        ), */
         centerTitle: true,
-        title: const Text("Grocery Store",
-            style: TextStyle(fontSize: 20, color: AppColors.white)),
-        actions: [
+        title: Text("lbl_app_name".translate,
+            style: const TextStyle(
+              fontSize: 20,
+              color: AppColors.white,
+            )),
+        actions: const [
           /* IconButton(
               onPressed: () {
                 var viewModel =

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/view/cash/widget/check_widget.dart';
 import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
@@ -15,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:grocery_store/ui/view/history/sales_history_page.dart';
 
 class CheckPage extends StatefulWidget {
   const CheckPage({super.key});
@@ -63,7 +65,25 @@ class _CheckPageState extends State<CheckPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartViewModel>(builder: (context, provider, _) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("lbl_check".translate),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: "Historial de Ventas",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SalesHistoryPage()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Consumer<CartViewModel>(builder: (context, provider, _) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Column(
@@ -416,6 +436,7 @@ class _CheckPageState extends State<CheckPage> {
               );
             }),
  */
+            //Discount and delivery
             Row(
               spacing: 8,
               //mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -423,12 +444,12 @@ class _CheckPageState extends State<CheckPage> {
                 Expanded(
                   child: GeneralTextformfield(
                     controller: discountController,
-                    labelText: "Discount",
-                    hintText: "Discount",
+                    labelText: "lbl_discount".translate,
+                    hintText: "lbl_discount".translate,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     onChanged: (value) {
-                      context.read<CartViewModel>().setDiscount(double.parse(value));
+                      context.read<CartViewModel>().setDiscount(double.tryParse(value) ?? 0);
                     },
 
                   ),
@@ -436,8 +457,8 @@ class _CheckPageState extends State<CheckPage> {
                 Expanded(
                   child: GeneralTextformfield(
                     controller: deliveryController,
-                    labelText: "Delivery",
-                    hintText: "Delivery",
+                    labelText: "lbl_delivery".translate,
+                    hintText: "lbl_delivery".translate,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
                     onChanged: (value) {
@@ -465,7 +486,7 @@ class _CheckPageState extends State<CheckPage> {
                 ),
               ),
             ),
-            if (provider.selectedCartForCheckout != null &&
+            /* if (provider.selectedCartForCheckout != null &&
                 provider.selectedCartForCheckout!.products.isNotEmpty)
               const Text(
                 "Metodos de Pago",
@@ -603,11 +624,63 @@ class _CheckPageState extends State<CheckPage> {
                   ),
                 ),
               ],
-            ),
+            ), */
+            GestureDetector(
+                  onTap: () {
+                    screenshotController.capture().then((image) async {
+                      if (image != null) {
+                        final directory = await getApplicationDocumentsDirectory();
+                        final imagePath = await File('${directory.path}/image.png').create();
+                        await imagePath.writeAsBytes(image);
+                        saveAndShareImage(image);
+                        // Save to history
+                        if (provider.selectedCartForCheckout != null) {
+                          provider.markCartAsPaid(provider.selectedCartForCheckout!.id);
+                        }
+                      }
+                    }).catchError((onError) {
+                      print(onError);
+                    });
+                  },
+                  child: Container(
+                    height: 60,
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    padding: const EdgeInsets.only(bottom: 5, right: 5),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: AppColors.ultralightgrey),
+                    child: Container(
+                      height: 55,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          color: AppColors.green,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: const Align(
+                        alignment: Alignment.center,
+                        child: Row(
+                          spacing: 16,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.print, color: AppColors.white, size: 32),
+                            Text(
+                              "Imprimir",
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             const SizedBox(height: 80),
           ],
         ),
       );
-    });
+    }));
   }
 }

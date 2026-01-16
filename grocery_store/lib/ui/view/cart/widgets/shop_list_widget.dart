@@ -10,6 +10,7 @@ import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:grocery_store/ui/view/widgets/FloatingMessage.dart';
 
 class ShopListWidget extends StatefulWidget {
   final List<Cart>? listCarts;
@@ -227,7 +228,25 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                               ),
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: () => widget.onPaymentCart(cart.id),
+                                  onPressed: () {
+                                    bool hasValidQuantity = false;
+                                    for (var product in cart.products) {
+                                      if (product.quantityToBuy > 0) {
+                                        hasValidQuantity = true;
+                                        break;
+                                      }
+                                    }
+
+                                    if (hasValidQuantity) {
+                                      widget.onPaymentCart(cart.id);
+                                    } else {
+                                      showFloatingMessage(
+                                          context: context,
+                                          message:
+                                              "lbl_error_quantity_zero".translate,
+                                          color: AppColors.red);
+                                    }
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.green,
                                     shape: RoundedRectangleBorder(

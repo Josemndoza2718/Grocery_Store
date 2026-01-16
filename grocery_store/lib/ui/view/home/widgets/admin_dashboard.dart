@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/view/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/view/home/widgets/asig_price_widget.dart';
 import 'package:grocery_store/ui/view/home/widgets/products_list_widget.dart';
@@ -126,7 +127,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               children: [
                 const SizedBox(height: 8),
                 Text(
-                  "${"lbl_welcome".translate}, ${provider.clientName.isNotEmpty ? provider.clientName : 'lbl_guest'.translate}",
+                  "${"lbl_welcome".translate}, ${Prefs.getString(PrefKeys.userName)}, ",
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.bold),
                 ),

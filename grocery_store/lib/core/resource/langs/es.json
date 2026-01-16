@@ -5,6 +5,7 @@
     "cancel": "Cancelar",
 
     "--BOTTOM NAVIGATION BAR--":"-----------------------------------",
+    "lbl_app_name": "My Store",
     "lbl_home": "Inicio",
     "lbl_carts": "Carritos",
     "lbl_sales": "Ventas",
@@ -23,6 +24,7 @@
     "lbl_user_add": "Usuario agregado",
     "lbl_user_exists": "Usuario ya existe",
     "lbl_product_exists_in_cart": "El producto ya está en el carrito",
+    "lbl_error_quantity_zero": "Debe agregar al menos un producto con cantidad mayor a 0",
 
     "--CART PAGE--":"-----------------------------------",
     "lbl_delete_cart": "Eliminar",
@@ -53,6 +55,7 @@
 
 
     "--CHECK PAGE--":"-----------------------------------",
+    "lbl_check": "Historial de ventas",
     "lbl_check_resume": "Resumen de la orden",
     "lbl_name": "Nombre",
     "lbl_products": "Productos",

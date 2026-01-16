@@ -22,9 +22,9 @@ class CartPage extends StatelessWidget {
               const SizedBox(height: 10),
               //GridViewButtons
               // ignore: unnecessary_null_comparison
-              if (provider.listCarts != null && provider.listCarts.isNotEmpty)
+              if (provider.visibleCarts.isNotEmpty)
                 ShopListWidget(
-                  listCarts: provider.listCarts.reversed.toList(),
+                  listCarts: provider.visibleCarts.reversed.toList(),
                   listProducts: provider.listProducts,
                   isActivePanel: provider.isActivePanel,
                   moneyConversion: provider.moneyConversion,

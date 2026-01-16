@@ -58,6 +58,10 @@ class CartViewModel extends ChangeNotifier {
   List<bool> _isActivePanel = [];
 
   double _moneyConversion = 0;
+
+  List<String> _hiddenCartIds = [];
+
+  
   int _payPart = 0;
   double _discount = 0;
   double _delivery = 0;
@@ -70,6 +74,10 @@ class CartViewModel extends ChangeNotifier {
   Cart? get selectedCartForCheckout => _selectedCartForCheckout;
   double get discount => _discount;
   double get delivery => _delivery;
+  
+  List<Cart> get paidCarts => listCarts.where((c) => c.status == 'paid').toList();
+  List<Cart> get visibleCarts => listCarts.where((c) => !_hiddenCartIds.contains(c.id) && c.status != 'paid').toList();
+
 
   setDiscount(double value) {
     _discount = value;
@@ -202,8 +210,9 @@ class CartViewModel extends ChangeNotifier {
   
   
   void prepareCartForCheckout(String cartId) {
+    _hiddenCartIds.add(cartId); // Hide cart from list
     _selectedCartForCheckout = null;
-    
+
     for (var cart in listCarts) {
       if (cart.id == cartId) {
         // Actualizar el stock de los productos (restar quantityToBuy)
@@ -337,6 +346,22 @@ class CartViewModel extends ChangeNotifier {
   void dispose() {
     _cartsSubscription?.cancel();
     super.dispose();
+  }
+
+  Future<void> markCartAsPaid(String cartId) async {
+    for (var element in listCarts) {
+      if (element.id == cartId) {
+        final updatedCart = element.copyWith(
+          status: 'paid',
+          payAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await updateCartUseCases.call(updatedCart);
+        _hiddenCartIds.remove(cartId); 
+        notifyListeners();
+        break;
+      }
+    }
   }
 
   void clearData() {
