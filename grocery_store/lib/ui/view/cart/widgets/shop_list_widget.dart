@@ -229,16 +229,21 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    bool hasValidQuantity = false;
+                                    bool allValidQuantity = true;
                                     for (var product in cart.products) {
-                                      if (product.quantityToBuy > 0) {
-                                        hasValidQuantity = true;
+                                      if (product.quantityToBuy <= 0) {
+                                        allValidQuantity = false;
                                         break;
                                       }
                                     }
 
-                                    if (hasValidQuantity) {
+                                    if (allValidQuantity) { 
                                       widget.onPaymentCart(cart.id);
+                                      showFloatingMessage(
+                                          context: context,
+                                          message:
+                                              "lbl_cart_added_to_check".translate,
+                                          color: AppColors.green);
                                     } else {
                                       showFloatingMessage(
                                           context: context,

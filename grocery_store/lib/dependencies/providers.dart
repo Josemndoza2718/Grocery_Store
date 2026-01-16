@@ -63,6 +63,8 @@ final List<SingleChildWidget> providers = [
                 NewDeleteCartUseCases(repository: NewCartRepositoryImpl()),
             updateCartUseCases:
                 NewUpdateCartUseCases(repository: NewCartRepositoryImpl()),
+            updateProductsUseCases:
+                UpdateProductsUseCases(NewProductRepositoryImpl()),
             createClientUseCases:
                 CreateClientUseCases(repository: ClientRepositoryImpl()),
             getClientsUseCases:

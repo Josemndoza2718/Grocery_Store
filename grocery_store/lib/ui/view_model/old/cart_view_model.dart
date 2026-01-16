@@ -13,6 +13,7 @@ import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cas
 import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:uuid/uuid.dart';
 
 class CartViewModel extends ChangeNotifier {
@@ -24,6 +25,7 @@ class CartViewModel extends ChangeNotifier {
     required this.createCartUseCases,
     required this.deleteCartUseCases,
     required this.updateCartUseCases,
+    required this.updateProductsUseCases,
     required this.createClientUseCases,
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
@@ -34,6 +36,7 @@ class CartViewModel extends ChangeNotifier {
 
   //Products
   final NewGetProductsUseCases getProductsUseCases;
+  final UpdateProductsUseCases updateProductsUseCases;
 
   //Carts
   final NewGetCartsUseCases getCartsUseCases;
@@ -351,13 +354,22 @@ class CartViewModel extends ChangeNotifier {
   Future<void> markCartAsPaid(String cartId) async {
     for (var element in listCarts) {
       if (element.id == cartId) {
+        // Update product stock globally
+        for (var product in element.products) {
+          if (product.quantityToBuy > 0) {
+            final int newStock = product.stockQuantity - product.quantityToBuy;
+            final updatedProduct = product.copyWith(stockQuantity: newStock);
+            await updateProductsUseCases.call(updatedProduct);
+          }
+        }
+
         final updatedCart = element.copyWith(
           status: 'paid',
           payAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
         await updateCartUseCases.call(updatedCart);
-        _hiddenCartIds.remove(cartId); 
+        _hiddenCartIds.remove(cartId);
         notifyListeners();
         break;
       }

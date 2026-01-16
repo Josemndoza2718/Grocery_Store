@@ -32,6 +32,7 @@
     "lbl_total_items": "N° de items",
     "lbl_$_uni": "$. c/uni",
     "lbl_bs_uni": "Bs. c/uni",
+    "lbl_cart_added_to_check": "Carrito agregado a la factura",
     
 
     "--ADD PRODUCT--":"-----------------------------------",
@@ -64,5 +65,6 @@
     "lbl_discount": "Descuento",
     "lbl_delivery": "Envio",
     "lbl_total": "Total",
-    "lbl_money_conversion": "Conversion de moneda"
+    "lbl_money_conversion": "Conversion de moneda",
+    "lbl_warning_no_items": "No hay productos en la factura"
 }

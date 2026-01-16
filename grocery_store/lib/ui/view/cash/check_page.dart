@@ -10,6 +10,7 @@ import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/view/cash/widget/check_widget.dart';
+import 'package:grocery_store/ui/view/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/view/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,7 +31,6 @@ class _CheckPageState extends State<CheckPage> {
   TextEditingController discountController = TextEditingController(text: "0");
   TextEditingController deliveryController = TextEditingController(text: "0");
   ScreenshotController screenshotController = ScreenshotController();
-  
 
   /* Future<dynamic> ShowCapturedWidget(
       BuildContext context, Uint8List capturedImage) {
@@ -66,31 +66,31 @@ class _CheckPageState extends State<CheckPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("lbl_check".translate),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: "Historial de Ventas",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const SalesHistoryPage()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<CartViewModel>(builder: (context, provider, _) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: Column(
-          spacing: 16,
-          children: [
-            const SizedBox(height: 10),
-            /* Consumer<CartViewModel>(builder: (context, viewModel, _) {
+        appBar: AppBar(
+          title: Text("lbl_check".translate),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: "Historial de Ventas",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SalesHistoryPage()),
+                );
+              },
+            ),
+          ],
+        ),
+        body: Consumer<CartViewModel>(builder: (context, provider, _) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Column(
+              spacing: 16,
+              children: [
+                const SizedBox(height: 10),
+                /* Consumer<CartViewModel>(builder: (context, viewModel, _) {
               return Container(
                 //height: 200,
                 width: double.infinity,
@@ -262,7 +262,7 @@ class _CheckPageState extends State<CheckPage> {
               );
             }),
              */
-            /* Consumer<CartViewModel>(builder: (context, viewModel, _) {
+                /* Consumer<CartViewModel>(builder: (context, viewModel, _) {
               return Container(
                 //height: 200,
                 width: double.infinity,
@@ -436,57 +436,65 @@ class _CheckPageState extends State<CheckPage> {
               );
             }),
  */
-            //Discount and delivery
-            Row(
-              spacing: 8,
-              //mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: GeneralTextformfield(
-                    controller: discountController,
-                    labelText: "lbl_discount".translate,
-                    hintText: "lbl_discount".translate,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    onChanged: (value) {
-                      context.read<CartViewModel>().setDiscount(double.tryParse(value) ?? 0);
-                    },
-
+                //Discount and delivery
+                Row(
+                  spacing: 8,
+                  //mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                      child: GeneralTextformfield(
+                        controller: discountController,
+                        labelText: "lbl_discount".translate,
+                        hintText: "lbl_discount".translate,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        onChanged: (value) {
+                          context
+                              .read<CartViewModel>()
+                              .setDiscount(double.tryParse(value) ?? 0);
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: GeneralTextformfield(
+                        controller: deliveryController,
+                        labelText: "lbl_delivery".translate,
+                        hintText: "lbl_delivery".translate,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d{0,2}'))
+                        ],
+                        onChanged: (value) {
+                          context
+                              .read<CartViewModel>()
+                              .setDelivery(double.tryParse(value) ?? 0);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Flexible(
+                  child: Screenshot(
+                    controller: screenshotController,
+                    child: CheckWidget(
+                      cart: provider.selectedCartForCheckout,
+                      subToTal: provider.subTotal,
+                      moneyConversion: provider.moneyConversion,
+                      iva: double.parse(Prefs.getString(PrefKeys.iva) ?? "0"),
+                      discount: provider.discount,
+                      delivery: provider.delivery,
+                      onTap: () {
+                        discountController.text = "0";
+                        deliveryController.text = "0";
+                        provider.clearData();
+                      },
+                    ),
                   ),
                 ),
-                Expanded(
-                  child: GeneralTextformfield(
-                    controller: deliveryController,
-                    labelText: "lbl_delivery".translate,
-                    hintText: "lbl_delivery".translate,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'))],
-                    onChanged: (value) {
-                      context.read<CartViewModel>().setDelivery(double.tryParse(value) ?? 0);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Flexible(
-              child: Screenshot(
-                controller: screenshotController,
-                child: CheckWidget(
-                  cart: provider.selectedCartForCheckout,
-                  subToTal: provider.subTotal,
-                  moneyConversion: provider.moneyConversion,
-                  iva: double.parse(Prefs.getString(PrefKeys.iva) ?? "0"),
-                  discount: provider.discount,
-                  delivery: provider.delivery,
-                  onTap: () {
-                    discountController.text = "0";
-                    deliveryController.text = "0";
-                    provider.clearData();
-                  },
-                ),
-              ),
-            ),
-            /* if (provider.selectedCartForCheckout != null &&
+                /* if (provider.selectedCartForCheckout != null &&
                 provider.selectedCartForCheckout!.products.isNotEmpty)
               const Text(
                 "Metodos de Pago",
@@ -625,22 +633,39 @@ class _CheckPageState extends State<CheckPage> {
                 ),
               ],
             ), */
-            GestureDetector(
+                GestureDetector(
                   onTap: () {
-                    screenshotController.capture().then((image) async {
-                      if (image != null) {
-                        final directory = await getApplicationDocumentsDirectory();
-                        final imagePath = await File('${directory.path}/image.png').create();
-                        await imagePath.writeAsBytes(image);
-                        saveAndShareImage(image);
-                        // Save to history
-                        if (provider.selectedCartForCheckout != null) {
-                          provider.markCartAsPaid(provider.selectedCartForCheckout!.id);
+                    if (provider.selectedCartForCheckout != null) {
+                      screenshotController.capture().then((image) async {
+                        if (image != null) {
+                          final directory =
+                              await getApplicationDocumentsDirectory();
+                          final imagePath =
+                              await File('${directory.path}/image.png')
+                                  .create();
+                          await imagePath.writeAsBytes(image);
+                          saveAndShareImage(image);
+                          // Save to history
+                          if (provider.selectedCartForCheckout != null) {
+                            provider
+                                .markCartAsPaid(
+                                    provider.selectedCartForCheckout!.id)
+                                .then((value) {
+                              discountController.text = "0";
+                              deliveryController.text = "0";
+                              provider.clearData();
+                            });
+                          }
                         }
-                      }
-                    }).catchError((onError) {
-                      print(onError);
-                    });
+                      }).catchError((onError) {
+                        print(onError);
+                      });
+                    } else {
+                      showFloatingMessage(
+                          context: context,
+                          message: "lbl_warning_no_items".translate,
+                          color: AppColors.red);
+                    }
                   },
                   child: Container(
                     height: 60,
@@ -677,10 +702,10 @@ class _CheckPageState extends State<CheckPage> {
                     ),
                   ),
                 ),
-            const SizedBox(height: 80),
-          ],
-        ),
-      );
-    }));
+                const SizedBox(height: 80),
+              ],
+            ),
+          );
+        }));
   }
 }
