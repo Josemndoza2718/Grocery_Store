@@ -20,7 +20,7 @@ class FakeGetProductsUseCases implements NewGetProductsUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Stream<List<Product>> callStream() {
+  Stream<List<Product>> callStream({String? userId}) {
     return _controller.stream;
   }
 

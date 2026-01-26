@@ -404,171 +404,152 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                       ),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        //Product Image
-                                        Container(
-                                          height: 150,
-                                          width: 150, //double.infinity,
-                                          //padding: const EdgeInsets.all(4),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            //color: AppColors.darkgreen,
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: Image.file(
-                                              File(product.image),
-                                              height: double.infinity,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  AppImages.imageNotFound,
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        // Calculate responsive image size
+                                        // Priority: text content first, image shrinks if needed
+                                        final double availableWidth = constraints.maxWidth;
+                                        // Reserve minimum ~200px for text content, rest for image
+                                        final double minTextWidth = 180;
+                                        final double maxImageSize = 150;
+                                        final double minImageSize = 80;
+                                        
+                                        // Calculate image size: available width minus text area
+                                        double imageSize = (availableWidth - minTextWidth - 24).clamp(minImageSize, maxImageSize);
+                                        
+                                        return Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            //Product Image - responsive size
+                                            Container(
+                                              height: imageSize,
+                                              width: imageSize,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(10),
+                                                child: Image.file(
+                                                  File(product.image),
+                                                  height: double.infinity,
+                                                  width: double.infinity,
                                                   fit: BoxFit.cover,
-                                                );
-                                              },
+                                                  errorBuilder: (context, error, stackTrace) {
+                                                    return Image.asset(
+                                                      AppImages.imageNotFound,
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        //Product Data
-                                        Expanded(
-                                          child: Container(
-                                            height: 160,
-                                            padding: const EdgeInsets.all(8),
-                                            //color: AppColors.orange,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                //Title
-                                                Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            const SizedBox(width: 8),
+                                            //Product Data - flexible width
+                                            Expanded(
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.min,
                                                   children: [
-                                                    Text(
-                                                      product.name,
-                                                      style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        widget.onDeleteProduct(
-                                                          cart.id,
-                                                          product.id,
-                                                        );
-                                                      },
-                                                      child: const Icon(
-                                                        Icons.delete_forever,
-                                                        color: AppColors.red,
-                                                        //size: 30,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                //Description
-                                                /* if (product.description.isNotEmpty)
-                                                  Text(
-                                                    product.description,
-                                                    style: const TextStyle(
-                                                        fontSize: 14),
-                                                  ), */
-                                                /* Text(
-                                                  "${product.id}",
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.normal),
-                                                ), */
-                                                Text(
-                                                  "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.normal),
-                                                ),
-                                                Text(
-                                                  "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.normal),
-                                                ),
-                                                const Divider(
-                                                  height: 8,
-                                                  color: AppColors.grey,
-                                                  thickness: 1,
-                                                ),
-                                                Text(
-                                                  "${'lbl_total'.translate}: ${((product.price * int.parse(_quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                const Spacer(),
-                                                //Quantity
-                                                Row(
-                                                  spacing: 8,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    GestureDetector(
-                                                      onTap: () => widget.onRemoveProduct(product.id.toString(), cart.id),
-                                                      child: const Icon(
-                                                        Icons.remove_circle,
-                                                        color: AppColors.darkgreen,
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 50,
-                                                      child: TextFormField(
-                                                        controller: _quantityControllers["${cart.id}_${product.id}"],
-                                                        keyboardType: TextInputType.number,
-                                                        textAlign: TextAlign.center,
-                                                        decoration: InputDecoration(
-                                                          enabled: true,
-                                                          isCollapsed: true,
-                                                          filled: true,
-                                                          fillColor: Colors.transparent,
-                                                          focusedBorder: OutlineInputBorder(
-                                                            borderSide: const BorderSide(
-                                                              width: 2,
-                                                              color: AppColors.green,
+                                                    //Title
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            product.name,
+                                                            style: const TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight: FontWeight.bold,
                                                             ),
-                                                            borderRadius: BorderRadius.circular(10),
-                                                          ),
-                                                          disabledBorder: OutlineInputBorder(
-                                                            borderSide: BorderSide.none,
-                                                            borderRadius: BorderRadius.circular(10),
-                                                          ),
-                                                          border: OutlineInputBorder(
-                                                            borderSide: BorderSide.none,
-                                                            borderRadius: BorderRadius.circular(10),
+                                                            overflow: TextOverflow.ellipsis,
+                                                            maxLines: 2,
                                                           ),
                                                         ),
-                                                        onChanged: (value) => widget.onChanged(value, product.id.toString(), cart.id),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            widget.onDeleteProduct(
+                                                              cart.id,
+                                                              product.id,
+                                                            );
+                                                          },
+                                                          child: const Icon(
+                                                            Icons.delete_forever,
+                                                            color: AppColors.red,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
+                                                      style: const TextStyle(fontSize: 13),
+                                                    ),
+                                                    Text(
+                                                      "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                                                      style: const TextStyle(fontSize: 13),
+                                                    ),
+                                                    const Divider(height: 8, color: AppColors.grey, thickness: 1),
+                                                    Text(
+                                                      "${'lbl_total'.translate}: ${((product.price * int.parse(_quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.bold,
                                                       ),
                                                     ),
-                                                    GestureDetector(
-                                                      onTap: () => widget.onAddProduct(product.id.toString(), cart.id),
-                                                      child: const Icon(
-                                                        Icons.add_circle,
-                                                        color:
-                                                            AppColors.darkgreen,
-                                                      ),
-                                                    )
+                                                    const SizedBox(height: 8),
+                                                    //Quantity controls
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () => widget.onRemoveProduct(product.id.toString(), cart.id),
+                                                          child: const Icon(Icons.remove_circle, color: AppColors.darkgreen),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        SizedBox(
+                                                          width: 50,
+                                                          child: TextFormField(
+                                                            controller: _quantityControllers["${cart.id}_${product.id}"],
+                                                            keyboardType: TextInputType.number,
+                                                            textAlign: TextAlign.center,
+                                                            decoration: InputDecoration(
+                                                              enabled: true,
+                                                              isCollapsed: true,
+                                                              filled: true,
+                                                              fillColor: Colors.transparent,
+                                                              focusedBorder: OutlineInputBorder(
+                                                                borderSide: const BorderSide(width: 2, color: AppColors.green),
+                                                                borderRadius: BorderRadius.circular(10),
+                                                              ),
+                                                              disabledBorder: OutlineInputBorder(
+                                                                borderSide: BorderSide.none,
+                                                                borderRadius: BorderRadius.circular(10),
+                                                              ),
+                                                              border: OutlineInputBorder(
+                                                                borderSide: BorderSide.none,
+                                                                borderRadius: BorderRadius.circular(10),
+                                                              ),
+                                                            ),
+                                                            onChanged: (value) => widget.onChanged(value, product.id.toString(), cart.id),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        GestureDetector(
+                                                          onTap: () => widget.onAddProduct(product.id.toString(), cart.id),
+                                                          child: const Icon(Icons.add_circle, color: AppColors.darkgreen),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ],
                                                 ),
-                                              ],
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      ],
+                                          ],
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),

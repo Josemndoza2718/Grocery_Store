@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/new/new_product_repository_impl.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/view/add_product/add_product_page.dart';
@@ -116,7 +117,8 @@ class _UserDashboardState extends State<UserDashboard> {
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: StreamBuilder<List<Product>>(
-            stream: NewProductRepositoryImpl().getAllProductsStream(),
+            stream: NewProductRepositoryImpl().getAllProductsStream(
+                userId: Prefs.getString(PrefKeys.userId) ?? ''),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

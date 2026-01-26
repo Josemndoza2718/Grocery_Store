@@ -4,6 +4,7 @@ import 'package:grocery_store/core/domain/entities/cart.dart';
 class CartModel extends Cart {
   CartModel({
     required super.id,
+    required super.userId,
     required super.ownerId,
     super.ownerCarName,
     super.status,
@@ -13,6 +14,7 @@ class CartModel extends Cart {
   factory CartModel.fromJson(Map<String, dynamic> json) {
     return CartModel(
       id: json['id'],
+      userId: json['userId'] ?? '',
       ownerId: json['owner_id'],
       ownerCarName: json['owner_car_name'],
       status: json['status'],
@@ -25,6 +27,7 @@ class CartModel extends Cart {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userId': userId,
       'owner_id': ownerId,
       'owner_car_name': ownerCarName,
       'status': status,
@@ -35,6 +38,7 @@ class CartModel extends Cart {
     toEntity(){
     return Cart(
       id: id,
+      userId: userId,
       ownerId: ownerId,
       ownerCarName: ownerCarName,
       status: status,

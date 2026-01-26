@@ -28,6 +28,7 @@ class CashProductRepositoryImpl implements CashProductRepository {
 
     CartModel carModel = CartModel(
       id: check.id,
+      userId: check.userId,
       ownerId: check.ownerId,
       ownerCarName: check.ownerCarName,
       products: check.products,

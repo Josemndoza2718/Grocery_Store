@@ -12,6 +12,8 @@ import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_
 import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
+import 'package:grocery_store/core/data/repositories/local/prefs.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
 
 class HomeViewModel extends ChangeNotifier {
   //Products
@@ -183,7 +185,9 @@ class HomeViewModel extends ChangeNotifier {
 
   //Products
   Future<void> getProducts() async {
-    getProductsUseCases.callStream().listen((products) {
+    final userId = Prefs.getString(PrefKeys.userId) ?? '';
+
+    getProductsUseCases.callStream(userId: userId).listen((products) {
       listProducts = products;
       // Re-apply filter if needed
       if (_isFilterList && listFilterProducts.length != listProducts.length) {

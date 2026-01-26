@@ -11,7 +11,7 @@ class NewGetProductsUseCases {
     return list;
   }
 
-  Stream<List<Product>> callStream() {
-    return _repository.getAllProductsStream();
+  Stream<List<Product>> callStream({String? userId}) {
+    return _repository.getAllProductsStream(userId: userId);
   }
 }

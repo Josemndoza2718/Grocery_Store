@@ -2,6 +2,7 @@ import 'package:grocery_store/core/domain/entities/product.dart';
 
 class Cart {
   final String id;
+  final String userId; // Firebase Auth UID for user isolation
   final int ownerId;
   final String? ownerCarName;
   String status;
@@ -15,6 +16,7 @@ class Cart {
 
   Cart({
     required this.id,
+    required this.userId,
     required this.ownerId,
     this.ownerCarName,
     this.status = 'pending',
@@ -32,6 +34,7 @@ class Cart {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userId': userId,
       'ownerId': ownerId,
       'ownerCarName': ownerCarName,
       'status': status,
@@ -48,6 +51,7 @@ class Cart {
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
       id: json['id'] as String,
+      userId: json['userId'] as String? ?? '',
       ownerId: json['ownerId'] as int,
       ownerCarName: json['ownerCarName'] as String?,
       status: json['status'] as String? ?? 'pending',
@@ -72,6 +76,7 @@ class Cart {
 
   Cart copyWith({
     String? id,
+    String? userId,
     int? ownerId,
     String? ownerCarName,
     String? status,
@@ -85,6 +90,7 @@ class Cart {
   }) {
     return Cart(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       ownerId: ownerId ?? this.ownerId,
       ownerCarName: ownerCarName ?? this.ownerCarName,
       status: status ?? this.status,

@@ -15,9 +15,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController =
-      TextEditingController(text: 'josemndoza2718@gmail.com');
+      TextEditingController(); //'josemndoza2718@gmail.com'
   final TextEditingController _passwordController =
-      TextEditingController(text: '2718*1817Mma');
+      TextEditingController(); //'2718*1817Mma'
 
   final RegExp _emailRegExp =
       RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');

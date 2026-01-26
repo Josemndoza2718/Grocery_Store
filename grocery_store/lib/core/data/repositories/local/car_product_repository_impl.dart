@@ -28,6 +28,7 @@ class CartRepositoryImpl implements CarProductRepository {
 
     CartModel cartModel = CartModel(
         id: cart.id,
+        userId: cart.userId,
         ownerId: cart.ownerId,
         ownerCarName: cart.ownerCarName,
         status: cart.status,
@@ -73,6 +74,7 @@ class CartRepositoryImpl implements CarProductRepository {
 
     CartModel cartModel = CartModel(
         id: cart.id,
+        userId: cart.userId,
         ownerId: cart.ownerId,
         ownerCarName: cart.ownerCarName,
         status: cart.status,

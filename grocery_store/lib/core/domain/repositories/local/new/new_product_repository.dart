@@ -5,5 +5,5 @@ abstract class NewProductRepository {
   Future<List<Product>> getLocalProducts();
   Future<void> deleteProduct(String id);
   Future<void> updateProduct(Product product);
-  Stream<List<Product>> getAllProductsStream();
+  Stream<List<Product>> getAllProductsStream({String? userId});
 }

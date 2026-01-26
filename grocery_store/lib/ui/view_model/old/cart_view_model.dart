@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/data/repositories/local/prefs.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/core/domain/entities/cart.dart';
 import 'package:grocery_store/core/domain/entities/client.dart';
 import 'package:grocery_store/core/domain/entities/product.dart';
@@ -264,10 +265,12 @@ class CartViewModel extends ChangeNotifier {
 
     if (listProductsInCart.isNotEmpty && ownerCarName.isNotEmpty) {
       final cartId = const Uuid().v4();
+      final userId = Prefs.getString(PrefKeys.userId) ?? '';
 
       await createCartUseCases.call(
         Cart(
           id: cartId,
+          userId: userId,
           ownerId: ownerId,
           ownerCarName: ownerCarName,
           status: 'pending',
@@ -314,15 +317,21 @@ class CartViewModel extends ChangeNotifier {
   }
 
   Future<void> getAllCarts() async {
+    final userId = Prefs.getString(PrefKeys.userId) ?? '';
+    
     // Subscribe to carts stream for real-time updates
     _cartsSubscription?.cancel();
-    _cartsSubscription = getCartsUseCases.callStream().listen((carts) {
+    _cartsSubscription = getCartsUseCases.callStream(userId: userId).listen((carts) {
       listCarts = carts;
       _isActivePanel = List.filled(listCarts.length, false);
       notifyListeners();
     });
 
-    // Get products
+    // Get products (Assuming getProductsUseCases also supports userId if needed, 
+    // but line 329 calls .call() which is for local products. 
+    // If we want cloud products filtered:
+    // listProducts = await getProductsUseCases.callStream(userId: userId).first; 
+    // But keeping existing logic for now, just updating carts stream)
     listProducts = await getProductsUseCases.call();
     notifyListeners();
   }

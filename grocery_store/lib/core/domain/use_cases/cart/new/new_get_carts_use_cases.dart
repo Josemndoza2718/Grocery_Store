@@ -7,8 +7,8 @@ class NewGetCartsUseCases {
   final NewCartRepository repository;
 
   // Para obtener el stream en tiempo real
-  Stream<List<Cart>> callStream() {
-    return repository.getAllCartsStream();
+  Stream<List<Cart>> callStream({String? userId}) {
+    return repository.getAllCartsStream(userId: userId);
   }
 
   // Para obtener caché local (sin conexión)

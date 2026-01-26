@@ -1,5 +1,6 @@
 class Product {
   final String id;
+  final String userId; // Firebase Auth UID for user isolation
   final String name;
   final String description;
   final double price;
@@ -10,6 +11,7 @@ class Product {
 
   Product({
     required this.id,
+    this.userId = '',
     required this.name,
     required this.description,
     required this.price,
@@ -30,6 +32,7 @@ class Product {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userId': userId,
       'name': name,
       'description': description,
       'price': price,
@@ -43,6 +46,7 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       id: json['id'],
+      userId: json['userId'] ?? '',
       name: json['name'],
       description: json['description'],
       price: json['price'],
@@ -55,6 +59,7 @@ class Product {
 
   Product copyWith({
     String? id,
+    String? userId,
     String? image,
     String? name,
     String? description,
@@ -65,6 +70,7 @@ class Product {
   }) {
     return Product(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       image: image ?? this.image,
       name: name ?? this.name,
       description: description ?? this.description,
