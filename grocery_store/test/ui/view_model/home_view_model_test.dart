@@ -1,15 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
+import 'package:grocery_store/core/errors/result.dart';
+import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/entities/client.dart';
+import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
+import 'package:grocery_store/domain/entities/client.dart';
 import 'dart:async';
 
 // Manual Mocks/Stubs
@@ -46,13 +47,17 @@ class FakeCreateProductsUseCases implements CreateProductsUseCases {
 class FakeDeleteProductsUseCases implements NewDeleteProductsUseCases {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-  Future<void> deleteProduct(String id) async {}
+  Future<Result<void>> deleteProduct(String id) async {
+    return const Success(null);
+  }
 }
 
 class FakeUpdateProductsUseCases implements UpdateProductsUseCases {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-  Future<void> call(Product product) async {}
+  Future<Result<void>> call(Product product) async {
+    return const Success(null);
+  }
 }
 
 class FakeCreateClientUseCases implements CreateClientUseCases {

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/core/data/repositories/local/prefs.dart';
+import 'package:grocery_store/domain/entities/product.dart';
+import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 
 class AddProductViewModel extends ChangeNotifier {
@@ -31,10 +31,31 @@ class AddProductViewModel extends ChangeNotifier {
   Future<void> createProduct(Product product) async {
     final userId = Prefs.getString(PrefKeys.userId) ?? '';
     final productWithUser = product.copyWith(userId: userId);
-    await createProductsUseCases.call(productWithUser);
+    
+    final result = await createProductsUseCases.call(productWithUser);
+    
+    result.fold(
+      onSuccess: (_) {},
+      onError: (failure) {
+         // In a real app, we might want to expose this failure to the UI
+         print('Error creating product: ${failure.message}');
+      },
+    );
   }
 
   Future<void> updateProduct(Product product) async {
-    await updateProductsUseCases.call(product);
+    final result = await updateProductsUseCases.call(product);
+    
+    result.fold(
+      onSuccess: (_) {},
+      onError: (failure) {
+        print('Error updating product: ${failure.message}');
+      },
+    );
+  }
+
+  void clearData(){
+    galleryImage = null;
+    notifyListeners();
   }
 }

@@ -2,13 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:grocery_store/core/data/repositories/local/prefs.dart';
-import 'package:grocery_store/core/resource/my_localizations.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/dependencies/di.dart';
-import 'package:grocery_store/ui/view/auth/login_page.dart';
-import 'package:grocery_store/ui/view/origin/main_page.dart';
+import 'package:grocery_store/ui/views/auth/login_page.dart';
+import 'package:grocery_store/ui/views/origin/main_page.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'; // ¡Esta es la más importante!
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,9 +21,9 @@ void main() async {
       supportedLocales: const [Locale('es'), Locale('en'),],
       path: 'lib/core/resource/langs',
       useFallbackTranslations: true,
-      fallbackLocale: Locale('es'),
-      startLocale: Locale('es'),
-      child: MyApp(),
+      fallbackLocale: const Locale('es'),
+      startLocale: const Locale('es'),
+      child: const MyApp(),
     ),
   );
 }

@@ -1,20 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/core/data/repositories/local/prefs.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
-import 'package:grocery_store/core/domain/entities/cart.dart';
-import 'package:grocery_store/core/domain/entities/client.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/cart/new/new_get_carts_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/domain/entities/cart.dart';
+import 'package:grocery_store/domain/entities/client.dart';
+import 'package:grocery_store/domain/entities/product.dart';
+import 'package:grocery_store/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/cart/new/new_get_carts_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:uuid/uuid.dart';
 
 class CartViewModel extends ChangeNotifier {
@@ -267,7 +267,7 @@ class CartViewModel extends ChangeNotifier {
       final cartId = const Uuid().v4();
       final userId = Prefs.getString(PrefKeys.userId) ?? '';
 
-      await createCartUseCases.call(
+      final result = await createCartUseCases.call(
         Cart(
           id: cartId,
           userId: userId,
@@ -277,7 +277,16 @@ class CartViewModel extends ChangeNotifier {
           products: listProductsInCart,
         ),
       );
-      // No need to call getAllCarts() - stream updates automatically
+      
+      result.fold(
+        onSuccess: (_) {
+           // Success logic (no need to do anything as stream updates)
+        },
+        onError: (failure) {
+          // Handle error (maybe set a local error state or notify UI via a callback/listener if architecture allows)
+          print('Error creating cart: ${failure.message}');
+        },
+      );
     }
   }
 
@@ -298,15 +307,24 @@ class CartViewModel extends ChangeNotifier {
 
         listProductsAddCart = List<Product>.from(element.products);
         listProductsAddCart.add(products);
-        await updateCartUseCases.call(
+        
+        final result = await updateCartUseCases.call(
           element.copyWith(
             products: listProductsAddCart,
             updatedAt: DateTime.now(),
           ),
         );
-        // No need to call getAllCarts() - stream updates automatically
-        notifyListeners();
-        return true; // Agregado exitosamente
+
+        return result.fold(
+          onSuccess: (_) {
+            notifyListeners();
+            return true;
+          },
+          onError: (failure) {
+            print('Error updating cart: ${failure.message}');
+            return false;
+          },
+        );
       } else {
         //print("No Agregado al carrito ${element.id}");
       }
@@ -327,18 +345,24 @@ class CartViewModel extends ChangeNotifier {
       notifyListeners();
     });
 
-    // Get products (Assuming getProductsUseCases also supports userId if needed, 
-    // but line 329 calls .call() which is for local products. 
-    // If we want cloud products filtered:
-    // listProducts = await getProductsUseCases.callStream(userId: userId).first; 
-    // But keeping existing logic for now, just updating carts stream)
-    listProducts = await getProductsUseCases.call();
-    notifyListeners();
+    final result = await getProductsUseCases.call();
+    result.fold(
+      onSuccess: (products) {
+        listProducts = products;
+        notifyListeners();
+      },
+      onError: (failure) {
+        print('Error fetching local products: ${failure.message}');
+      },
+    );
   }
 
   Future<void> deletedCart(String id) async {
-    await deleteCartUseCases.call(id);
-    // No need to call getAllCarts() - stream updates automatically
+    final result = await deleteCartUseCases.call(id);
+    result.fold(
+      onSuccess: (_) {},
+      onError: (failure) => print('Error deleting cart: ${failure.message}'),
+    );
   }
 
   Future<void> updateProductCart(String cartId, String productId) async {
@@ -346,9 +370,13 @@ class CartViewModel extends ChangeNotifier {
       if (element.id == cartId) {
         element.products.removeWhere((product) => product.id == productId);
         element.updatedAt = DateTime.now();
-        await updateCartUseCases.call(element);
-        // No need to call getAllCarts() - stream updates automatically
-        notifyListeners();
+        
+        final result = await updateCartUseCases.call(element);
+        
+        result.fold(
+          onSuccess: (_) => notifyListeners(),
+          onError: (failure) => print('Error updating product in cart: ${failure.message}'),
+        );
         break;
       }
     }
@@ -369,6 +397,7 @@ class CartViewModel extends ChangeNotifier {
             final int newStock = product.stockQuantity - product.quantityToBuy;
             final updatedProduct = product.copyWith(stockQuantity: newStock);
             await updateProductsUseCases.call(updatedProduct);
+            // Ignore result for individual product updates for now, or handle cumulatively
           }
         }
 
@@ -377,9 +406,16 @@ class CartViewModel extends ChangeNotifier {
           payAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        await updateCartUseCases.call(updatedCart);
-        _hiddenCartIds.remove(cartId);
-        notifyListeners();
+        
+        final result = await updateCartUseCases.call(updatedCart);
+        
+        result.fold(
+          onSuccess: (_) {
+            _hiddenCartIds.remove(cartId);
+            notifyListeners();
+          },
+          onError: (failure) => print('Error marking cart as paid: ${failure.message}'),
+        );
         break;
       }
     }

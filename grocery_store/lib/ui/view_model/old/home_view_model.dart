@@ -1,18 +1,18 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/core/domain/entities/category.dart';
-import 'package:grocery_store/core/domain/entities/client.dart';
-import 'package:grocery_store/core/domain/entities/product.dart';
-import 'package:grocery_store/core/domain/use_cases/client/create_client_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/client/get_clients_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/create_product_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/delete_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/get_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/core/domain/use_cases/product/send_product_firebase_use_cases.dart';
-import 'package:grocery_store/core/data/repositories/local/prefs.dart';
+import 'package:grocery_store/domain/entities/category.dart';
+import 'package:grocery_store/domain/entities/client.dart';
+import 'package:grocery_store/domain/entities/product.dart';
+import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -214,12 +214,18 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    await deleteProductsUseCases.deleteProduct(id);
-    // getProducts() is stream-based now, so it updates automatically
+    final result = await deleteProductsUseCases.deleteProduct(id);
+    result.fold(
+      onSuccess: (_) {}, 
+      onError: (failure) => print('Error deleting product: ${failure.message}'),
+    );
   }
 
   Future<void> updateProduct(Product product) async {
-    await updateProductsUseCases.call(product);
-    // getProducts() is stream-based now, so it updates automatically
+    final result = await updateProductsUseCases.call(product);
+    result.fold(
+      onSuccess: (_) {},
+      onError: (failure) => print('Error updating product: ${failure.message}'),
+    );
   }
 }
