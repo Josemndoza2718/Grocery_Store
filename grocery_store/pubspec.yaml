@@ -51,6 +51,7 @@ dependencies:
   permission_handler: ^12.0.1
   easy_localization: ^3.0.8
   flutter_launcher_icons: ^0.14.4
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

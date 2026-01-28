@@ -12,18 +12,15 @@ import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
 class ProductsListWidget extends StatelessWidget {
   const ProductsListWidget({
     super.key,
-    //this.isPayMode = false,
     required this.listProducts,
-    required this.onTap,
     required this.onPressed,
     required this.onClose,
     this.moneyConversion,
     required this.onDeleteProduct,
   });
 
-  //final bool isPayMode;
+  
   final List<Product>? listProducts;
-  final Function(int) onTap;
   final Function(int) onPressed;
   final Function() onClose;
   final Function(int) onDeleteProduct;
@@ -68,7 +65,6 @@ class ProductsListWidget extends StatelessWidget {
 
                 return GestureDetector(
                   onTap: () {
-                    onTap(index);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -91,8 +87,7 @@ class ProductsListWidget extends StatelessWidget {
                       },
                     );
                   },
-                  child:
-                      //Products List
+                  child: //Products List
                       Container(
                     margin: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -108,11 +103,23 @@ class ProductsListWidget extends StatelessWidget {
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              //border: Border.all(color: AppColors.green, width: 4),
                               color: AppColors.transparent),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: Image.file(
+                            child: listProducts![index].image.contains('http')
+                            ? Image.network(
+                              listProducts![index].image,
+                              // height: 100,
+                              // width: 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  AppImages.imageNotFound,
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            )
+                            : Image.file(
                               File(listProducts![index].image),
                               // height: 100,
                               // width: 100,

@@ -8,8 +8,8 @@ import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/views/home/widgets/asig_price_widget.dart';
 import 'package:grocery_store/ui/views/home/widgets/products_list_widget.dart';
-import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:provider/provider.dart';
@@ -22,12 +22,9 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  int selectedIndex = 0;
-
   TextEditingController searchController = TextEditingController();
   TextEditingController moneyconversionController = TextEditingController();
   TextEditingController clientController = TextEditingController();
-  double money = 0;
 
   @override
   void initState() {
@@ -42,8 +39,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void initMoney() async {
-    var viewModel = context.read<HomeViewModel>();
-    viewModel.moneyConversion = await Prefs.getMoneyConversion();
+    var provider = context.read<HomeViewModel>();
+    provider.moneyConversion = await Prefs.getMoneyConversion();
   }
 
   double parseFormattedCurrency(String text) {
@@ -113,10 +110,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
     context.read<CartViewModel>().getMoneyConversion();
   }
 
+  void onSetPrice(HomeViewModel provider) {
+    double value = parseFormattedCurrency(moneyconversionController.value.text);
+
+    provider.setMoneyConversion(value);
+    Prefs.setMoneyConversion(value);
+    moneyconversionController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(), // Esto quita el foco de cualquier TextField
+      onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.opaque,
       child: SafeArea(
         child: Consumer<HomeViewModel>(builder: (context, provider, _) {
@@ -129,21 +134,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 Text(
                   "${"lbl_welcome".translate}, ${Prefs.getString(PrefKeys.userName)}, ",
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold),
+                      fontSize: 20, 
+                      fontWeight: FontWeight.bold,
+                      ),
                 ),
                 //Money Conversion
                 AsignPriceWidget(
                   label: 'lbl_money_rate'.translate,
                   price: provider.moneyConversion,
                   controller: moneyconversionController,
-                  onTap: () {
-                    double value = parseFormattedCurrency(
-                        moneyconversionController.value.text);
-
-                    provider.setMoneyConversion(value);
-                    Prefs.setMoneyConversion(value);
-                    moneyconversionController.clear();
-                  },
+                  onTap: () => onSetPrice(provider),
                 ),
                 //Client Menu
                 Row(
@@ -151,12 +151,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        provider.toggleIsActive();
-                      },
+                      onTap: () => provider.toggleIsActive(),
                       child: Container(
                         height: 55,
-                        //width: double.infinity,
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                             color: AppColors.darkgreen,
@@ -254,8 +251,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       ),
                     ),
                     onTap: () {
-                      if (clientController.text.isNotEmpty &&
-                          clientController.text != "") {
+                      if (clientController.text.isNotEmpty && clientController.text != "") {
                         bool exists = provider.listClients.any(
                             (element) => element.name == clientController.text);
 
@@ -270,7 +266,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           showFloatingMessage(
                               context: context,
                               message: "lbl_user_add".translate,
-                              color: AppColors.green);
+                              color: AppColors.darkgreen);
                         } else {
                           showFloatingMessage(
                               context: context,
@@ -339,14 +335,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                         //Text("Client ${viewModel.clientName}"),
                         ProductsListWidget(
-                          listProducts: provider.listFilterProducts,
-                          onTap: (index) {}, //TODO: VER SI SE DEJA
-                          onPressed: (index) async => await onAddItemProduct(provider, index),
-                          onClose: () => provider.getProducts(),
-                          moneyConversion: provider.moneyConversion,
-                          onDeleteProduct: (index) => provider.deleteProduct(
-                              provider.listFilterProducts[index].id)
-                        ),
+                            listProducts: provider.listFilterProducts,
+                            onPressed: (index) async => await onAddItemProduct(provider, index),
+                            onClose: () => provider.getProducts(),
+                            moneyConversion: provider.moneyConversion,
+                            onDeleteProduct: (index) => provider.deleteProduct(
+                                provider.listFilterProducts[index].id)),
                       ],
                     ),
                   ),

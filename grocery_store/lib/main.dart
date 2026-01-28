@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/resource/app_theme.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/dependencies/di.dart';
 import 'package:grocery_store/ui/views/auth/login_page.dart';
@@ -43,6 +44,9 @@ class MyApp extends StatelessWidget {
           locale: context.locale,
           title: 'Material App',
           debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
           home: StreamBuilder<User?>(
             // Escuchamos el estado de autenticación de Firebase
             stream: FirebaseAuth.instance.authStateChanges(),

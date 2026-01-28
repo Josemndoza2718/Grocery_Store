@@ -7,7 +7,7 @@ import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/core/utils/extension.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
@@ -407,9 +407,9 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                         // Priority: text content first, image shrinks if needed
                                         final double availableWidth = constraints.maxWidth;
                                         // Reserve minimum ~200px for text content, rest for image
-                                        final double minTextWidth = 180;
-                                        final double maxImageSize = 150;
-                                        final double minImageSize = 80;
+                                        const double minTextWidth = 180;
+                                        const double maxImageSize = 150;
+                                        const double minImageSize = 80;
                                         
                                         // Calculate image size: available width minus text area
                                         double imageSize = (availableWidth - minTextWidth - 24).clamp(minImageSize, maxImageSize);
@@ -427,7 +427,17 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                               ),
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(10),
-                                                child: Image.file(
+                                                child: product.image.contains('http') ? Image.network(
+                                                  product.image,
+                                                  height: double.infinity,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) {
+                                                    return const Icon(Icons.error, color: AppColors.red);
+                                                  },
+                                                )
+                                                
+                                                : Image.file(
                                                   File(product.image),
                                                   height: double.infinity,
                                                   width: double.infinity,

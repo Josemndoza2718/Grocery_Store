@@ -5,7 +5,7 @@ import 'package:grocery_store/ui/views/cash/check_page.dart';
 import 'package:grocery_store/ui/views/home/home_page.dart';
 import 'package:grocery_store/ui/views/cart/cart_page.dart';
 import 'package:grocery_store/ui/views/settings/settings_page.dart';
-import 'package:grocery_store/ui/view_model/old/main_page_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/main_page_view_model.dart';
 import 'package:grocery_store/ui/widgets/bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
 

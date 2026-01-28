@@ -12,7 +12,7 @@ import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/views/cash/widget/check_widget.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/widgets/general_textformfield.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';

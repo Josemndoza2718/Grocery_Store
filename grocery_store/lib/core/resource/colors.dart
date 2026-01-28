@@ -20,6 +20,6 @@ class AppColors {
 
   static const transparent = Color(0x00000000);
 
-  static const background = Color(0xffFFF3D4);
+  
   
 }

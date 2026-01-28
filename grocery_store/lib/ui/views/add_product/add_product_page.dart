@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_store/core/resource/custom_dialgos.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/domain/entities/product.dart';
@@ -11,8 +13,8 @@ import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/widgets/general_button.dart';
 import 'package:grocery_store/ui/widgets/general_textformfield.dart';
-import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/add_product_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
 import 'package:grocery_store/core/utils/phone_image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -34,9 +36,9 @@ class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _stockQuantityController =
-      TextEditingController();
+  final TextEditingController _stockQuantityController = TextEditingController();
   final TextEditingController _idStockController = TextEditingController();
+  final TextEditingController _urlController = TextEditingController();
 
   late final TextEditingController nameEditController;
   late final TextEditingController descriptionEditController;
@@ -47,12 +49,9 @@ class _AddProductPageState extends State<AddProductPage> {
   void initState() {
     super.initState();
 
-
     nameEditController = TextEditingController(text: widget.product?.name);
-    descriptionEditController =
-        TextEditingController(text: widget.product?.description);
-    priceEditController =
-        TextEditingController(text: widget.product?.price.toString());
+    descriptionEditController = TextEditingController(text: widget.product?.description);
+    priceEditController = TextEditingController(text: widget.product?.price.toString());
     _stockEditQuantityController =
         TextEditingController(text: widget.product?.stockQuantity.toString());
   }
@@ -205,7 +204,9 @@ class _AddProductPageState extends State<AddProductPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         spacing: 8,
                         children: [
-                          GestureDetector(
+                          ButtonSearchImage(
+                            label: "lbl_gallery".translate,
+                            icon: Icons.image,
                             onTap: () async {
                               final pickedImageGalery = await PhoneImage()
                                   .pickImageFromGallery(ImageSource.gallery);
@@ -213,32 +214,39 @@ class _AddProductPageState extends State<AddProductPage> {
                                 provider.setGalleryImage(pickedImageGalery);
                               }
                             },
-                            child: Container(
-                              height: 90,
-                              width: 90,
-                              decoration: BoxDecoration(
-                                color: AppColors.darkgreen,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.image,
-                                    color: AppColors.lightwhite,
-                                    size: 40,
-                                  ),
-                                  Text(
-                                    "lbl_gallery".translate,
-                                    style: const TextStyle(
-                                        color: AppColors.lightwhite,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
-                          GestureDetector(
+                          ButtonSearchImage(
+                            label: "lbl_internet_image".translate,
+                            icon: Icons.link,
+                            onTap: () {
+                              CustomDialgos.showAlertDialog(
+                                context: context,
+                                title: 'Definir URL',
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    GeneralTextformfield(
+                                      controller: _urlController,
+                                      hintText: 'URL',
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Por favor, una url';
+                                        }
+                                        return null;
+                                      },
+                                    )
+                                  ],
+                                ),
+                                onConfirm: () {
+                                  provider.setUrlImage(_urlController.text);
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                          ),
+                          ButtonSearchImage(
+                            label: "lbl_photo".translate,
+                            icon: Icons.camera_alt,
                             onTap: () async {
                               final pickedImageCamera = await PhoneImage()
                                   .pickImageFromGallery(ImageSource.camera);
@@ -247,29 +255,6 @@ class _AddProductPageState extends State<AddProductPage> {
                                 provider.setGalleryImage(pickedImageCamera);
                               }
                             },
-                            child: Container(
-                              height: 90,
-                              width: 90,
-                              decoration: BoxDecoration(
-                                  color: AppColors.darkgreen,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.camera_alt,
-                                    color: AppColors.lightwhite,
-                                    size: 40,
-                                  ),
-                                  Text(
-                                    "lbl_photo".translate,
-                                    style: const TextStyle(
-                                        color: AppColors.lightwhite,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
                         ],
                       ),
@@ -281,7 +266,14 @@ class _AddProductPageState extends State<AddProductPage> {
                             color: AppColors.lightwhite,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: provider.galleryImage != null
+                          child: provider.urlImage.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: provider.urlImage,
+                              fit: BoxFit.contain,
+                              errorWidget: (context, url, error) =>
+                                  Image.asset(AppImages.imageNotFound),
+                            )
+                          : provider.galleryImage != null
                               ? SizedBox(
                                   height: double.infinity,
                                   child: Image.file(
@@ -295,8 +287,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                     },
                                   ),
                                 )
-                              : (widget.product != null &&
-                                      widget.product!.image.isNotEmpty)
+                              : (widget.product != null && widget.product!.image.isNotEmpty)
                                   ? SizedBox(
                                       height: double.infinity,
                                       child: widget.product!.image
@@ -384,7 +375,7 @@ class _AddProductPageState extends State<AddProductPage> {
                               controller: widget.product == null
                                   ? _descriptionController
                                   : descriptionEditController,
-                              labelText: 'lbl_description'.translate,
+                              labelText: 'lbl_product_description'.translate,
                               hintText: 'lbl_product_detail'.translate,
                               maxLines: 2,
                             ),
@@ -450,8 +441,9 @@ class _AddProductPageState extends State<AddProductPage> {
                                         price: double.tryParse(
                                                 priceEditController.text) ??
                                             0.0,
-                                        image: provider.galleryImage?.path ??
-                                            widget.product!.image,
+                                        image: provider.urlImage.isEmpty
+                                        ? provider.galleryImage?.path ?? ''
+                                        : provider.urlImage,
                                         idStock: _idStockController.text,
                                         stockQuantity: int.tryParse(
                                                 _stockEditQuantityController
@@ -469,18 +461,13 @@ class _AddProductPageState extends State<AddProductPage> {
                                           product: Product(
                                         id: _uuid.v4(),
                                         name: _nameController.text,
-                                        description:
-                                            _descriptionController.text,
-                                        price: double.tryParse(
-                                                _priceController.text) ??
-                                            0.0,
-                                        image:
-                                            provider.galleryImage?.path ?? '',
+                                        description: _descriptionController.text,
+                                        price: double.tryParse(_priceController.text) ?? 0.0,
+                                        image: provider.urlImage.isEmpty
+                                                  ? provider.galleryImage?.path ?? ''
+                                                  : provider.urlImage,
                                         idStock: _idStockController.text,
-                                        stockQuantity: int.tryParse(
-                                                _stockQuantityController
-                                                    .text) ??
-                                            0,
+                                        stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
                                         quantityToBuy: 0,
                                         userId: userId,
                                       ));
@@ -509,6 +496,49 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
           );
         })),
+      ),
+    );
+  }
+}
+
+class ButtonSearchImage extends StatelessWidget {
+  final Function onTap;
+  final String label;
+  final IconData icon;
+
+  const ButtonSearchImage({
+    super.key,
+    required this.onTap,
+    required this.label,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onTap(),
+      child: Container(
+        height: 60,
+        width: 60,
+        decoration: BoxDecoration(
+          color: AppColors.darkgreen,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: AppColors.lightwhite,
+              size: 40,
+            ),
+            /* Text(
+              label,
+              style: const TextStyle(
+                  color: AppColors.lightwhite, fontWeight: FontWeight.bold),
+            ), */
+          ],
+        ),
       ),
     );
   }

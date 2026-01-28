@@ -9,8 +9,8 @@ import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/views/home/widgets/asig_price_widget.dart';
 import 'package:grocery_store/ui/views/home/widgets/products_list_widget.dart';
-import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:provider/provider.dart';
@@ -311,7 +311,7 @@ class _UserDashboardState extends State<UserDashboard> {
                                 showFloatingMessage(
                                     context: context,
                                     message: "User added",
-                                    color: AppColors.green);
+                                    color: AppColors.darkgreen);
                               } else {
                                 showFloatingMessage(
                                     context: context,
@@ -384,7 +384,6 @@ class _UserDashboardState extends State<UserDashboard> {
                               //Text("Client ${viewModel.clientName}"),
                               ProductsListWidget(
                                 listProducts: products,
-                                onTap: (index) {}, //TODO: VER SI SE DEJA
                                 onPressed: (index) async =>
                                     await onAddItemProduct(provider, index),
                                 onClose: () => provider.getProducts(),

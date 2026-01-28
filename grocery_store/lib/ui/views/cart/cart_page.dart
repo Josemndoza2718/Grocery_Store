@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/views/cart/widgets/shop_list_widget.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:provider/provider.dart';
 

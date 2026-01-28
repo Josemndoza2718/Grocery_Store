@@ -17,6 +17,7 @@ class AddProductViewModel extends ChangeNotifier {
   });
 
   File? galleryImage;
+  String urlImage = '';
   final String _errorMessage = 'Ocurrió un error inesperado.';
 
   String get errorMessage => _errorMessage;
@@ -24,6 +25,11 @@ class AddProductViewModel extends ChangeNotifier {
   //SETTERS
   void setGalleryImage(File? image) {
     galleryImage = image;
+    notifyListeners();
+  }
+
+  void setUrlImage(String url) {
+    urlImage = url;
     notifyListeners();
   }
 
@@ -38,7 +44,7 @@ class AddProductViewModel extends ChangeNotifier {
       onSuccess: (_) {},
       onError: (failure) {
          // In a real app, we might want to expose this failure to the UI
-         print('Error creating product: ${failure.message}');
+          print('Error creating product: ${failure.message}');
       },
     );
   }

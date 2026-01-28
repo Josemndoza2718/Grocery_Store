@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/ui/views/detail_pay/widgets/products_list_widget.dart';
-import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
 import 'package:grocery_store/ui/widgets/general_button.dart';
 import 'package:provider/provider.dart';
 

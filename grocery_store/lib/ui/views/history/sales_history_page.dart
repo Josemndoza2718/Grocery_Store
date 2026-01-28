@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +21,7 @@ class SalesHistoryPage extends StatelessWidget {
           final paidCarts = provider.paidCarts.reversed.toList();
 
           if (paidCarts.isEmpty) {
-            return Center(
+            return const Center(
               child: Text(
                 "No hay ventas registradas",
                 style: TextStyle(fontSize: 18, color: Colors.grey),

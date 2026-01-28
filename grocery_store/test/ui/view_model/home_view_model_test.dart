@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/product.dart';
-import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';

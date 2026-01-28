@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/ui/views/auth/forgot_password_page.dart';
 import 'package:grocery_store/ui/views/auth/register_page.dart';
 import 'package:grocery_store/ui/views/origin/main_page.dart';
-import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {

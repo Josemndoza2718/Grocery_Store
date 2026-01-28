@@ -5,7 +5,7 @@ import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
 import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/widgets/general_textformfield.dart';
-import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {

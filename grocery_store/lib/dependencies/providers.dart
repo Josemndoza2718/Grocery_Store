@@ -17,12 +17,12 @@ import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
-import 'package:grocery_store/ui/view_model/new/add_new_product_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/cart_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/check_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/home_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
-import 'package:grocery_store/ui/view_model/old/main_page_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/add_product_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/check_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/main_page_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 

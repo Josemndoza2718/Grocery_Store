@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store/ui/view_model/old/login_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreen extends StatefulWidget {
