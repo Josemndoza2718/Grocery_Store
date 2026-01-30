@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
-import 'package:grocery_store/ui/views/cash/check_page.dart';
+import 'package:grocery_store/core/utils/prefs_keys.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
+import 'package:grocery_store/ui/views/check/check_page.dart';
+import 'package:grocery_store/ui/views/history/sales_history_page.dart';
 import 'package:grocery_store/ui/views/home/home_page.dart';
 import 'package:grocery_store/ui/views/cart/cart_page.dart';
 import 'package:grocery_store/ui/views/settings/settings_page.dart';
@@ -24,49 +27,58 @@ class MainPage extends StatelessWidget {
     SettingsPage(),
   ];
 
+  static final List<String> _pageNames = [
+    "${"lbl_welcome".translate}, ${Prefs.getString(PrefKeys.userName)}",
+    "", //"lbl_cart".translate,
+    "lbl_check".translate,
+    "lbl_settings".translate,
+  ];
+
+  List<Widget> _pageIcons(BuildContext context) {
+    return [
+      Container(),
+      Container(),
+      IconButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SalesHistoryPage()),
+          );
+        },
+        icon: const Icon(Icons.history, color: AppColors.white),
+      ),
+      IconButton(
+        onPressed: () {},
+        icon: const Icon(Icons.settings, color: AppColors.white),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.green,
-        centerTitle: true,
-        title: Text("lbl_app_name".translate,
-            style: const TextStyle(
-              fontSize: 20,
-              color: AppColors.white,
-            )),
-        actions: const [
-          /* IconButton(
-              onPressed: () {
-                var viewModel =
-                    Provider.of<HomeViewModel>(context, listen: false);
-                viewModel.saveDataToFirebase();
-              },
-              icon: const Icon(
-                Icons.save,
-                color: AppColors.white,
-              )),
-          IconButton(
-              onPressed: () async {
-                var viewModel =
-                    Provider.of<HomeViewModel>(context, listen: false);
-                await viewModel.getProducts();
-                viewModel.initList();
-              },
-              icon: const Icon(
-                Icons.restart_alt_rounded,
-                color: AppColors.white,
-              )), */
-        ],
-      ),
-      body: SafeArea(
-        child: Consumer<MainPageViewModel>(builder: (context, viewModel, _) {
-          return Stack(
+    return Consumer<MainPageViewModel>(builder: (context, provider, _) {
+      return Scaffold(
+        resizeToAvoidBottomInset: false,
+        //backgroundColor: AppColors.white,
+        appBar: AppBar(
+          //backgroundColor: AppColors.green,
+          centerTitle: false,
+          toolbarHeight: 70,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+          title: Text(_pageNames[provider.selectedIndex],
+              style: Theme.of(context).textTheme.displaySmall),
+          actions: [_pageIcons(context)[provider.selectedIndex]],
+        ),
+        body: SafeArea(
+          child: Stack(
             children: [
               IndexedStack(
-                index: viewModel.selectedIndex,
+                index: provider.selectedIndex,
                 children: _pages,
               ),
               Positioned(
@@ -74,14 +86,15 @@ class MainPage extends StatelessWidget {
                 left: 0,
                 right: 0,
                 child: BottomNavigationBarWidget(
-                  selectedIndex: viewModel.selectedIndex,
-                  setSelectedIndex: (index) => viewModel.setSelectedIndex = index,
+                  selectedIndex: provider.selectedIndex,
+                  setSelectedIndex: (index) =>
+                      provider.setSelectedIndex = index,
                 ),
               ),
             ],
-          );
-        }),
-      ),
-    );
+          ),
+        ),
+      );
+    });
   }
 }

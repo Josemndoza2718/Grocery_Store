@@ -11,17 +11,18 @@ class CustomDialgos {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Center(child: Text(title)),
+          title: Text(title, style: Theme.of(context).textTheme.bodyMedium,),
           content: content,
+          //actionsAlignment: MainAxisAlignment.center,
           actions: <Widget>[
             TextButton(
-              child: const Text('cancelar'),
+              child: Text('cancelar', style: Theme.of(context).textTheme.bodyMedium,),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('aceptar'),
+              child: Text('aceptar', style: Theme.of(context).textTheme.bodyMedium,),
               onPressed: () => onConfirm()
             ),
           ],

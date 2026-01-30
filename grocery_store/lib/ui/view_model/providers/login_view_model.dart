@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:grocery_store/data/repositories/local/prefs.dart';
 
 class LoginProvider with ChangeNotifier {
   bool _isPasswordVisible = false;
@@ -82,6 +83,7 @@ class LoginProvider with ChangeNotifier {
     try {
       await FirebaseAuth.instance.signOut();
       _isLoggedIn = false; // <-- CAMBIAMOS EL ESTADO A FALSE AL CERRAR SESIÓN
+      Prefs.clear();
       // Ya no necesitamos manejar _isLoggedIn, el StreamBuilder en main.dart lo hará por nosotros.
     } catch (e) {
       _errorMessage = 'Ocurrió un error al cerrar sesión.';

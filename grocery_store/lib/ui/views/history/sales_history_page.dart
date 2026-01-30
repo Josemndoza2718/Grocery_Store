@@ -13,7 +13,8 @@ class SalesHistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("lbl_sales_history".translate),
+        title: Text("lbl_history_sales".translate),
+        centerTitle: false,
         backgroundColor: AppColors.green,
       ),
       body: Consumer<CartViewModel>(
@@ -21,10 +22,10 @@ class SalesHistoryPage extends StatelessWidget {
           final paidCarts = provider.paidCarts.reversed.toList();
 
           if (paidCarts.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                "No hay ventas registradas",
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+                "lbl_no_sales".translate,
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
             );
           }
@@ -64,36 +65,28 @@ class SalesHistoryPage extends StatelessWidget {
                               border: Border.all(color: AppColors.green),
                             ),
                             child: Text(
-                              "PAGADO",
-                              style: const TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
+                              "lbl_paid".translate,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "Fecha: ${DateFormat('dd/MM/yyyy HH:mm').format(cart.updatedAt)}",
-                        style: const TextStyle(color: Colors.grey),
+                        "${"lbl_date".translate}: ${DateFormat('dd/MM/yyyy HH:mm').format(cart.updatedAt)}",
+                        style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       const Divider(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "${cart.products.length} productos",
+                            "${cart.products.length} ${"lbl_sales_products".translate}",
                             style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
                           Text(
-                            "Total: ${_calculateTotal(cart, provider.moneyConversion).toStringAsFixed(2)}bs",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
+                            "${"lbl_total".translate}: ${_calculateTotal(cart, provider.moneyConversion).toStringAsFixed(2)}bs",
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ],
                       ),

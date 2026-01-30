@@ -40,7 +40,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
             ),
             AnimatedButton(
               icon: Icons.shopping_cart,
-              label: "lbl_carts".translate,
+              label: "lbl_cart".translate,
               isSelected: selectedIndex == 1,
               selectColor: AppColors.white,
               unSelectColor: AppColors.darkgreen,
@@ -60,7 +60,6 @@ class BottomNavigationBarWidget extends StatelessWidget {
               height: 40,
               onTap: () {
                 setSelectedIndex(2);
-                //context.read<CartViewModel>().setListPayProduct();
               },
             ),
             AnimatedButton(

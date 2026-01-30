@@ -158,9 +158,10 @@ class _AddProductPageState extends State<AddProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      //backgroundColor: AppColors.white,
       appBar: AppBar(
         backgroundColor: AppColors.darkgreen,
+        centerTitle: false,
         title: Text(
           widget.product != null
               ? "lbl_update_product".translate

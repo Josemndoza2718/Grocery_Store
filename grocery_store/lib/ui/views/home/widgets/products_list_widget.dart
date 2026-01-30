@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
 import 'package:grocery_store/core/resource/images.dart';
-import 'package:grocery_store/core/resource/my_localizations.dart';
 import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
 
 class ProductsListWidget extends StatelessWidget {
@@ -32,7 +32,7 @@ class ProductsListWidget extends StatelessWidget {
       child: Container(
         height: double.infinity,
         decoration: BoxDecoration(
-            color: AppColors.lightwhite,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(10)),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -48,8 +48,7 @@ class ProductsListWidget extends StatelessWidget {
             crossAxisCount = (availableWidth / 180).floor().clamp(2, 4);
             // Adjust aspect ratio based on available space
             final double itemWidth = availableWidth / crossAxisCount;
-            childAspectRatio =
-                itemWidth / 340; // Height ~340px for product card
+            childAspectRatio = itemWidth / 340; // Height ~340px for product card
 
             return GridView.builder(
               scrollDirection: Axis.vertical,
@@ -61,7 +60,8 @@ class ProductsListWidget extends StatelessWidget {
               ),
               itemCount: listProducts!.length,
               itemBuilder: (context, index) {
-                final localizations = MyLocalizations.of(context);
+                final  product = listProducts![index];
+                final TextStyle textStyle = Theme.of(context).textTheme.bodySmall!;
 
                 return GestureDetector(
                   onTap: () {
@@ -80,7 +80,7 @@ class ProductsListWidget extends StatelessWidget {
                     HapticFeedback.mediumImpact();
                     CustomDialgos.showAlertDialog(
                       context: context,
-                      title: localizations?.translate('title') ?? 'title',
+                      title: 'lbl_delete_product'.translate,
                       onConfirm: () {
                         onDeleteProduct(index);
                         Navigator.pop(context);
@@ -91,7 +91,7 @@ class ProductsListWidget extends StatelessWidget {
                       Container(
                     margin: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Column(
@@ -136,57 +136,45 @@ class ProductsListWidget extends StatelessWidget {
                         //const SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            listProducts![index].name,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        /* Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              listProducts![index].description.isEmpty
-                                  ? ""
-                                  : "Description: ${listProducts![index].description}",
-                              style: const TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ), */
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            "Cantidad: ${listProducts![index].stockQuantity}",
-                            style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.normal),
-                          ),
-                        ),
-                        /* Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "${"${listProducts![index].stockQuantity}"} ${setselectedMeasurements(int.parse(listProducts![index].idStock))}",
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
-                            ),
-                          ), */
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Precio: ${((listProducts![index].price.toStringAsFixed(2)))}\$",
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal),
+                                product.name,
+                                style: Theme.of(context).textTheme.bodyLarge
+                              ),
+                              /* Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text(
+                                    listProducts![index].description.isEmpty
+                                        ? ""
+                                        : "Description: ${listProducts![index].description}",
+                                    style: const TextStyle(
+                                        fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ), */
+                              Text(
+                                "Cantidad: ${product.stockQuantity}",
+                                style: textStyle,
+                              ),
+                              /* Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text(
+                                    "${"${listProducts![index].stockQuantity}"} ${setselectedMeasurements(int.parse(listProducts![index].idStock))}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ), */
+                              Text(
+                                "Precio: ${((product.price.toStringAsFixed(2)))}\$",
+                                style: textStyle,
                               ),
                               Text(
-                                "Precio: ${(((listProducts![index].price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal),
+                                "Precio: ${(((product.price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
+                                style: textStyle,
                               ),
                               const SizedBox(height: 10),
                               GestureDetector(

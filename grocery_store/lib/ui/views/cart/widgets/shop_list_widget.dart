@@ -66,8 +66,8 @@ class _ShopListWidgetState extends State<ShopListWidget> {
       for (Cart element in widget.listCarts ?? []) {
         for (var product in element.products) {
           final key = "${element.id}_${product.id}";
-          _quantityControllers[key] = TextEditingController(
-              text: (product.quantityToBuy).toString());
+          _quantityControllers[key] =
+              TextEditingController(text: (product.quantityToBuy).toString());
         }
       }
       viewModel.addListener(_onProductProviderChanged);
@@ -109,12 +109,10 @@ class _ShopListWidgetState extends State<ShopListWidget> {
         // Solo actualiza el controlador si el valor del modelo es diferente para evitar loops infinitos
         if (_quantityControllers[key]?.text !=
             product.quantityToBuy.toString()) {
-          _quantityControllers[key]?.text =
-              product.quantityToBuy.toString();
+          _quantityControllers[key]?.text = product.quantityToBuy.toString();
           // Mueve el cursor al final para mejor UX si el valor cambia
-          _quantityControllers[key]?.selection =
-              TextSelection.fromPosition(TextPosition(
-                  offset: product.quantityToBuy.toString().length));
+          _quantityControllers[key]?.selection = TextSelection.fromPosition(
+              TextPosition(offset: product.quantityToBuy.toString().length));
         }
       }
     }
@@ -129,7 +127,8 @@ class _ShopListWidgetState extends State<ShopListWidget> {
             .map((product) =>
                 product.price *
                 double.parse(
-                    _quantityControllers["${cart.id}_${product.id}"]?.text ?? "0"))
+                    _quantityControllers["${cart.id}_${product.id}"]?.text ??
+                        "0"))
             .reduce((a, b) => a + b);
       }
     }
@@ -165,119 +164,53 @@ class _ShopListWidgetState extends State<ShopListWidget> {
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
           child: ExpansionPanelList(
-            expansionCallback: (panelIndex, isExpanded) =>
-                widget.onTapPanel(panelIndex),
+            expansionCallback: (panelIndex, isExpanded) => widget.onTapPanel(panelIndex),
             children: widget.listCarts!.map<ExpansionPanel>((Cart cart) {
               return ExpansionPanel(
-                backgroundColor: AppColors.white,
+                backgroundColor: Theme.of(context).expansionTileTheme.backgroundColor,
                 canTapOnHeader: true,
-                isExpanded: widget.listCarts!.isNotEmpty && widget.isActivePanel.length > widget.listCarts!.indexOf(cart)
+                isExpanded: widget.listCarts!.isNotEmpty &&
+                        widget.isActivePanel.length >
+                            widget.listCarts!.indexOf(cart)
                     ? widget.isActivePanel[widget.listCarts!.indexOf(cart)]
                     : false,
                 headerBuilder: (context, isExpanded) {
                   return ListTile(
-                      leading: const Icon(
+                      leading: Icon(
                         Icons.shopping_cart_outlined,
                         size: 50,
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       title: Text(
                         cart.ownerCarName ?? "",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      subtitle: Text("#${DateFormat('yyyyMMdd').format(cart.createdAt)}"),
+                      subtitle: Text(
+                          "#${DateFormat('yyyyMMdd').format(cart.createdAt)}",
+                          style: Theme.of(context).textTheme.labelSmall),
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             "${'lbl_total_items'.translate}: ${_getTotalItemsCart(cart.id)}",
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
-                          Text("${'lbl_total'.translate}: ${_getTotalPriceCart(cart.id)} Bs"),
+                          Text(
+                              "${'lbl_total'.translate}: ${_getTotalPriceCart(cart.id)} Bs",
+                              style: Theme.of(context).textTheme.labelSmall),
                         ],
                       ));
                 },
                 body: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                        children: [
-                          //Buttons DPP
-                          Row(
-                            spacing: 8,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () => widget.onRemoveCart(cart.id),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.red,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "lbl_delete_cart".translate,
-                                    style: const TextStyle(color: AppColors.white),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    bool allValidQuantity = true;
-                                    for (var product in cart.products) {
-                                      if (product.quantityToBuy <= 0) {
-                                        allValidQuantity = false;
-                                        break;
-                                      }
-                                    }
-
-                                    if (allValidQuantity) { 
-                                      widget.onPaymentCart(cart.id);
-                                      showFloatingMessage(
-                                          context: context,
-                                          message:
-                                              "lbl_cart_added_to_check".translate,
-                                          color: AppColors.green);
-                                    } else {
-                                      showFloatingMessage(
-                                          context: context,
-                                          message:
-                                              "lbl_error_quantity_zero".translate,
-                                          color: AppColors.red);
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.green,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    "lbl_pay_cart".translate,
-                                    style: const TextStyle(color: AppColors.white),
-                                  ),
-                                ),
-                              ),
-                              /* GestureDetector(
-                                onTap: () => widget.onPaymentCart(cart.id),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.grey,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Icon(Icons.share, color: AppColors.white),
-                                ),
-                              ) */
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          //Payment Options
-                          /* if (isPayment)
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      //Buttons DPP
+                      DeletedOrPayButtonsWidget(widget: widget, cart: cart),
+                      const SizedBox(height: 8),
+                      //Payment Options
+                      /* if (isPayment)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -331,8 +264,8 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                 ),
                               ],
                             ), */
-                          //if (isPayment) const SizedBox(height: 8),
-                          /* if (isPayment)
+                      //if (isPayment) const SizedBox(height: 8),
+                      /* if (isPayment)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -374,202 +307,315 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                                 ),
                               ],
                             ), */
-                          //Cards Products
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: cart.products.length,
-                            itemBuilder: (context, index) {
-                              final product = cart.products[index];
+                      //Cards Products
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: cart.products.length,
+                        itemBuilder: (context, index) {
+                          final product = cart.products[index];
 
-                              return Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8),
-                                child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.white,
-                                      border: const Border(
-                                        bottom: BorderSide(
-                                          width: 6,
-                                          color: AppColors.ultralightgrey,
-                                        ),
-                                        right: BorderSide(
-                                          width: 6,
-                                          color: AppColors.ultralightgrey,
-                                        ),
-                                      ),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        // Calculate responsive image size
-                                        // Priority: text content first, image shrinks if needed
-                                        final double availableWidth = constraints.maxWidth;
-                                        // Reserve minimum ~200px for text content, rest for image
-                                        const double minTextWidth = 180;
-                                        const double maxImageSize = 150;
-                                        const double minImageSize = 80;
-                                        
-                                        // Calculate image size: available width minus text area
-                                        double imageSize = (availableWidth - minTextWidth - 24).clamp(minImageSize, maxImageSize);
-                                        
-                                        return Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            //Product Image - responsive size
-                                            Container(
-                                              height: imageSize,
-                                              width: imageSize,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(10),
-                                                child: product.image.contains('http') ? Image.network(
-                                                  product.image,
-                                                  height: double.infinity,
-                                                  width: double.infinity,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) {
-                                                    return const Icon(Icons.error, color: AppColors.red);
-                                                  },
-                                                )
-                                                
-                                                : Image.file(
-                                                  File(product.image),
-                                                  height: double.infinity,
-                                                  width: double.infinity,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (context, error, stackTrace) {
-                                                    return Image.asset(
-                                                      AppImages.imageNotFound,
-                                                      fit: BoxFit.cover,
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            //Product Data - flexible width
-                                            Expanded(
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    //Title
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                          child: Text(
-                                                            product.name,
-                                                            style: const TextStyle(
-                                                              fontSize: 16,
-                                                              fontWeight: FontWeight.bold,
-                                                            ),
-                                                            overflow: TextOverflow.ellipsis,
-                                                            maxLines: 2,
-                                                          ),
-                                                        ),
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            widget.onDeleteProduct(
-                                                              cart.id,
-                                                              product.id,
-                                                            );
-                                                          },
-                                                          child: const Icon(
-                                                            Icons.delete_forever,
-                                                            color: AppColors.red,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Text(
-                                                      "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
-                                                      style: const TextStyle(fontSize: 13),
-                                                    ),
-                                                    Text(
-                                                      "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
-                                                      style: const TextStyle(fontSize: 13),
-                                                    ),
-                                                    const Divider(height: 8, color: AppColors.grey, thickness: 1),
-                                                    Text(
-                                                      "${'lbl_total'.translate}: ${((product.price * int.parse(_quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 8),
-                                                    //Quantity controls
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: () => widget.onRemoveProduct(product.id.toString(), cart.id),
-                                                          child: const Icon(Icons.remove_circle, color: AppColors.darkgreen),
-                                                        ),
-                                                        const SizedBox(width: 8),
-                                                        SizedBox(
-                                                          width: 50,
-                                                          child: TextFormField(
-                                                            controller: _quantityControllers["${cart.id}_${product.id}"],
-                                                            keyboardType: TextInputType.number,
-                                                            textAlign: TextAlign.center,
-                                                            decoration: InputDecoration(
-                                                              enabled: true,
-                                                              isCollapsed: true,
-                                                              filled: true,
-                                                              fillColor: Colors.transparent,
-                                                              focusedBorder: OutlineInputBorder(
-                                                                borderSide: const BorderSide(width: 2, color: AppColors.green),
-                                                                borderRadius: BorderRadius.circular(10),
-                                                              ),
-                                                              disabledBorder: OutlineInputBorder(
-                                                                borderSide: BorderSide.none,
-                                                                borderRadius: BorderRadius.circular(10),
-                                                              ),
-                                                              border: OutlineInputBorder(
-                                                                borderSide: BorderSide.none,
-                                                                borderRadius: BorderRadius.circular(10),
-                                                              ),
-                                                            ),
-                                                            onChanged: (value) => widget.onChanged(value, product.id.toString(), cart.id),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 8),
-                                                        GestureDetector(
-                                                          onTap: () => widget.onAddProduct(product.id.toString(), cart.id),
-                                                          child: const Icon(Icons.add_circle, color: AppColors.darkgreen),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                              );
-                            },
-                          ),
-                        ],
+                          return CardsProducts(
+                            widget: widget,
+                            cart: cart,
+                            quantityControllers: _quantityControllers,
+                            product: product,
+                          );
+                        },
                       ),
-                    ),
+                    ],
+                  ),
+                ),
               );
             }).toList(),
           ),
         ),
       ),
     );
+  }
+}
+
+class DeletedOrPayButtonsWidget extends StatelessWidget {
+  const DeletedOrPayButtonsWidget({
+    super.key,
+    required this.widget,
+    required this.cart,
+  });
+
+  final ShopListWidget widget;
+  final Cart cart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: 8,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => widget.onRemoveCart(cart.id),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              "lbl_delete_cart".translate,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
+        ),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () {
+              bool allValidQuantity = true;
+              for (var product in cart.products) {
+                if (product.quantityToBuy <= 0) {
+                  allValidQuantity = false;
+                  break;
+                }
+              }
+
+              if (allValidQuantity) {
+                widget.onPaymentCart(cart.id);
+                showFloatingMessage(
+                    context: context,
+                    message: "lbl_cart_added_to_check".translate,
+                    color: AppColors.darkgreen);
+              } else {
+                showFloatingMessage(
+                    context: context,
+                    message: "lbl_error_quantity_zero".translate,
+                    color: AppColors.red);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.green,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              "lbl_pay_cart".translate,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
+        ),
+        /* GestureDetector(
+          onTap: () => widget.onPaymentCart(cart.id),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.grey,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.share, color: AppColors.white),
+          ),
+        ) */
+      ],
+    );
+  }
+}
+
+class CardsProducts extends StatelessWidget {
+  const CardsProducts({
+    super.key,
+    required this.widget,
+    required this.cart,
+    required this.product,
+    required this.quantityControllers,
+  });
+
+  final ShopListWidget widget;
+  final Cart cart;
+  final Product product;
+  final Map<String, TextEditingController> quantityControllers;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+        color: Theme.of(context).expansionTileTheme.backgroundColor,
+          border: const Border(
+            bottom: BorderSide(
+              width: 6,
+              color: AppColors.ultralightgrey,
+            ),
+            right: BorderSide(
+              width: 6,
+              color: AppColors.ultralightgrey,
+            ),
+          ),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate responsive image size
+            // Priority: text content first, image shrinks if needed
+            final double availableWidth = constraints.maxWidth;
+            // Reserve minimum ~200px for text content, rest for image
+            const double minTextWidth = 180;
+            const double maxImageSize = 150;
+            const double minImageSize = 80;
+
+            // Calculate image size: available width minus text area
+            double imageSize = (availableWidth - minTextWidth - 24)
+                .clamp(minImageSize, maxImageSize);
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                //Product Image - responsive size
+                Container(
+                  height: imageSize,
+                  width: imageSize,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: product.image.contains('http')
+                        ? Image.network(
+                            product.image,
+                            height: double.infinity,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.error,
+                                  color: AppColors.red);
+                            },
+                          )
+                        : Image.file(
+                            File(product.image),
+                            height: double.infinity,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                AppImages.imageNotFound,
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                //Product Data - flexible width
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        //Title
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                product.name,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                widget.onDeleteProduct(
+                                  cart.id,
+                                  product.id,
+                                );
+                              },
+                              child: const Icon(
+                                Icons.delete_forever,
+                                color: AppColors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        Text(
+                          "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        const Divider(height: 8, color: AppColors.grey, thickness: 1),
+                        Text(
+                          "${'lbl_total'.translate}: ${((product.price * int.parse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        //Quantity controls
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => widget.onRemoveProduct(
+                                  product.id.toString(), cart.id),
+                              child: const Icon(Icons.remove_circle,
+                                  color: AppColors.darkgreen),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 50,
+                              child: TextFormField(
+                                controller: quantityControllers["${cart.id}_${product.id}"],
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  enabled: true,
+                                  isCollapsed: true,
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: const BorderSide(
+                                        width: 2, color: AppColors.green),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  disabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onChanged: (value) => widget.onChanged(
+                                    value, product.id.toString(), cart.id),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => widget.onAddProduct(
+                                  product.id.toString(), cart.id),
+                              child: const Icon(Icons.add_circle,
+                                  color: AppColors.darkgreen),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    
   }
 }

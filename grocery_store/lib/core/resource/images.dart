@@ -1,8 +1,8 @@
 
 
 class AppImages {
-  static const imageNotFound = 'lib/core/resource/image/png/Image-not-found.png';
-  static const imageWhatsapp = 'lib/core/resource/image/png/whatsapp.png';
-  static const logoImage = 'lib/core/resource/image/png/logo_image.png';
-  static const imageWhatsappOutline = 'lib/core/resource/image/png/whatsapp_outline.png';
+  static const imageNotFound = 'assets/img/png/Image-not-found.png';
+  static const imageWhatsapp = 'assets/img/png/whatsapp.png';
+  static const logoImage = 'assets/img/png/logo_image.png';
+  static const imageWhatsappOutline = 'assets/img/png/whatsapp_outline.png';
 }

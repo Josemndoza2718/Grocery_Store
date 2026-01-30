@@ -17,6 +17,8 @@ class AppColors {
   static const ultralightgrey = Color(0xffd0cfcf);
   
   static const black = Color(0xff000000);
+  static const lightblack = Color(0xff373737);
+  static const ultralightblack = Color(0xff4f4f4f);
 
   static const transparent = Color(0x00000000);
 

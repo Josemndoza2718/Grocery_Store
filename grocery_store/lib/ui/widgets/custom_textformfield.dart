@@ -36,10 +36,11 @@ class CustomTextFormField extends StatelessWidget {
         if (isButtonActive == true)
           GestureDetector(
             onTap: () => onTap!(),
-            child: Container(
+            child: 
+            Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: AppColors.green,
+                color: Theme.of(context).canvasColor,
               ),
               width: 50,
               height: 50,

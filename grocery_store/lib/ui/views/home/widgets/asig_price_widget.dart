@@ -21,7 +21,7 @@ class AsignPriceWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("$label: ${price.toStringAsFixed(2)}"),
+        Text("$label: ${price.toStringAsFixed(2)}", style: Theme.of(context).textTheme.bodyMedium,),
         CustomTextFormField(
           isButtonActive: true,
           controller: controller,
@@ -31,6 +31,7 @@ class AsignPriceWidget extends StatelessWidget {
           ],
           decoration: InputDecoration(
             hintText: "lbl_money_conversion".translate,
+            hintStyle: Theme.of(context).textTheme.headlineSmall,
             filled: true,
             fillColor: AppColors.lightwhite,
             focusedBorder: OutlineInputBorder(
@@ -50,13 +51,6 @@ class AsignPriceWidget extends StatelessWidget {
             ),
           ),
           onTap: () => onTap(),
-          /* double value = parseFormattedCurrency(controller.value.text);
-
-            viewModel.setMoneyConversion(value);
-
-            Prefs.setMoneyConversion(value);
-
-            controller.clear(); */
         ),
       ],
     );

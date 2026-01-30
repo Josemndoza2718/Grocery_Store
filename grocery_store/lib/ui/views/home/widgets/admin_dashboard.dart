@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/views/home/widgets/asig_price_widget.dart';
 import 'package:grocery_store/ui/views/home/widgets/products_list_widget.dart';
@@ -131,13 +130,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
               spacing: 16,
               children: [
                 const SizedBox(height: 8),
-                Text(
-                  "${"lbl_welcome".translate}, ${Prefs.getString(PrefKeys.userName)}, ",
-                  style: const TextStyle(
-                      fontSize: 20, 
-                      fontWeight: FontWeight.bold,
-                      ),
-                ),
                 //Money Conversion
                 AsignPriceWidget(
                   label: 'lbl_money_rate'.translate,
@@ -164,66 +156,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                       ),
                     ),
-                    Flexible(
-                      child: Container(
-                        //margin: const EdgeInsets.symmetric(horizontal: 10),
-                        padding: const EdgeInsets.only(left: 12),
-                        decoration: BoxDecoration(
-                          color: AppColors.green,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: DropdownMenu<int>(
-                          width: double.infinity,
-                          enableSearch: true,
-                          enableFilter: true,
-                          requestFocusOnTap: true,
-                          hintText: 'lbl_select_client'.translate,
-                          textStyle: const TextStyle(
-                            color: AppColors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          inputDecorationTheme: const InputDecorationTheme(
-                            border: InputBorder.none,
-                          ),
-                          menuStyle: MenuStyle(
-                            backgroundColor:
-                                WidgetStateProperty.all(AppColors.white),
-                            shape: WidgetStateProperty.all(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                          dropdownMenuEntries:
-                              provider.listClients.map((client) {
-                            return DropdownMenuEntry<int>(
-                              value: client.id,
-                              label: client.name,
-                              style: MenuItemButton.styleFrom(
-                                foregroundColor: AppColors.black,
-                              ),
-                              trailingIcon: IconButton(
-                                  onPressed: () {
-                                    provider.deletedClient(client.id);
-                                  },
-                                  icon: const Icon(
-                                    Icons.remove_circle,
-                                    color: AppColors.red,
-                                  )),
-                            );
-                          }).toList(),
-                          onSelected: (value) {
-                            final selectedClient =
-                                provider.listClients.firstWhere(
-                              (element) => element.id == value,
-                            );
-                            provider.clientId = value!;
-                            provider.setClientName = selectedClient.name;
-                          },
-                        ),
-                      ),
-                    ),
+                    DropSelectClientWidget(provider: provider),
                   ],
                 ),
                 if (provider.isActive)
@@ -232,8 +165,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     controller: clientController,
                     decoration: InputDecoration(
                       hintText: 'lbl_name_or_id'.translate,
+                      hintStyle: Theme.of(context).textTheme.bodySmall,
                       filled: true,
-                      fillColor: AppColors.lightwhite,
+                      fillColor: Theme.of(context).inputDecorationTheme.fillColor,
                       focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: AppColors.green,
@@ -280,7 +214,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 Flexible(
                   child: Container(
                     decoration: BoxDecoration(
-                        color: AppColors.lightwhite,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(10)),
                     child: Column(
                       children: [
@@ -288,27 +222,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Flexible(
-                              child: Container(
-                                height: 50,
-                                margin: const EdgeInsets.all(8),
-                                child: SearchBar(
-                                  backgroundColor: const WidgetStatePropertyAll(
-                                      AppColors.white),
-                                  controller: searchController,
-                                  leading: const Icon(Icons.search),
-                                  shape: const WidgetStatePropertyAll(
-                                      RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
-                                  )),
-                                  onChanged: (value) {
-                                    provider.filterProducts(value);
-                                  },
-                                ),
-                              ),
-                            ),
+                            SearchBarProductsWidget(searchController: searchController, provider: provider),
                             IconButton(
                               icon: Container(
                                   decoration: BoxDecoration(
@@ -333,7 +247,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             ),
                           ],
                         ),
-                        //Text("Client ${viewModel.clientName}"),
                         ProductsListWidget(
                             listProducts: provider.listFilterProducts,
                             onPressed: (index) async => await onAddItemProduct(provider, index),
@@ -350,6 +263,114 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class SearchBarProductsWidget extends StatelessWidget {
+  final HomeViewModel provider;
+  const SearchBarProductsWidget({
+    super.key,
+    required this.searchController,
+    required this.provider,
+  });
+
+  final TextEditingController searchController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: Container(
+        height: 50,
+        margin: const EdgeInsets.all(8),
+        child: SearchBar(
+          hintText: "lbl_search".translate,
+          hintStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
+          textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
+          backgroundColor: Theme.of(context).searchBarTheme.backgroundColor,
+          controller: searchController,
+          leading: const Icon(Icons.search),
+          shape: const WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10),
+            ),
+          )),
+          onChanged: (value) {
+            provider.filterProducts(value);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class DropSelectClientWidget extends StatelessWidget {
+
+  final HomeViewModel provider;
+  const DropSelectClientWidget({
+    super.key,
+    required this.provider,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: Container(
+        padding: const EdgeInsets.only(left: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: DropdownMenu<int>(
+          width: double.infinity,
+          enableSearch: true,
+          enableFilter: true,
+          requestFocusOnTap: true,
+          hintText: 'lbl_select_client'.translate,
+          textStyle: Theme.of(context).textTheme.labelLarge,
+          inputDecorationTheme: InputDecorationTheme(
+            border: InputBorder.none,
+            hintStyle: Theme.of(context).textTheme.labelLarge,
+            suffixIconColor: AppColors.white,
+          ),
+          menuStyle: MenuStyle(
+            backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surface),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                side: BorderSide.none,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          dropdownMenuEntries: provider.listClients.map((client) {
+            return DropdownMenuEntry<int>(
+              value: client.id,
+              label: client.name,
+              leadingIcon: Icon(Icons.person, color: Theme.of(context).colorScheme.onSurface),
+              style: MenuItemButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+              ),
+              trailingIcon: IconButton(
+                  onPressed: () {
+                    provider.deletedClient(client.id);
+                  },
+                  icon: const Icon(
+                    Icons.remove_circle,
+                    color: AppColors.red,
+                  )),
+            );
+          }).toList(),
+          onSelected: (value) {
+            final selectedClient =
+                provider.listClients.firstWhere(
+              (element) => element.id == value,
+            );
+            provider.clientId = value!;
+            provider.setClientName = selectedClient.name;
+          },
+        ),
       ),
     );
   }

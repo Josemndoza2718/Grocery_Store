@@ -43,7 +43,7 @@ class CheckWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: AppColors.lightwhite, borderRadius: BorderRadius.circular(10)),
+          color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
         child: Column(
@@ -55,10 +55,7 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "lbl_check_resume".translate,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 GestureDetector(
                   onTap: () => onTap(),
@@ -76,10 +73,7 @@ class CheckWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               "${"lbl_name".translate}: ${cart?.ownerCarName ?? 'N/A'}",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 8),
             Flexible(
@@ -99,15 +93,11 @@ class CheckWidget extends StatelessWidget {
                               children: [
                                 Text(
                                   cart!.products[index].name,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                                 Text(
                                   "${cart!.products[index].quantityToBuy.toStringAsFixed(0)} X ${((cart!.products[index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall,
                                 ),
                               ],
                             ),
@@ -124,16 +114,11 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "lbl_subtotal".translate,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
                   "${(subToTal * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
             ),
@@ -142,16 +127,11 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "${"lbl_iva".translate}($iva%)",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
                   "${((subToTal * (moneyConversion ?? 0)) * (iva / 100)).toStringAsFixed(2)}bs",
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
             ),
@@ -160,16 +140,11 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "${"lbl_discount".translate} ($discount%)",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
                   "${((subToTal * (moneyConversion ?? 0)) * (discount / 100)).toStringAsFixed(2)}bs",
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
             ),
@@ -178,16 +153,11 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "lbl_delivery".translate,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
                   "${(delivery * moneyConversion!).toStringAsFixed(2)}bs",
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
             ),
@@ -197,17 +167,11 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "lbl_total".translate,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
                   "${getTotal().toStringAsFixed(2)}bs",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),
