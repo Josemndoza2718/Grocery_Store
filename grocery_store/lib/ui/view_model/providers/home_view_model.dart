@@ -60,6 +60,7 @@ class HomeViewModel extends ChangeNotifier {
   double _moneyConversion = 0;
 
   String _selectedCategory = '';
+  String _searchQuery = '';
 
   bool _isFilterList = false;
 
@@ -117,19 +118,6 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-/*   String getRandomString(int length) {
-    const characters =
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random();
-
-    return String.fromCharCodes(
-      Iterable.generate(
-        length,
-        (_) => characters.codeUnitAt(random.nextInt(characters.length)),
-      ),
-    );
-  } */
-
   void toggleIsActive() {
     _isActive = !_isActive;
     notifyListeners();
@@ -147,15 +135,23 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   void filterProducts(String query) {
-    if (query.isEmpty) {
-      listFilterProducts = listProducts;
+    _searchQuery = query;
+    if (_searchQuery.isEmpty) {
+      listFilterProducts = List.from(listProducts);
     } else {
-      listFilterProducts = listProducts
-          .where((product) =>
-              product.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      final lowercaseQuery = _searchQuery.toLowerCase();
+      listFilterProducts = listProducts.where((product) {
+        final matchesName = product.name.toLowerCase().contains(lowercaseQuery);
+        final matchesCode = product.idStock.toLowerCase().contains(lowercaseQuery);
+        return matchesName || matchesCode;
+      }).toList();
     }
     notifyListeners();
+  }
+
+  void clearSearch() {
+    _searchQuery = '';
+    initList();
   }
 
   void setIsFilterList(bool value) {
@@ -189,17 +185,8 @@ class HomeViewModel extends ChangeNotifier {
 
     getProductsUseCases.callStream(userId: userId).listen((products) {
       listProducts = products;
-      // Re-apply filter if needed
-      if (_isFilterList && listFilterProducts.length != listProducts.length) {
-        // Optionally maintain filter state here, but for now just init list
-        // or re-run filter if query is stored.
-        // Simpler approach: update filter list if it's currently showing all (initList logic)
-        // or if we decide to just reset filter on update.
-        // Let's just update lists and notify.
-        initList();
-      } else {
-        initList();
-      }
+      // Re-apply current filter instead of just resetting to full list
+      filterProducts(_searchQuery);
     });
   }
 

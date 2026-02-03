@@ -12,7 +12,7 @@ class AnimatedButton extends StatelessWidget {
   final double height;
 
   const AnimatedButton({
-    Key? key,
+    super.key,
     required this.icon,
     this.label,
     this.onTap,
@@ -22,7 +22,7 @@ class AnimatedButton extends StatelessWidget {
     this.unSelectTextolor = Colors.white,
     this.height = 60,
     required this.isSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

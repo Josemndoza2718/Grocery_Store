@@ -29,7 +29,7 @@ class MainPage extends StatelessWidget {
 
   static final List<String> _pageNames = [
     "${"lbl_welcome".translate}, ${Prefs.getString(PrefKeys.userName)}",
-    "", //"lbl_cart".translate,
+    "lbl_cart".translate,
     "lbl_check".translate,
     "lbl_settings".translate,
   ];
@@ -37,7 +37,10 @@ class MainPage extends StatelessWidget {
   List<Widget> _pageIcons(BuildContext context) {
     return [
       Container(),
-      Container(),
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        child: Icon(Icons.shopping_cart, color: AppColors.white),
+      ),
       IconButton(
         onPressed: () {
           Navigator.push(

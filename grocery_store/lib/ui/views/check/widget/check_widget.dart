@@ -26,12 +26,31 @@ class CheckWidget extends StatelessWidget {
   });
 
   double getTotal() {
-    double total = 0;
-    double subTotal = subToTal * moneyConversion!;
-    double ivaTotal = subTotal * (iva / 100);
-    double deliveryTotal = delivery * moneyConversion!;
-    double preDiscountTotal = discount / 100;
-    double discountTotal = (preDiscountTotal * subTotal);
+    double total;
+    double subTotal;
+    double ivaTotal;
+    double deliveryTotal;
+    double preDiscountTotal;
+    double discountTotal;
+
+    if (moneyConversion != null) {
+      double total = 0;
+      double subTotal = subToTal * moneyConversion!;
+      double ivaTotal = subTotal * (iva / 100);
+      double deliveryTotal = delivery * moneyConversion!;
+      double preDiscountTotal = discount / 100;
+      double discountTotal = (preDiscountTotal * subTotal);
+
+      total = subTotal + ivaTotal + deliveryTotal - discountTotal;
+
+      return total;
+    } 
+
+    subTotal = subToTal;
+    ivaTotal = subTotal * (iva / 100);
+    deliveryTotal = delivery;
+    preDiscountTotal = discount / 100;
+    discountTotal = (preDiscountTotal * subTotal);
 
     total = subTotal + ivaTotal + deliveryTotal - discountTotal;
 
@@ -43,7 +62,8 @@ class CheckWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface, borderRadius: BorderRadius.circular(10)),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
         child: Column(
@@ -81,6 +101,10 @@ class CheckWidget extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: cart?.products.length ?? 0,
                 itemBuilder: (context, index) {
+                  final product = cart!.products[index];
+                  final price = product.price * moneyConversion!;
+                  final priceBs = product.price * moneyConversion!;
+
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -92,11 +116,13 @@ class CheckWidget extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  cart!.products[index].name,
+                                  product.name,
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                                 Text(
-                                  "${cart!.products[index].quantityToBuy.toStringAsFixed(0)} X ${((cart!.products[index].price) * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                                  moneyConversion == null
+                                      ? "${product.quantityToBuy.toStringAsFixed(0)} X ${price.toStringAsFixed(2)}\$"
+                                      : "${product.quantityToBuy.toStringAsFixed(0)} X ${priceBs.toStringAsFixed(2)} Bs",
                                   style: Theme.of(context).textTheme.labelSmall,
                                 ),
                               ],
@@ -117,7 +143,9 @@ class CheckWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
-                  "${(subToTal * (moneyConversion ?? 0)).toStringAsFixed(2)}bs",
+                  moneyConversion == null
+                      ? "${subToTal.toStringAsFixed(2)}\$"
+                      : "${(subToTal * (moneyConversion ?? 0)).toStringAsFixed(2)} Bs",
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
@@ -130,7 +158,9 @@ class CheckWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
-                  "${((subToTal * (moneyConversion ?? 0)) * (iva / 100)).toStringAsFixed(2)}bs",
+                  moneyConversion == null
+                      ? "${(subToTal * (iva / 100)).toStringAsFixed(2)}\$"
+                      : "${((subToTal * (moneyConversion ?? 0)) * (iva / 100)).toStringAsFixed(2)} bs",
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
@@ -143,7 +173,9 @@ class CheckWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
-                  "${((subToTal * (moneyConversion ?? 0)) * (discount / 100)).toStringAsFixed(2)}bs",
+                  moneyConversion == null
+                      ? "${(subToTal * (discount / 100)).toStringAsFixed(2)}\$"
+                      : "${((subToTal * (moneyConversion ?? 0)) * (discount / 100)).toStringAsFixed(2)} bs",
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
@@ -156,7 +188,9 @@ class CheckWidget extends StatelessWidget {
                   style: Theme.of(context).textTheme.labelMedium,
                 ),
                 Text(
-                  "${(delivery * moneyConversion!).toStringAsFixed(2)}bs",
+                  moneyConversion == null
+                      ? "${delivery.toStringAsFixed(2)}\$"
+                      : "${(delivery * moneyConversion!).toStringAsFixed(2)} bs",
                   style: Theme.of(context).textTheme.labelSmall,
                 ),
               ],
@@ -167,10 +201,12 @@ class CheckWidget extends StatelessWidget {
               children: [
                 Text(
                   "lbl_total".translate,
-                  style: Theme.of(context).textTheme.labelMedium,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 Text(
-                  "${getTotal().toStringAsFixed(2)}bs",
+                  moneyConversion == null
+                      ? "${getTotal().toStringAsFixed(2)}\$"
+                      : "${getTotal().toStringAsFixed(2)} bs",
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],

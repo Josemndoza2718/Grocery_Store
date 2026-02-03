@@ -8,6 +8,7 @@ class Product {
   final String idStock;
   final int stockQuantity;
   int quantityToBuy;
+  final DateTime createdAt;
 
   Product({
     required this.id,
@@ -19,7 +20,8 @@ class Product {
     required this.stockQuantity,
     required this.idStock,
     this.quantityToBuy = 0,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
 
   @override
   bool operator ==(Object other) =>
@@ -40,6 +42,7 @@ class Product {
       'idStock': idStock,
       'stockQuantity': stockQuantity,
       'quantity': quantityToBuy,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 
@@ -54,6 +57,9 @@ class Product {
       idStock: json['idStock'],
       stockQuantity: json['stockQuantity'],
       quantityToBuy: json['quantity'] ?? 0,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
     );
   }
 
@@ -67,6 +73,7 @@ class Product {
     String? idStock,
     int? stockQuantity,
     int? quantity,
+    DateTime? createdAt,
   }) {
     return Product(
       id: id ?? this.id,
@@ -76,8 +83,9 @@ class Product {
       description: description ?? this.description,
       price: price ?? this.price,
       idStock: idStock ?? this.idStock,
-      stockQuantity: stockQuantity ?? this.stockQuantity,
-      quantityToBuy: quantity ?? this.quantityToBuy,
-    );
+        stockQuantity: stockQuantity ?? this.stockQuantity,
+        quantityToBuy: quantity ?? this.quantityToBuy,
+        createdAt: createdAt ?? this.createdAt,
+      );
   }
 }

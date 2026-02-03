@@ -62,15 +62,15 @@ class NewCartRepositoryImpl implements NewCartRepository {
 
   @override
   Future<Result<void>> createCart(Cart cart) async {
+    final cartMap = cart.toJson();
+
+    // 1. Guardar en Sembast (Local) - Siempre inmediato
+    final sembastDb = await _getSembastDb();
+    await _store.record(cart.id).put(sembastDb, cartMap);
+
+    // 2. Intentar guardar en Firestore (Nube)
     return FirebaseErrorHandler.guard(() async {
-      final cartMap = cart.toJson();
-
-      // 1. Guardar en Firestore (Nube) usando el ID como documento
       await _db.collection('carts').doc(cart.id).set(cartMap);
-
-      // 2. Guardar en Sembast (Local)
-      final sembastDb = await _getSembastDb();
-      await _store.record(cart.id).put(sembastDb, cartMap);
     });
   }
 
@@ -88,18 +88,18 @@ class NewCartRepositoryImpl implements NewCartRepository {
 
   @override
   Future<Result<void>> updateCart(Cart cart) async {
-    return FirebaseErrorHandler.guard(() async {
-      final cartMap = cart.toJson();
+    final cartMap = cart.toJson();
 
-      // 1. Actualizar en Firestore (usar set con merge para evitar NOT_FOUND)
+    // 1. Actualizar en Sembast (Local) - Siempre inmediato
+    final sembastDb = await _getSembastDb();
+    await _store.record(cart.id).put(sembastDb, cartMap);
+
+    // 2. Intentar actualizar en Firestore (Nube)
+    return FirebaseErrorHandler.guard(() async {
       await _db.collection('carts').doc(cart.id).set(
             cartMap,
             SetOptions(merge: true),
           );
-
-      // 2. Actualizar en Sembast
-      final sembastDb = await _getSembastDb();
-      await _store.record(cart.id).put(sembastDb, cartMap);
     });
   }
 

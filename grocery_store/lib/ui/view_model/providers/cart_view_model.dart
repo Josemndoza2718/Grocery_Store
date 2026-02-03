@@ -19,6 +19,8 @@ import 'package:uuid/uuid.dart';
 
 class CartViewModel extends ChangeNotifier {
   StreamSubscription<List<Cart>>? _cartsSubscription;
+  Timer? _debounceTimer;
+  final Duration _debounceDuration = const Duration(milliseconds: 1500);
 
   CartViewModel({
     required this.getProductsUseCases,
@@ -126,6 +128,7 @@ class CartViewModel extends ChangeNotifier {
       }
     }
     notifyListeners();
+    _saveCartDebounced(cartId);
   }
 
   void removeQuantityProduct(String productId, String cartId) {
@@ -142,6 +145,7 @@ class CartViewModel extends ChangeNotifier {
       }
     }
     notifyListeners(); // Notifica a los oyentes
+    _saveCartDebounced(cartId);
   }
 
   void updateQuantityManually(String value, String productId, String cartId) {
@@ -165,6 +169,7 @@ class CartViewModel extends ChangeNotifier {
       }
     }
     notifyListeners();
+    _saveCartDebounced(cartId);
   }
 
   void setQuantityProductForm(int index, int value) {
@@ -246,6 +251,19 @@ class CartViewModel extends ChangeNotifier {
       }
     }
     notifyListeners();
+  }
+
+  void _saveCartDebounced(String cartId) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer?.cancel();
+
+    _debounceTimer = Timer(_debounceDuration, () async {
+      final cartIndex = listCarts.indexWhere((c) => c.id == cartId);
+      if (cartIndex != -1) {
+        final cart = listCarts[cartIndex];
+        await updateCartUseCases.call(cart);
+        print('Carrito $cartId auto-guardado exitosamente.');
+      }
+    });
   }
   
   void getMoneyConversion() async {
@@ -385,6 +403,7 @@ class CartViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _cartsSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 

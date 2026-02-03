@@ -94,7 +94,7 @@ class AppTheme {
           // decorationColor: AppColors.orange,
         ),
         headlineMedium: TextStyle(
-          color: AppColors.orange,
+          color: AppColors.black,
           fontSize: 18,
           fontFamily: 'CreatoDisplay',
           fontWeight: FontWeight.w700,
@@ -255,7 +255,7 @@ class AppTheme {
           // decorationColor: AppColors.orange,
         ),
         headlineMedium: TextStyle(
-          color: AppColors.orange,
+          color: AppColors.white,
           fontSize: 18,
           fontFamily: 'CreatoDisplay',
           fontWeight: FontWeight.w700,

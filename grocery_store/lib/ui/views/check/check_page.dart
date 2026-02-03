@@ -132,10 +132,8 @@ class _CheckPageState extends State<CheckPage> {
                 if (provider.selectedCartForCheckout != null) {
                   screenshotController.capture().then((image) async {
                     if (image != null) {
-                      final directory =
-                          await getApplicationDocumentsDirectory();
-                      final imagePath =
-                          await File('${directory.path}/image.png').create();
+                      final directory = await getApplicationDocumentsDirectory();
+                      final imagePath = await File('${directory.path}/image.png').create();
                       await imagePath.writeAsBytes(image);
                       saveAndShareImage(image);
                       // Save to history

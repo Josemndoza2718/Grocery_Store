@@ -39,7 +39,11 @@ class NewProductRepositoryImpl implements NewProductRepository {
         return Product.fromJson(data);
       }).toList();
 
-      // 3. Opcional: Sincronizar con Sembast en segundo plano (para mantener el caché local actualizado)
+      // 3. Ordenar en memoria: Más reciente a más viejo
+      // Esto evita que Firestore oculte los productos que no tienen el campo 'createdAt'
+      products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      // 4. Opcional: Sincronizar con Sembast en segundo plano
       _syncProductsToLocal(products);
 
       return products;

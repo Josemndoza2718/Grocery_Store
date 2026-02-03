@@ -11,6 +11,8 @@ import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
 import 'package:grocery_store/core/utils/extension.dart';
+import 'package:grocery_store/ui/views/home/widgets/decimal_widget.dart';
+import 'package:grocery_store/ui/widgets/final_text_form_field.dart';
 import 'package:grocery_store/ui/widgets/general_button.dart';
 import 'package:grocery_store/ui/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/providers/add_product_view_model.dart';
@@ -36,7 +38,8 @@ class _AddProductPageState extends State<AddProductPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _stockQuantityController = TextEditingController();
+  final TextEditingController _stockQuantityController =
+      TextEditingController();
   final TextEditingController _idStockController = TextEditingController();
   final TextEditingController _urlController = TextEditingController();
 
@@ -50,8 +53,10 @@ class _AddProductPageState extends State<AddProductPage> {
     super.initState();
 
     nameEditController = TextEditingController(text: widget.product?.name);
-    descriptionEditController = TextEditingController(text: widget.product?.description);
-    priceEditController = TextEditingController(text: widget.product?.price.toString());
+    descriptionEditController =
+        TextEditingController(text: widget.product?.description);
+    priceEditController =
+        TextEditingController(text: widget.product?.price.toString());
     _stockEditQuantityController =
         TextEditingController(text: widget.product?.stockQuantity.toString());
   }
@@ -166,11 +171,7 @@ class _AddProductPageState extends State<AddProductPage> {
           widget.product != null
               ? "lbl_update_product".translate
               : "lbl_add_product".translate,
-          style: const TextStyle(
-            color: AppColors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(context).textTheme.displaySmall,
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.white),
@@ -180,10 +181,7 @@ class _AddProductPageState extends State<AddProductPage> {
         ),
       ),
       body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context)
-              .unfocus(); // Esto quita el foco de cualquier TextField
-        },
+        onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SafeArea(child:
             Consumer<AddProductViewModel>(builder: (context, provider, _) {
@@ -193,152 +191,12 @@ class _AddProductPageState extends State<AddProductPage> {
               spacing: 16,
               children: [
                 const SizedBox(height: 0),
+                DefinitionImageWidget(
+                    urlController: _urlController,
+                    widget: widget,
+                    provider: provider),
                 //TODO: COMPONETIZAR ESTE WIDGET
-                Container(
-                  height: 200,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        spacing: 8,
-                        children: [
-                          ButtonSearchImage(
-                            label: "lbl_gallery".translate,
-                            icon: Icons.image,
-                            onTap: () async {
-                              final pickedImageGalery = await PhoneImage()
-                                  .pickImageFromGallery(ImageSource.gallery);
-                              if (pickedImageGalery != null) {
-                                provider.setGalleryImage(pickedImageGalery);
-                              }
-                            },
-                          ),
-                          ButtonSearchImage(
-                            label: "lbl_internet_image".translate,
-                            icon: Icons.link,
-                            onTap: () {
-                              CustomDialgos.showAlertDialog(
-                                context: context,
-                                title: 'Definir URL',
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    GeneralTextformfield(
-                                      controller: _urlController,
-                                      hintText: 'URL',
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Por favor, una url';
-                                        }
-                                        return null;
-                                      },
-                                    )
-                                  ],
-                                ),
-                                onConfirm: () {
-                                  provider.setUrlImage(_urlController.text);
-                                  Navigator.pop(context);
-                                },
-                              );
-                            },
-                          ),
-                          ButtonSearchImage(
-                            label: "lbl_photo".translate,
-                            icon: Icons.camera_alt,
-                            onTap: () async {
-                              final pickedImageCamera = await PhoneImage()
-                                  .pickImageFromGallery(ImageSource.camera);
-
-                              if (pickedImageCamera != null) {
-                                provider.setGalleryImage(pickedImageCamera);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          margin: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.lightwhite,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: provider.urlImage.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: provider.urlImage,
-                              fit: BoxFit.contain,
-                              errorWidget: (context, url, error) =>
-                                  Image.asset(AppImages.imageNotFound),
-                            )
-                          : provider.galleryImage != null
-                              ? SizedBox(
-                                  height: double.infinity,
-                                  child: Image.file(
-                                    provider.galleryImage!,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Image.asset(
-                                        AppImages.imageNotFound,
-                                        fit: BoxFit.cover,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : (widget.product != null && widget.product!.image.isNotEmpty)
-                                  ? SizedBox(
-                                      height: double.infinity,
-                                      child: widget.product!.image
-                                              .startsWith('http')
-                                          ? Image.network(
-                                              widget.product!.image,
-                                              fit: BoxFit.contain,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  AppImages.imageNotFound,
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            )
-                                          : Image.file(
-                                              File(widget.product!.image),
-                                              fit: BoxFit.contain,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Image.asset(
-                                                  AppImages.imageNotFound,
-                                                  fit: BoxFit.cover,
-                                                );
-                                              },
-                                            ),
-                                    )
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      spacing: 16,
-                                      children: [
-                                        const Icon(
-                                          Icons.image_not_supported,
-                                          size: 60,
-                                          color: AppColors.darkgreen,
-                                        ),
-                                        Text(
-                                          "lbl_no_image_selected".translate,
-                                          style: const TextStyle(
-                                              color: AppColors.black),
-                                        ),
-                                      ],
-                                    ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                //TODO: COMPONETIZAR ESTE WIDGET
+                //TODO: A FUTURO SE DEBEN CAMBIAR LOS GENERALTEXTFORMFIELD POR UN FINALTEXTFORMFIELD
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -380,7 +238,26 @@ class _AddProductPageState extends State<AddProductPage> {
                               hintText: 'lbl_product_detail'.translate,
                               maxLines: 2,
                             ),
-                            GeneralTextformfield(
+                            FinalTextFormField(
+                              controller: widget.product == null
+                                  ? _priceController
+                                  : priceEditController,
+                              labelText: 'lbl_product_price'.translate,
+                              hintText: 'lbl_product_price'.translate,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                DecimalInputFormatter(),
+                              ],
+                              validator: (value) {
+                                final cleaned = value?.replaceAll('.', '').replaceAll(',', '.');
+                                final price = double.tryParse(cleaned ?? '');
+                                if (price == null || price <= 0) {
+                                  return 'lbl_product_price_>_0'.translate;
+                                }
+                                return null;
+                              },
+                            ),
+                            /* GeneralTextformfield(
                               controller: widget.product == null
                                   ? _priceController
                                   : priceEditController,
@@ -398,75 +275,62 @@ class _AddProductPageState extends State<AddProductPage> {
                                 }
                                 return null;
                               },
-                            ),
-                            Row(
-                              spacing: 8,
-                              children: [
-                                Flexible(
-                                  child: GeneralTextformfield(
-                                    controller: widget.product == null
-                                        ? _stockQuantityController
-                                        : _stockEditQuantityController,
-                                    labelText:
-                                        'lbl_quantity_in_stock'.translate,
-                                    hintText: 'lbl_quantity_example'.translate,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly
-                                    ],
-                                    validator: (value) {
-                                      final quantity =
-                                          int.tryParse(value ?? '');
-                                      if (quantity == null || quantity < 0) {
-                                        return 'lbl_quantity_>_0'.translate;
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
+                            ), */
+                            GeneralTextformfield(
+                              controller: widget.product == null
+                                  ? _stockQuantityController
+                                  : _stockEditQuantityController,
+                              labelText: 'lbl_quantity_in_stock'.translate,
+                              hintText: 'lbl_quantity_example'.translate,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
                               ],
+                              validator: (value) {
+                                final quantity = int.tryParse(value ?? '');
+                                if (quantity == null || quantity < 0) {
+                                  return 'lbl_quantity_>_0'.translate;
+                                }
+                                return null;
+                              },
                             ),
                             const SizedBox(height: 0),
                             GeneralButton(
                               onTap: widget.product != null
                                   ? () async {
-                                      final userId =
-                                          Prefs.getString(PrefKeys.userId) ??
-                                              '';
+                                      final userId = Prefs.getString(PrefKeys.userId) ?? '';
+                                      final price = priceEditController.text.replaceAll('.', '').replaceAll(',', '.');
+
                                       _updateProduct(
                                           product: Product(
                                         id: widget.product!.id,
                                         name: nameEditController.text,
-                                        description:
-                                            descriptionEditController.text,
-                                        price: double.tryParse(
-                                                priceEditController.text) ??
-                                            0.0,
+                                        description: descriptionEditController.text,
+                                        price: double.tryParse(price) ?? 0.0,
                                         image: provider.urlImage.isEmpty
-                                        ? provider.galleryImage?.path ?? ''
-                                        : provider.urlImage,
+                                            ? provider.galleryImage?.path ?? ''
+                                            : provider.urlImage,
                                         idStock: _idStockController.text,
-                                        stockQuantity: int.tryParse(
-                                                _stockEditQuantityController
-                                                    .text) ??
-                                            0,
+                                        stockQuantity: int.tryParse(_stockEditQuantityController.text) ?? 0,
                                         quantityToBuy: 0,
                                         userId: userId,
                                       ));
                                     }
                                   : () async {
-                                      final userId =
-                                          Prefs.getString(PrefKeys.userId) ??
-                                              '';
+                                      final userId = Prefs.getString(PrefKeys.userId) ?? '';
+
+                                      final price = _priceController.text.replaceAll('.', '').replaceAll(',', '.');
+
+
                                       _createProduct(
                                           product: Product(
                                         id: _uuid.v4(),
                                         name: _nameController.text,
                                         description: _descriptionController.text,
-                                        price: double.tryParse(_priceController.text) ?? 0.0,
+                                        price: double.tryParse(price) ?? 0.0,
                                         image: provider.urlImage.isEmpty
-                                                  ? provider.galleryImage?.path ?? ''
-                                                  : provider.urlImage,
+                                            ? provider.galleryImage?.path ?? ''
+                                            : provider.urlImage,
                                         idStock: _idStockController.text,
                                         stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
                                         quantityToBuy: 0,
@@ -497,6 +361,166 @@ class _AddProductPageState extends State<AddProductPage> {
             ),
           );
         })),
+      ),
+    );
+  }
+}
+
+class DefinitionImageWidget extends StatelessWidget {
+  final TextEditingController _urlController;
+  final AddProductPage widget;
+  final AddProductViewModel provider;
+
+  const DefinitionImageWidget({
+    super.key,
+    required TextEditingController urlController,
+    required this.widget,
+    required this.provider,
+  }) : _urlController = urlController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        spacing: 8,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 8,
+            children: [
+              ButtonSearchImage(
+                label: "lbl_gallery".translate,
+                icon: Icons.image,
+                onTap: () async {
+                  final pickedImageGalery = await PhoneImage()
+                      .pickImageFromGallery(ImageSource.gallery);
+                  if (pickedImageGalery != null) {
+                    provider.setGalleryImage(pickedImageGalery);
+                  }
+                },
+              ),
+              ButtonSearchImage(
+                label: "lbl_internet_image".translate,
+                icon: Icons.link,
+                onTap: () {
+                  CustomDialgos.showAlertDialog(
+                    context: context,
+                    title: 'Definir URL',
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GeneralTextformfield(
+                          controller: _urlController,
+                          hintText: 'URL',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, una url';
+                            }
+                            return null;
+                          },
+                        )
+                      ],
+                    ),
+                    onConfirm: () {
+                      provider.setUrlImage(_urlController.text);
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+              ButtonSearchImage(
+                label: "lbl_photo".translate,
+                icon: Icons.camera_alt,
+                onTap: () async {
+                  final pickedImageCamera = await PhoneImage()
+                      .pickImageFromGallery(ImageSource.camera);
+
+                  if (pickedImageCamera != null) {
+                    provider.setGalleryImage(pickedImageCamera);
+                  }
+                },
+              ),
+            ],
+          ),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.lightwhite,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: provider.urlImage.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: provider.urlImage,
+                      fit: BoxFit.contain,
+                      errorWidget: (context, url, error) =>
+                          Image.asset(AppImages.imageNotFound),
+                    )
+                  : provider.galleryImage != null
+                      ? SizedBox(
+                          height: double.infinity,
+                          child: Image.file(
+                            provider.galleryImage!,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                AppImages.imageNotFound,
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          ),
+                        )
+                      : (widget.product != null &&
+                              widget.product!.image.isNotEmpty)
+                          ? SizedBox(
+                              height: double.infinity,
+                              child: widget.product!.image.startsWith('http')
+                                  ? Image.network(
+                                      widget.product!.image,
+                                      fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          AppImages.imageNotFound,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    )
+                                  : Image.file(
+                                      File(widget.product!.image),
+                                      fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          AppImages.imageNotFound,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    ),
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              spacing: 16,
+                              children: [
+                                const Icon(
+                                  Icons.image_not_supported,
+                                  size: 60,
+                                  color: AppColors.darkgreen,
+                                ),
+                                Text(
+                                  "lbl_no_image_selected".translate,
+                                  style:
+                                      const TextStyle(color: AppColors.black),
+                                ),
+                              ],
+                            ),
+            ),
+          )
+        ],
       ),
     );
   }

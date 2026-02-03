@@ -21,7 +21,7 @@ class AsignPriceWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("$label: ${price.toStringAsFixed(2)}", style: Theme.of(context).textTheme.bodyMedium,),
+        Text("$label: ${price.toStringAsFixed(2)}", style: Theme.of(context).textTheme.headlineMedium,),
         CustomTextFormField(
           isButtonActive: true,
           controller: controller,

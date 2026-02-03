@@ -13,9 +13,15 @@ class SalesHistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("lbl_history_sales".translate),
+        title: Text("lbl_history_sales".translate, style: Theme.of(context).textTheme.displaySmall,),
         centerTitle: false,
         backgroundColor: AppColors.green,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Consumer<CartViewModel>(
         builder: (context, provider, _) {
@@ -38,6 +44,7 @@ class SalesHistoryPage extends StatelessWidget {
               return Card(
                 elevation: 3,
                 margin: const EdgeInsets.symmetric(vertical: 8),
+                color: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -51,10 +58,7 @@ class SalesHistoryPage extends StatelessWidget {
                         children: [
                           Text(
                             cart.ownerCarName ?? '',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -82,7 +86,7 @@ class SalesHistoryPage extends StatelessWidget {
                         children: [
                           Text(
                             "${cart.products.length} ${"lbl_sales_products".translate}",
-                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           Text(
                             "${"lbl_total".translate}: ${_calculateTotal(cart, provider.moneyConversion).toStringAsFixed(2)}bs",
@@ -107,6 +111,10 @@ class SalesHistoryPage extends StatelessWidget {
       if (product.quantityToBuy > 0) {
         total += (product.price * product.quantityToBuy);
       }
+    }
+
+    if (moneyConversion == 0 ) {
+      return total;
     }
     return total * moneyConversion;
   }

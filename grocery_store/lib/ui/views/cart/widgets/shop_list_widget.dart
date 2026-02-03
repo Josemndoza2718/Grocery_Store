@@ -132,7 +132,14 @@ class _ShopListWidgetState extends State<ShopListWidget> {
             .reduce((a, b) => a + b);
       }
     }
-    return (totalPrice * widget.moneyConversion).toStringAsFixed(2);
+
+
+
+    if (widget.moneyConversion != 0) {
+      return (totalPrice * widget.moneyConversion).toStringAsFixed(2);
+    } else {
+      return totalPrice.toStringAsFixed(2);
+    }
   }
 
   int _getTotalItemsCart(String cartId) {
@@ -197,8 +204,11 @@ class _ShopListWidgetState extends State<ShopListWidget> {
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                           Text(
-                              "${'lbl_total'.translate}: ${_getTotalPriceCart(cart.id)} Bs",
-                              style: Theme.of(context).textTheme.labelSmall),
+                            widget.moneyConversion != 0
+                                ? "${'lbl_total'.translate}: ${_getTotalPriceCart(cart.id)} Bs"
+                                : "${'lbl_total'.translate}: ${_getTotalPriceCart(cart.id)} \$",
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
                         ],
                       ));
                 },
@@ -544,13 +554,16 @@ class CardsProducts extends StatelessWidget {
                           "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
+                        if(widget.moneyConversion != 0)
                         Text(
                           "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
                         const Divider(height: 8, color: AppColors.grey, thickness: 1),
                         Text(
-                          "${'lbl_total'.translate}: ${((product.price * int.parse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                          widget.moneyConversion == 0 
+                          ? "${'lbl_total'.translate}: ${((product.price * int.parse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "0"))).toStringAsFixed(2)}\$"
+                          : "${'lbl_total'.translate}: ${((product.price * int.parse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 8),

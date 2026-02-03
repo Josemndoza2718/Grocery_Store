@@ -27,6 +27,9 @@
     "lbl_product_exists_in_cart": "El producto ya está en el carrito",
     "lbl_error_quantity_zero": "Debe agregar al menos un producto con cantidad mayor a 0",
     "lbl_delete_product": "¿Estás seguro de eliminar este producto?",
+    "lbl_quantity": "Cantidad",
+    "lbl_price": "Precio",
+
 
     "--CART PAGE--":"-----------------------------------",
     "lbl_cart": "Carrito",

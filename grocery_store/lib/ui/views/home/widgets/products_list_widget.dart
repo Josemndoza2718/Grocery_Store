@@ -61,6 +61,9 @@ class ProductsListWidget extends StatelessWidget {
               itemCount: listProducts!.length,
               itemBuilder: (context, index) {
                 final  product = listProducts![index];
+                final quantity = product.stockQuantity;
+                final price = product.price;
+                final priceBs = ((product.price) * (moneyConversion ?? 0)).toStringAsFixed(2);
                 final TextStyle textStyle = Theme.of(context).textTheme.bodySmall!;
 
                 return GestureDetector(
@@ -155,7 +158,7 @@ class ProductsListWidget extends StatelessWidget {
                                   ),
                                 ), */
                               Text(
-                                "Cantidad: ${product.stockQuantity}",
+                                "${'lbl_quantity'.translate}: $quantity",
                                 style: textStyle,
                               ),
                               /* Padding(
@@ -169,11 +172,12 @@ class ProductsListWidget extends StatelessWidget {
                                   ),
                                 ), */
                               Text(
-                                "Precio: ${((product.price.toStringAsFixed(2)))}\$",
+                                "${'lbl_price'.translate}: ${price.toStringAsFixed(2)}\$",
                                 style: textStyle,
                               ),
+                              if(moneyConversion != null && moneyConversion != 0)
                               Text(
-                                "Precio: ${(((product.price) * (moneyConversion ?? 0)).toStringAsFixed(2))}bs",
+                                "${'lbl_price'.translate}: ${priceBs}bs",
                                 style: textStyle,
                               ),
                               const SizedBox(height: 10),

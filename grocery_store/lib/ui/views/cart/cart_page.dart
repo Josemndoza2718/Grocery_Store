@@ -20,7 +20,6 @@ class CartPage extends StatelessWidget {
             spacing: 16,
             children: [
               const SizedBox(height: 10),
-              //GridViewButtons
               // ignore: unnecessary_null_comparison
               if (provider.visibleCarts.isNotEmpty)
                 ShopListWidget(

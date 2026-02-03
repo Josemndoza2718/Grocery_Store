@@ -47,10 +47,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return double.parse(cleaned);
   }
 
-  Future<void> onAddItemProduct(HomeViewModel viewModel, int index) async {
+  Future<void> onAddItemProduct(HomeViewModel provider, int index) async {
     var carViewModel = Provider.of<CartViewModel>(context, listen: false);
 
-    if (viewModel.clientName.isEmpty) {
+    if (provider.clientName.isEmpty) {
       showFloatingMessage(
           context: context,
           message: "lbl_warning_select_client".translate,
@@ -58,7 +58,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       return;
     }
 
-    if (viewModel.listProducts.isEmpty) {
+    if (provider.listFilterProducts.isEmpty) {
       showFloatingMessage(
           context: context,
           message: "lbl_warning_no_products".translate,
@@ -68,15 +68,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
     // Check if a cart for the client already exists
     final existingCart = carViewModel.listCarts
         .where(
-          (element) => element.ownerId == viewModel.clientId,
+          (element) => element.ownerId == provider.clientId,
         )
         .toList();
 
     if (existingCart.isEmpty) {
       await carViewModel.createCart(
-        ownerId: viewModel.clientId,
-        ownerCarName: viewModel.clientName,
-        products: viewModel.listProducts[index],
+        ownerId: provider.clientId,
+        ownerCarName: provider.clientName,
+        products: provider.listFilterProducts[index],
       );
       showFloatingMessage(
           context: context,
@@ -85,9 +85,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     } else {
       final added = await carViewModel.updateCart(
         cartId: existingCart.first.id,
-        ownerId: viewModel.clientId,
-        ownerCarName: viewModel.clientName,
-        products: viewModel.listProducts[index],
+        ownerId: provider.clientId,
+        ownerCarName: provider.clientName,
+        products: provider.listFilterProducts[index],
       );
 
       if (added) {
@@ -95,7 +95,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             context: context,
             message: "lbl_product_added_to_client_cart"
                 .translate
-                .replaceAll("{client}", viewModel.clientName),
+                .replaceAll("{client}", provider.clientName),
             color: AppColors.darkgreen);
       } else {
         showFloatingMessage(
@@ -104,6 +104,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             color: AppColors.red);
       }
     }
+
+    //Revisar esto, con la intención de hacerlo en otra parte
     context.read<HomeViewModel>().getProducts();
     context.read<CartViewModel>().getAllCarts();
     context.read<CartViewModel>().getMoneyConversion();
@@ -300,6 +302,16 @@ class SearchBarProductsWidget extends StatelessWidget {
           onChanged: (value) {
             provider.filterProducts(value);
           },
+          trailing: [
+            if (searchController.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  searchController.clear();
+                  provider.clearSearch();
+                },
+              ),
+          ],
         ),
       ),
     );

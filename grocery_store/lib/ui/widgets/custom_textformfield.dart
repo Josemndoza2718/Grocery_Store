@@ -29,6 +29,7 @@ class CustomTextFormField extends StatelessWidget {
             controller: controller,
             keyboardType: keyboardType,
             inputFormatters: inputFormatters,
+            style: Theme.of(context).textTheme.headlineSmall,
             decoration: decoration,
           ),
         ),
