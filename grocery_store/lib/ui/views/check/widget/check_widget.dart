@@ -117,7 +117,7 @@ class CheckWidget extends StatelessWidget {
                               children: [
                                 Text(
                                   product.name,
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  style: Theme.of(context).textTheme.labelSmall,
                                 ),
                                 Text(
                                   moneyConversion == null

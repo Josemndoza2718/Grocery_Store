@@ -77,6 +77,7 @@ class HomeViewModel extends ChangeNotifier {
   }) async {
     if (name.isNotEmpty && name != "") {
       bool exists = listClients.any((element) => element.name == name);
+      //TODO: generar id unico
       if (!exists) {
         Random random = Random();
         int randomNumber = random.nextInt(100000000);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
-import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/sales_history_view_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -23,11 +23,15 @@ class SalesHistoryPage extends StatelessWidget {
           },
         ),
       ),
-      body: Consumer<CartViewModel>(
+      body: Consumer<SalesHistoryViewModel>(
         builder: (context, provider, _) {
-          final paidCarts = provider.paidCarts.reversed.toList();
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-          if (paidCarts.isEmpty) {
+          final salesList = provider.sales;
+
+          if (salesList.isEmpty) {
             return Center(
               child: Text(
                 "lbl_no_sales".translate,
@@ -38,9 +42,9 @@ class SalesHistoryPage extends StatelessWidget {
 
           return ListView.builder(
             padding: const EdgeInsets.all(12),
-            itemCount: paidCarts.length,
+            itemCount: salesList.length,
             itemBuilder: (context, index) {
-              final cart = paidCarts[index];
+              final cart = salesList[index];
               return Card(
                 elevation: 3,
                 margin: const EdgeInsets.symmetric(vertical: 8),

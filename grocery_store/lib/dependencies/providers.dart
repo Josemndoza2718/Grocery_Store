@@ -2,6 +2,7 @@ import 'package:grocery_store/data/repositories/local/car_client_repository_impl
 import 'package:grocery_store/data/repositories/local/cash_product_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_cart_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_product_repository_impl.dart';
+import 'package:grocery_store/data/repositories/local/new/sales_history_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/product_repository_impl.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
@@ -17,12 +18,15 @@ import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/sales/create_sale_use_case.dart';
+import 'package:grocery_store/domain/use_cases/sales/get_sales_use_case.dart';
 import 'package:grocery_store/ui/view_model/providers/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/check_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/main_page_view_model.dart';
+import 'package:grocery_store/ui/view_model/providers/sales_history_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -71,6 +75,9 @@ final List<SingleChildWidget> providers = [
                 GetClientsUseCases(repository: ClientRepositoryImpl()),
             deleteClientsUseCases:
                 DeleteClientsUseCases(repository: ClientRepositoryImpl()),
+            //Sales
+            createSaleUseCase:
+                CreateSaleUseCase(SalesHistoryRepositoryImpl()),
           )),
   ChangeNotifierProvider(
       create: (context) => AddProductViewModel(
@@ -88,5 +95,9 @@ final List<SingleChildWidget> providers = [
                 NewGetCartsUseCases(repository: NewCartRepositoryImpl()),
             deleteCashProductsUseCases: DeleteCashProductsUseCases(
                 repository: CashProductRepositoryImpl()),
+          )),
+  ChangeNotifierProvider(
+      create: (context) => SalesHistoryViewModel(
+            getSalesUseCase: GetSalesUseCase(SalesHistoryRepositoryImpl()),
           )),
 ];

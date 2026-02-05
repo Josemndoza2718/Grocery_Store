@@ -15,6 +15,7 @@ import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.d
 import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/sales/create_sale_use_case.dart';
 import 'package:uuid/uuid.dart';
 
 class CartViewModel extends ChangeNotifier {
@@ -32,6 +33,7 @@ class CartViewModel extends ChangeNotifier {
     required this.createClientUseCases,
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
+    required this.createSaleUseCase,
   }) {
     getAllCarts();
     getMoneyConversion();
@@ -51,6 +53,9 @@ class CartViewModel extends ChangeNotifier {
   final CreateClientUseCases createClientUseCases;
   final GetClientsUseCases getClientsUseCases;
   final DeleteClientsUseCases deleteClientsUseCases;
+
+  //Sales
+  final CreateSaleUseCase createSaleUseCase;
 
   List<Product> listProducts = [];
   List<Cart> listCarts = [];
@@ -279,7 +284,8 @@ class CartViewModel extends ChangeNotifier {
     required Product products,
   }) async {
     List<Product> listProductsInCart = [];
-    listProductsInCart.add(products);
+    // Create a defensive copy starting with quantity 1
+    listProductsInCart.add(products.copyWith(quantity: 1));
 
     if (listProductsInCart.isNotEmpty && ownerCarName.isNotEmpty) {
       final cartId = const Uuid().v4();
@@ -324,7 +330,8 @@ class CartViewModel extends ChangeNotifier {
         }
 
         listProductsAddCart = List<Product>.from(element.products);
-        listProductsAddCart.add(products);
+        // Create a defensive copy starting with quantity 1
+        listProductsAddCart.add(products.copyWith(quantity: 1));
         
         final result = await updateCartUseCases.call(
           element.copyWith(
@@ -416,7 +423,6 @@ class CartViewModel extends ChangeNotifier {
             final int newStock = product.stockQuantity - product.quantityToBuy;
             final updatedProduct = product.copyWith(stockQuantity: newStock);
             await updateProductsUseCases.call(updatedProduct);
-            // Ignore result for individual product updates for now, or handle cumulatively
           }
         }
 
@@ -426,14 +432,17 @@ class CartViewModel extends ChangeNotifier {
           updatedAt: DateTime.now(),
         );
         
-        final result = await updateCartUseCases.call(updatedCart);
+        // 1. Move to sales-history
+        final saleResult = await createSaleUseCase.call(updatedCart);
         
-        result.fold(
-          onSuccess: (_) {
+        saleResult.fold(
+          onSuccess: (_) async {
+            // 2. Delete from active carts
+            await deleteCartUseCases.call(cartId);
             _hiddenCartIds.remove(cartId);
             notifyListeners();
           },
-          onError: (failure) => print('Error marking cart as paid: ${failure.message}'),
+          onError: (failure) => print('Error creating sale: ${failure.message}'),
         );
         break;
       }

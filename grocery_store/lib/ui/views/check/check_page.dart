@@ -138,9 +138,7 @@ class _CheckPageState extends State<CheckPage> {
                       saveAndShareImage(image);
                       // Save to history
                       if (provider.selectedCartForCheckout != null) {
-                        provider
-                            .markCartAsPaid(
-                                provider.selectedCartForCheckout!.id)
+                        provider.markCartAsPaid(provider.selectedCartForCheckout!.id)
                             .then((value) {
                           discountController.text = "0";
                           deliveryController.text = "0";
