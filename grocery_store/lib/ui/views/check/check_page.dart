@@ -31,20 +31,6 @@ class _CheckPageState extends State<CheckPage> {
   TextEditingController deliveryController = TextEditingController(text: "0");
   ScreenshotController screenshotController = ScreenshotController();
 
-  /* Future<dynamic> ShowCapturedWidget(
-      BuildContext context, Uint8List capturedImage) {
-    return showDialog(
-      useSafeArea: false,
-      context: context,
-      builder: (context) => Scaffold(
-        appBar: AppBar(
-          title: Text("Captured widget screenshot"),
-        ),
-        body: Center(child: Image.memory(capturedImage)),
-      ),
-    );
-  } */
-
   Future<void> saveAndShareImage(Uint8List image) async {
     final time = DateTime.now().toIso8601String().replaceAll(".", "_");
     final directory = await getExternalStorageDirectory();
@@ -113,6 +99,7 @@ class _CheckPageState extends State<CheckPage> {
               child: Screenshot(
                 controller: screenshotController,
                 child: CheckWidget(
+                  isPaid: provider.isPaid,
                   cart: provider.selectedCartForCheckout,
                   subToTal: provider.subTotal,
                   moneyConversion: provider.moneyConversion,
@@ -127,67 +114,141 @@ class _CheckPageState extends State<CheckPage> {
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                if (provider.selectedCartForCheckout != null) {
-                  screenshotController.capture().then((image) async {
-                    if (image != null) {
-                      final directory = await getApplicationDocumentsDirectory();
-                      final imagePath = await File('${directory.path}/image.png').create();
-                      await imagePath.writeAsBytes(image);
-                      saveAndShareImage(image);
-                      // Save to history
-                      if (provider.selectedCartForCheckout != null) {
-                        provider.markCartAsPaid(provider.selectedCartForCheckout!.id)
-                            .then((value) {
-                          discountController.text = "0";
-                          deliveryController.text = "0";
-                          provider.clearData();
-                        });
-                      }
-                    }
-                  }).catchError((onError) {
-                    print(onError);
-                  });
-                } else {
-                  showFloatingMessage(
-                      context: context,
-                      message: "lbl_warning_no_items".translate,
-                      color: AppColors.red);
-                }
-              },
-              child: Container(
-                height: 60,
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                padding: const EdgeInsets.only(bottom: 5, right: 5),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColors.ultralightgrey),
-                child: Container(
-                  height: 55,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      color: AppColors.green,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Row(
-                      spacing: 16,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.print,
-                            color: AppColors.white, size: 32),
-                        Text(
-                          "lbl_print".translate,
-                          style: Theme.of(context).textTheme.labelLarge,
+            // Send Check
+            if (provider.selectedCartForCheckout != null)
+              Row(
+                children: [
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (provider.selectedCartForCheckout != null) {
+                          screenshotController.capture().then((image) async {
+                            if (image != null) {
+                              final directory =
+                                  await getApplicationDocumentsDirectory();
+                              final imagePath =
+                                  await File('${directory.path}/image.png')
+                                      .create();
+                              await imagePath.writeAsBytes(image);
+                              saveAndShareImage(image);
+                            }
+                          }).catchError((onError) {
+                            print(onError);
+                          });
+                        } else {
+                          showFloatingMessage(
+                              context: context,
+                              message: "lbl_warning_no_items".translate,
+                              color: AppColors.red);
+                        }
+                      },
+                      child: Container(
+                        height: 60,
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(bottom: 5, right: 5),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.ultralightgrey),
+                        child: Container(
+                          height: 55,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: AppColors.green,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              spacing: 16,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.send,
+                                    color: AppColors.white, size: 32),
+                                Text(
+                                  "lbl_send_check".translate,
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (provider.selectedCartForCheckout != null) {
+                          provider.setIsPaid(true);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            screenshotController.capture().then((image) async {
+                              if (image != null) {
+                                final directory =
+                                    await getApplicationDocumentsDirectory();
+                                final imagePath =
+                                    await File('${directory.path}/image.png')
+                                        .create();
+                                await imagePath.writeAsBytes(image);
+                                saveAndShareImage(image);
+                                // Save to history
+                                if (provider.selectedCartForCheckout != null) {
+                                  provider
+                                      .markCartAsPaid(
+                                          provider.selectedCartForCheckout!.id)
+                                      .then((value) {
+                                    discountController.text = "0";
+                                    deliveryController.text = "0";
+                                    provider.clearData();
+                                  });
+                                }
+                              }
+                            }).catchError((onError) {
+                              print(onError);
+                            });
+                          });
+                        } else {
+                          showFloatingMessage(
+                              context: context,
+                              message: "lbl_warning_no_items".translate,
+                              color: AppColors.red);
+                        }
+                      },
+                      child: Container(
+                        height: 60,
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.only(bottom: 5, right: 5),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.ultralightgrey),
+                        child: Container(
+                          height: 55,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: AppColors.green,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Row(
+                              spacing: 16,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.print,
+                                    color: AppColors.white, size: 32),
+                                Text(
+                                  "lbl_print".translate,
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+
             const SizedBox(height: 80),
           ],
         ),

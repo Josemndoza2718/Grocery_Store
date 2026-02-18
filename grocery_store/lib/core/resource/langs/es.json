@@ -3,15 +3,13 @@
     "content": "¿Estás seguro de que deseas continuar?",
     "confirm": "Ok",
     "cancel": "Cancelar",
-
-    "--BOTTOM NAVIGATION BAR--":"-----------------------------------",
+    "--BOTTOM NAVIGATION BAR--": "-----------------------------------",
     "lbl_app_name": "My Store",
     "lbl_home": "Inicio",
     "lbl_carts": "Carritos",
     "lbl_sales": "Ventas",
     "lbl_settings": "Ajustes",
-
-    "--ADMIN DASHBOARD--":"-----------------------------------",
+    "--ADMIN DASHBOARD--": "-----------------------------------",
     "lbl_welcome": "Bienvenido",
     "lbl_guest": "Invitado",
     "lbl_money_rate": "Tasa de moneda en Uso",
@@ -29,9 +27,7 @@
     "lbl_delete_product": "¿Estás seguro de eliminar este producto?",
     "lbl_quantity": "Cantidad",
     "lbl_price": "Precio",
-
-
-    "--CART PAGE--":"-----------------------------------",
+    "--CART PAGE--": "-----------------------------------",
     "lbl_cart": "Carrito",
     "lbl_delete_cart": "Eliminar",
     "lbl_pay_cart": "Pagar",
@@ -39,9 +35,7 @@
     "lbl_$_uni": "$. c/uni",
     "lbl_bs_uni": "Bs. c/uni",
     "lbl_cart_added_to_check": "Carrito agregado a la factura",
-    
-
-    "--ADD PRODUCT--":"-----------------------------------",
+    "--ADD PRODUCT--": "-----------------------------------",
     "lbl_add_product": "Agregar producto",
     "lbl_update_product": "Actualizar producto",
     "lbl_gallery": "galería",
@@ -60,9 +54,7 @@
     "lbl_quantity_>_0": "Ingrese una cantidad válida",
     "lbl_save": "Guardar",
     "lbl_update": "Actualizar",
-
-
-    "--CHECK PAGE--":"-----------------------------------",
+    "--CHECK PAGE--": "-----------------------------------",
     "lbl_check": "Historial de ventas",
     "lbl_check_resume": "Resumen de la orden",
     "lbl_name": "Nombre",
@@ -72,12 +64,11 @@
     "lbl_discount": "Descuento",
     "lbl_delivery": "Envio",
     "lbl_total": "Total",
+    "lbl_send_check": "Enviar factura",
     "lbl_print": "Imprimir",
     "lbl_money_conversion": "Conversion de moneda",
     "lbl_warning_no_items": "No hay productos en la factura",
-
-
-    "--HISTORY SALES PAGE--":"-----------------------------------",
+    "--HISTORY SALES PAGE--": "-----------------------------------",
     "lbl_history_sales": "Historial de ventas",
     "lbl_paid": "PAGADO",
     "lbl_date": "Fecha",

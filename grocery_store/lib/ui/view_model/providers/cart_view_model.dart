@@ -72,10 +72,10 @@ class CartViewModel extends ChangeNotifier {
 
   List<String> _hiddenCartIds = [];
 
-  
   int _payPart = 0;
   double _discount = 0;
   double _delivery = 0;
+  bool _isPaid = false;
 
   double get moneyConversion => _moneyConversion;
   double get subTotal => _subTotal;
@@ -85,10 +85,18 @@ class CartViewModel extends ChangeNotifier {
   Cart? get selectedCartForCheckout => _selectedCartForCheckout;
   double get discount => _discount;
   double get delivery => _delivery;
-  
-  List<Cart> get paidCarts => listCarts.where((c) => c.status == 'paid').toList();
-  List<Cart> get visibleCarts => listCarts.where((c) => !_hiddenCartIds.contains(c.id) && c.status != 'paid').toList();
+  bool get isPaid => _isPaid;
 
+  List<Cart> get paidCarts =>
+      listCarts.where((c) => c.status == 'paid').toList();
+  List<Cart> get visibleCarts => listCarts
+      .where((c) => !_hiddenCartIds.contains(c.id) && c.status != 'paid')
+      .toList();
+
+  setIsPaid(bool value) {
+    _isPaid = value;
+    notifyListeners();
+  }
 
   setDiscount(double value) {
     _discount = value;
@@ -122,14 +130,14 @@ class CartViewModel extends ChangeNotifier {
     // Buscar el producto en todas las categorías
     for (var category in listCarts) {
       if (category.id == cartId) {
-      for (var product in category.products) {
-        if (product.id.toString() == productId) {
-          if (product.quantityToBuy < product.stockQuantity) {
-            product.quantityToBuy++;
-            // Notifica a los oyentes
-          } // Salir una vez encontrado y actualizado
+        for (var product in category.products) {
+          if (product.id.toString() == productId) {
+            if (product.quantityToBuy < product.stockQuantity) {
+              product.quantityToBuy++;
+              // Notifica a los oyentes
+            } // Salir una vez encontrado y actualizado
+          }
         }
-      }
       }
     }
     notifyListeners();
@@ -140,13 +148,13 @@ class CartViewModel extends ChangeNotifier {
     // Buscar el producto en todas las categorías
     for (var category in listCarts) {
       if (category.id == cartId) {
-      for (var product in category.products) {
-        if (product.id.toString() == productId) {
-          if (product.quantityToBuy > 0) {
-            product.quantityToBuy--;
+        for (var product in category.products) {
+          if (product.id.toString() == productId) {
+            if (product.quantityToBuy > 0) {
+              product.quantityToBuy--;
+            }
           }
         }
-      }
       }
     }
     notifyListeners(); // Notifica a los oyentes
@@ -195,8 +203,7 @@ class CartViewModel extends ChangeNotifier {
           element.payPart = value;
           element.updatedAt = DateTime.now();
         }
-      }
-      else{
+      } else {
         if (element.id == id) {
           element.status = "buying";
           element.payAt = null; // Reset payment date if changing back to buying
@@ -221,8 +228,7 @@ class CartViewModel extends ChangeNotifier {
   }
 
   /// Prepara un carrito específico para el checkout
-  
-  
+
   void prepareCartForCheckout(String cartId) {
     _hiddenCartIds.add(cartId); // Hide cart from list
     _selectedCartForCheckout = null;
@@ -235,7 +241,7 @@ class CartViewModel extends ChangeNotifier {
           int newStock = product.stockQuantity - product.quantityToBuy;
           updatedProducts.add(product.copyWith(stockQuantity: newStock));
         }
-        
+
         // Crear copia del carrito con los productos actualizados
         _selectedCartForCheckout = cart.copyWith(products: updatedProducts);
         break;
@@ -252,7 +258,7 @@ class CartViewModel extends ChangeNotifier {
             .where((product) => product.quantityToBuy > 0)
             .map((product) => product.price * product.quantityToBuy)
             .fold(0.0, (previousValue, element) => previousValue + element);
-        break; 
+        break;
       }
     }
     notifyListeners();
@@ -270,7 +276,7 @@ class CartViewModel extends ChangeNotifier {
       }
     });
   }
-  
+
   void getMoneyConversion() async {
     double money = await Prefs.getMoneyConversion();
     _moneyConversion = money;
@@ -301,10 +307,10 @@ class CartViewModel extends ChangeNotifier {
           products: listProductsInCart,
         ),
       );
-      
+
       result.fold(
         onSuccess: (_) {
-           // Success logic (no need to do anything as stream updates)
+          // Success logic (no need to do anything as stream updates)
         },
         onError: (failure) {
           // Handle error (maybe set a local error state or notify UI via a callback/listener if architecture allows)
@@ -332,7 +338,7 @@ class CartViewModel extends ChangeNotifier {
         listProductsAddCart = List<Product>.from(element.products);
         // Create a defensive copy starting with quantity 1
         listProductsAddCart.add(products.copyWith(quantity: 1));
-        
+
         final result = await updateCartUseCases.call(
           element.copyWith(
             products: listProductsAddCart,
@@ -361,10 +367,11 @@ class CartViewModel extends ChangeNotifier {
 
   Future<void> getAllCarts() async {
     final userId = Prefs.getString(PrefKeys.userId) ?? '';
-    
+
     // Subscribe to carts stream for real-time updates
     _cartsSubscription?.cancel();
-    _cartsSubscription = getCartsUseCases.callStream(userId: userId).listen((carts) {
+    _cartsSubscription =
+        getCartsUseCases.callStream(userId: userId).listen((carts) {
       listCarts = carts;
       _isActivePanel = List.filled(listCarts.length, false);
       notifyListeners();
@@ -395,12 +402,13 @@ class CartViewModel extends ChangeNotifier {
       if (element.id == cartId) {
         element.products.removeWhere((product) => product.id == productId);
         element.updatedAt = DateTime.now();
-        
+
         final result = await updateCartUseCases.call(element);
-        
+
         result.fold(
           onSuccess: (_) => notifyListeners(),
-          onError: (failure) => print('Error updating product in cart: ${failure.message}'),
+          onError: (failure) =>
+              print('Error updating product in cart: ${failure.message}'),
         );
         break;
       }
@@ -431,10 +439,10 @@ class CartViewModel extends ChangeNotifier {
           payAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        
+
         // 1. Move to sales-history
         final saleResult = await createSaleUseCase.call(updatedCart);
-        
+
         saleResult.fold(
           onSuccess: (_) async {
             // 2. Delete from active carts
@@ -442,7 +450,8 @@ class CartViewModel extends ChangeNotifier {
             _hiddenCartIds.remove(cartId);
             notifyListeners();
           },
-          onError: (failure) => print('Error creating sale: ${failure.message}'),
+          onError: (failure) =>
+              print('Error creating sale: ${failure.message}'),
         );
         break;
       }
@@ -452,6 +461,7 @@ class CartViewModel extends ChangeNotifier {
   void clearData() {
     _selectedCartForCheckout = null;
     _subTotal = 0;
+    _isPaid = false;
     notifyListeners();
   }
 }
