@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **pendiente de iniciar** · Rama sugerida: `feature/multi-tienda`
+> Estado: **Fase 0 completada** · Rama: `feature/multi-tienda`
 
 ---
 
@@ -224,17 +224,21 @@ Cada fase termina con: `flutter analyze` sin errores, tests en verde, pruebas de
 reglas en el emulador y prueba manual en dispositivo. **Las fases 1 y 2 se publican
 juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio).
 
-### Fase 0 — Preparación · tamaño S
-- [ ] Hacer commit del trabajo pendiente actual en `main` y crear `feature/multi-tienda`.
-- [ ] Añadir sección `firestore` a `firebase.json` (rules + indexes) para publicar con
+### Fase 0 — Preparación · tamaño S · ✅ completada
+- [x] Hacer commit del trabajo pendiente actual en `main` y crear `feature/multi-tienda`.
+- [x] Añadir sección `firestore` a `firebase.json` (rules + indexes) para publicar con
       `firebase deploy --only firestore` en vez de copiar/pegar en la consola.
-- [ ] Crear `firestore.indexes.json`.
-- [ ] Montar pruebas de reglas con el Emulator Suite (`@firebase/rules-unit-testing`,
-      requiere Node.js y Firebase CLI).
-- [ ] Borrar código legado muerto: `car/*`, `cash/*`, `category/*`, `CheckViewModel`,
+- [x] Crear `firestore.indexes.json` (+ `.firebaserc` con el proyecto por defecto).
+- [x] Montar pruebas de reglas con el Emulator Suite en `firestore-tests/`
+      (`@firebase/rules-unit-testing`; Node.js + Firebase CLI + Java 17 de Android Studio).
+      25 pruebas de las reglas actuales en verde.
+- [x] Borrar código legado muerto: `car/*`, `cash/*`, `category/*`, `CheckViewModel`,
       `CashProductRepositoryImpl`, `CartRepositoryImpl`, `ProductRepositoryImpl`,
       `SendProductFirebaseUseCases`, `CreateSaleUseCase`, archivos `* copy.dart`.
-- [ ] Reemplazar `test/widget_test.dart` (test del contador, falla).
+      También: categorías (sin uso), `DetailPayPage` (maqueta), `GeneralListWidget`,
+      modelos `CartModel`/`ProductModel`/`CategoryModel`, `my_localizations.dart` y la
+      dependencia `flutter_localization`.
+- [x] Reemplazar `test/widget_test.dart` por pruebas de entidades (`test/domain/entities_test.dart`).
 
 ### Fase 1 — Tiendas y sesión · tamaño L
 - [ ] Entidades: `Store`, `Employee`, `Invitation`, `AppSession`.

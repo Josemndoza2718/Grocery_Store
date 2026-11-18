@@ -13,7 +13,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   await Prefs.init();
-  //await FlutterLocalization.instance.ensureInitialized();
 
   await Firebase.initializeApp();
 

@@ -1,15 +1,11 @@
 import 'package:grocery_store/data/repositories/local/car_client_repository_impl.dart';
-import 'package:grocery_store/data/repositories/local/cash_product_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_cart_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_product_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/sales_history_repository_impl.dart';
-import 'package:grocery_store/data/repositories/local/product_repository_impl.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_get_carts_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/cash/create_cash_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/cash/delete_car_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
@@ -19,12 +15,9 @@ import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.
 import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/sales/create_sale_use_case.dart';
 import 'package:grocery_store/domain/use_cases/sales/get_sales_use_case.dart';
 import 'package:grocery_store/ui/view_model/providers/add_product_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
-import 'package:grocery_store/ui/view_model/providers/check_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/providers/main_page_view_model.dart';
@@ -42,8 +35,6 @@ final legacyClientRepository = ClientRepositoryImpl();
 final clientRepository = NewClientRepositoryImpl();
 final newCartRepository = NewCartRepositoryImpl();
 final salesHistoryRepository = SalesHistoryRepositoryImpl();
-final productRepository = ProductRepositoryImpl();
-final cashProductRepository = CashProductRepositoryImpl();
 final paymentRepository = PaymentRepositoryImpl();
 
 /// Providers that live for the whole app lifetime (independent of the session).
@@ -66,8 +57,6 @@ List<SingleChildWidget> sessionProviders(String userId) => [
                 //Products
                 createProductsUseCases:
                     CreateProductsUseCases(newProductRepository),
-                sendProductsToFirebaseUseCases:
-                    SendProductFirebaseUseCases(repository: productRepository),
                 getProductsUseCases:
                     NewGetProductsUseCases(newProductRepository),
                 deleteProductsUseCases:
@@ -102,7 +91,6 @@ List<SingleChildWidget> sessionProviders(String userId) => [
                 updateProductsUseCases:
                     UpdateProductsUseCases(newProductRepository),
                 //Sales
-                createSaleUseCase: CreateSaleUseCase(salesHistoryRepository),
                 processPaymentUseCase: ProcessPaymentUseCase(paymentRepository),
               )),
       ChangeNotifierProvider(
@@ -114,15 +102,6 @@ List<SingleChildWidget> sessionProviders(String userId) => [
                     UpdateProductsUseCases(newProductRepository),
               )),
       ChangeNotifierProvider(create: (context) => MainPageViewModel()),
-      ChangeNotifierProvider(
-          create: (context) => CheckViewModel(
-                createCashProductsUseCases: CreateCashProductsUseCases(
-                    repository: cashProductRepository),
-                getCartsUseCases:
-                    NewGetCartsUseCases(repository: newCartRepository),
-                deleteCashProductsUseCases: DeleteCashProductsUseCases(
-                    repository: cashProductRepository),
-              )),
       ChangeNotifierProvider(
           create: (context) => SalesHistoryViewModel(
                 userId: userId,

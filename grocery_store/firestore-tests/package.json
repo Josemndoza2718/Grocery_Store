@@ -1,0 +1,14 @@
+{
+  "name": "grocery-store-firestore-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Pruebas de las reglas de Firestore con el emulador",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 rules.test.js",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-grocery-store \"npm test\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0"
+  }
+}

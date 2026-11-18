@@ -11,7 +11,6 @@ import 'package:grocery_store/domain/use_cases/cart/new/new_get_carts_use_cases.
 import 'package:grocery_store/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/sales/create_sale_use_case.dart';
 import 'package:grocery_store/domain/use_cases/sales/process_payment_use_case.dart';
 import 'package:uuid/uuid.dart';
 
@@ -28,7 +27,6 @@ class CartViewModel extends ChangeNotifier {
     required this.deleteCartUseCases,
     required this.updateCartUseCases,
     required this.updateProductsUseCases,
-    required this.createSaleUseCase,
     required this.processPaymentUseCase,
   }) {
     getAllCarts();
@@ -50,7 +48,6 @@ class CartViewModel extends ChangeNotifier {
   final NewUpdateCartUseCases updateCartUseCases;
 
   //Sales
-  final CreateSaleUseCase createSaleUseCase;
   final ProcessPaymentUseCase processPaymentUseCase;
 
   List<Product> listProducts = [];

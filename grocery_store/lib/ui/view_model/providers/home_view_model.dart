@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/errors/failure.dart';
-import 'package:grocery_store/domain/entities/category.dart';
 import 'package:grocery_store/domain/entities/client.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
@@ -13,7 +12,6 @@ import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.
 import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:uuid/uuid.dart';
 
 class HomeViewModel extends ChangeNotifier {
@@ -21,7 +19,6 @@ class HomeViewModel extends ChangeNotifier {
   StreamSubscription<List<Client>>? _clientsSubscription;
   //Products
   final NewGetProductsUseCases getProductsUseCases;
-  final SendProductFirebaseUseCases sendProductsToFirebaseUseCases;
   final CreateProductsUseCases createProductsUseCases;
   final NewDeleteProductsUseCases deleteProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases;
@@ -41,7 +38,6 @@ class HomeViewModel extends ChangeNotifier {
     required this.userId,
     //Products
     required this.getProductsUseCases,
-    required this.sendProductsToFirebaseUseCases,
     required this.createProductsUseCases,
     required this.deleteProductsUseCases,
     required this.updateProductsUseCases,
@@ -56,10 +52,8 @@ class HomeViewModel extends ChangeNotifier {
     _migrateLocalClients();
   }
 
-  List<Category> listCategories = [];
   List<Product> listProducts = [];
   List<Product> listFilterProducts = [];
-  List<Product> listProductsByCategory = [];
 
   List<Client> listClients = [];
   bool _isActive = false;
@@ -71,7 +65,6 @@ class HomeViewModel extends ChangeNotifier {
   int _pressedIndex = -1;
   double _moneyConversion = 0;
 
-  String _selectedCategory = '';
   String _searchQuery = '';
 
   bool _isFilterList = false;
@@ -79,7 +72,6 @@ class HomeViewModel extends ChangeNotifier {
   double get moneyConversion => _moneyConversion;
   int get pressedIndex => _pressedIndex;
   int get selectedIndexGrid => _selectedIndexGrid;
-  String get selectedCategory => _selectedCategory;
   bool get isFilterList => _isFilterList;
   bool get isActive => _isActive;
 
@@ -112,11 +104,6 @@ class HomeViewModel extends ChangeNotifier {
         return failure;
       },
     );
-  }
-
-  Future<void> saveDataToFirebase() async {
-    await sendProductsToFirebaseUseCases.call();
-    notifyListeners();
   }
 
   /// Subscribes to the real-time list of clients of the current user.
@@ -233,11 +220,6 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedCategory(String category) {
-    _selectedCategory = category;
-    notifyListeners();
-  }
-
   //Products
   Future<void> getProducts() async {
     await _productsSubscription?.cancel();
@@ -252,16 +234,6 @@ class HomeViewModel extends ChangeNotifier {
         debugPrint('Error listening products: $error');
       },
     );
-  }
-
-  Future<void> getProductsByCategory(int category) async {
-    listProductsByCategory.clear();
-    for (var element in listProducts) {
-      if (!listProductsByCategory.contains(element)) {
-        listProductsByCategory.add(element);
-      }
-    }
-    notifyListeners();
   }
 
   Future<void> deleteProduct(String id) async {
