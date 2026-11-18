@@ -19,7 +19,10 @@ void main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: const [Locale('es'), Locale('en'),],
+      supportedLocales: const [
+        Locale('es'),
+        Locale('en'),
+      ],
       path: 'lib/core/resource/langs',
       useFallbackTranslations: true,
       fallbackLocale: const Locale('es'),
@@ -35,42 +38,64 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ...di,
-        ],
-        child: MaterialApp(
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-          title: 'Material App',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          home: StreamBuilder<User?>(
-            // Escuchamos el estado de autenticación de Firebase
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              // Muestra un indicador de carga mientras verifica el estado
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
+      providers: [
+        ...globalDi,
+      ],
+      // The auth state is listened ABOVE MaterialApp so that the session
+      // providers (and the whole navigator) are rebuilt when the user changes.
+      child: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Muestra un indicador de carga mientras verifica el estado
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildApp(
+              context,
+              key: const ValueKey('auth-loading'),
+              home: const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          }
 
-              // Si hay un usuario autenticado, muestra el HomeScreen
-              if (snapshot.hasData) {
-                return const MainPage(
-                  selectedIndex: 0,
-                );
-              }
+          final user = snapshot.data;
 
-              // Si no hay usuario, muestra el LoginScreen
-              return const LoginScreen();
-            },
-          ),
-        ));
+          // Si no hay usuario, muestra el LoginScreen
+          if (user == null) {
+            return _buildApp(
+              context,
+              key: const ValueKey('logged-out'),
+              home: const LoginScreen(),
+            );
+          }
+
+          // Usuario autenticado: los view models se crean para ESTE uid.
+          // La key garantiza que al cambiar de usuario se desechen los
+          // anteriores (y sus suscripciones a Firestore).
+          return MultiProvider(
+            key: ValueKey('session-${user.uid}'),
+            providers: sessionDi(user.uid),
+            child: _buildApp(
+              context,
+              home: const MainPage(selectedIndex: 0),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildApp(BuildContext context, {Key? key, required Widget home}) {
+    return MaterialApp(
+      key: key,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      title: 'Material App',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: home,
+    );
   }
 }

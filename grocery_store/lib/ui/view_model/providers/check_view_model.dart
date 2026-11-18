@@ -20,8 +20,6 @@ class CheckViewModel extends ChangeNotifier {
   List<Product> listProducts = [];
   List<Product> get listProductsByCar => listProducts;
 
-  
-
   /* Future<void> getCarTProducts(String cartId, String ownerId) async {
     await deleteCashProductsUseCases.deleteCashProduct(id);
   } */

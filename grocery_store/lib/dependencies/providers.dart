@@ -13,6 +13,8 @@ import 'package:grocery_store/domain/use_cases/cash/delete_car_products_use_case
 import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
+import 'package:grocery_store/domain/use_cases/client/migrate_local_clients_use_case.dart';
+import 'package:grocery_store/data/repositories/local/new/new_client_repository_impl.dart';
 import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
@@ -30,74 +32,100 @@ import 'package:grocery_store/ui/view_model/providers/sales_history_view_model.d
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-final List<SingleChildWidget> providers = [
+import 'package:grocery_store/data/repositories/local/new/payment_repository_impl.dart';
+import 'package:grocery_store/domain/use_cases/sales/process_payment_use_case.dart';
+
+// Instancias compartidas únicas de repositorios para inyección de dependencias
+final newProductRepository = NewProductRepositoryImpl();
+// Legacy local (Sembast) clients store: only used to migrate them to Firestore.
+final legacyClientRepository = ClientRepositoryImpl();
+final clientRepository = NewClientRepositoryImpl();
+final newCartRepository = NewCartRepositoryImpl();
+final salesHistoryRepository = SalesHistoryRepositoryImpl();
+final productRepository = ProductRepositoryImpl();
+final cashProductRepository = CashProductRepositoryImpl();
+final paymentRepository = PaymentRepositoryImpl();
+
+/// Providers that live for the whole app lifetime (independent of the session).
+final List<SingleChildWidget> globalProviders = [
   ChangeNotifierProvider(
     create: (context) => LoginProvider(),
   ),
-  ChangeNotifierProvider(
-      create: (context) => HomeViewModel(
-            //Products
-            createProductsUseCases:
-                CreateProductsUseCases(NewProductRepositoryImpl()),
-            sendProductsToFirebaseUseCases: SendProductFirebaseUseCases(
-                repository: ProductRepositoryImpl()),
-            getProductsUseCases:
-                NewGetProductsUseCases(NewProductRepositoryImpl()),
-            deleteProductsUseCases:
-                NewDeleteProductsUseCases(NewProductRepositoryImpl()),
-            updateProductsUseCases:
-                UpdateProductsUseCases(NewProductRepositoryImpl()),
-            //Clients
-            createClientUseCases:
-                CreateClientUseCases(repository: ClientRepositoryImpl()),
-            getClientsUseCases:
-                GetClientsUseCases(repository: ClientRepositoryImpl()),
-            deleteClientsUseCases:
-                DeleteClientsUseCases(repository: ClientRepositoryImpl()),
-          )),
-  ChangeNotifierProvider(
-      create: (context) => CartViewModel(
-            getProductsUseCases:
-                NewGetProductsUseCases(NewProductRepositoryImpl()),
-            getCartsUseCases:
-                NewGetCartsUseCases(repository: NewCartRepositoryImpl()),
-            createCartUseCases:
-                NewCreateCartUseCases(repository: NewCartRepositoryImpl()),
-            deleteCartUseCases:
-                NewDeleteCartUseCases(repository: NewCartRepositoryImpl()),
-            updateCartUseCases:
-                NewUpdateCartUseCases(repository: NewCartRepositoryImpl()),
-            updateProductsUseCases:
-                UpdateProductsUseCases(NewProductRepositoryImpl()),
-            createClientUseCases:
-                CreateClientUseCases(repository: ClientRepositoryImpl()),
-            getClientsUseCases:
-                GetClientsUseCases(repository: ClientRepositoryImpl()),
-            deleteClientsUseCases:
-                DeleteClientsUseCases(repository: ClientRepositoryImpl()),
-            //Sales
-            createSaleUseCase:
-                CreateSaleUseCase(SalesHistoryRepositoryImpl()),
-          )),
-  ChangeNotifierProvider(
-      create: (context) => AddProductViewModel(
-            createProductsUseCases:
-                CreateProductsUseCases(NewProductRepositoryImpl()),
-            updateProductsUseCases:
-                UpdateProductsUseCases(NewProductRepositoryImpl()),
-          )),
-  ChangeNotifierProvider(create: (context) => MainPageViewModel()),
-  ChangeNotifierProvider(
-      create: (context) => CheckViewModel(
-            createCashProductsUseCases: CreateCashProductsUseCases(
-                repository: CashProductRepositoryImpl()),
-            getCartsUseCases:
-                NewGetCartsUseCases(repository: NewCartRepositoryImpl()),
-            deleteCashProductsUseCases: DeleteCashProductsUseCases(
-                repository: CashProductRepositoryImpl()),
-          )),
-  ChangeNotifierProvider(
-      create: (context) => SalesHistoryViewModel(
-            getSalesUseCase: GetSalesUseCase(SalesHistoryRepositoryImpl()),
-          )),
 ];
+
+/// Providers scoped to an authenticated session.
+///
+/// They are created for a specific Firebase Auth [userId] and must be mounted
+/// under a widget keyed by that uid, so that logging out / switching account
+/// disposes them (cancelling their Firestore subscriptions) and creates fresh
+/// instances for the new user.
+List<SingleChildWidget> sessionProviders(String userId) => [
+      ChangeNotifierProvider(
+          create: (context) => HomeViewModel(
+                userId: userId,
+                //Products
+                createProductsUseCases:
+                    CreateProductsUseCases(newProductRepository),
+                sendProductsToFirebaseUseCases:
+                    SendProductFirebaseUseCases(repository: productRepository),
+                getProductsUseCases:
+                    NewGetProductsUseCases(newProductRepository),
+                deleteProductsUseCases:
+                    NewDeleteProductsUseCases(newProductRepository),
+                updateProductsUseCases:
+                    UpdateProductsUseCases(newProductRepository),
+                //Clients
+                createClientUseCases:
+                    CreateClientUseCases(repository: clientRepository),
+                getClientsUseCases:
+                    GetClientsUseCases(repository: clientRepository),
+                deleteClientsUseCases:
+                    DeleteClientsUseCases(repository: clientRepository),
+                migrateLocalClientsUseCase: MigrateLocalClientsUseCase(
+                  legacyRepository: legacyClientRepository,
+                  repository: clientRepository,
+                ),
+              )),
+      ChangeNotifierProvider(
+          create: (context) => CartViewModel(
+                userId: userId,
+                getProductsUseCases:
+                    NewGetProductsUseCases(newProductRepository),
+                getCartsUseCases:
+                    NewGetCartsUseCases(repository: newCartRepository),
+                createCartUseCases:
+                    NewCreateCartUseCases(repository: newCartRepository),
+                deleteCartUseCases:
+                    NewDeleteCartUseCases(repository: newCartRepository),
+                updateCartUseCases:
+                    NewUpdateCartUseCases(repository: newCartRepository),
+                updateProductsUseCases:
+                    UpdateProductsUseCases(newProductRepository),
+                //Sales
+                createSaleUseCase: CreateSaleUseCase(salesHistoryRepository),
+                processPaymentUseCase: ProcessPaymentUseCase(paymentRepository),
+              )),
+      ChangeNotifierProvider(
+          create: (context) => AddProductViewModel(
+                userId: userId,
+                createProductsUseCases:
+                    CreateProductsUseCases(newProductRepository),
+                updateProductsUseCases:
+                    UpdateProductsUseCases(newProductRepository),
+              )),
+      ChangeNotifierProvider(create: (context) => MainPageViewModel()),
+      ChangeNotifierProvider(
+          create: (context) => CheckViewModel(
+                createCashProductsUseCases: CreateCashProductsUseCases(
+                    repository: cashProductRepository),
+                getCartsUseCases:
+                    NewGetCartsUseCases(repository: newCartRepository),
+                deleteCashProductsUseCases: DeleteCashProductsUseCases(
+                    repository: cashProductRepository),
+              )),
+      ChangeNotifierProvider(
+          create: (context) => SalesHistoryViewModel(
+                userId: userId,
+                getSalesUseCase: GetSalesUseCase(salesHistoryRepository),
+              )),
+    ];

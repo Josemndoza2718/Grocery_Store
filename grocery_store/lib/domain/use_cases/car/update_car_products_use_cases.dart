@@ -6,7 +6,6 @@ class UpdateCarProductsUseCases {
 
   final CartRepositoryImpl repository;
 
- 
   Future<void> updateProduct(Cart cart) async {
     await repository.updateCarProduct(cart);
   }

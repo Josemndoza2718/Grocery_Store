@@ -42,9 +42,29 @@ class _AdminDashboardState extends State<AdminDashboard> {
     provider.moneyConversion = await Prefs.getMoneyConversion();
   }
 
-  double parseFormattedCurrency(String text) {
-    final cleaned = text.replaceAll('.', '').replaceAll(',', '.');
-    return double.parse(cleaned);
+  /// Parses a value formatted as "1.234,56". Returns `null` when the text is
+  /// empty or invalid, instead of throwing a FormatException.
+  double? parseFormattedCurrency(String text) {
+    final cleaned = text.trim().replaceAll('.', '').replaceAll(',', '.');
+    return double.tryParse(cleaned);
+  }
+
+  /// Validates and saves the conversion rate. Returns false (and warns the
+  /// user) when the value is empty, invalid or not greater than 0.
+  bool _saveMoneyConversion(HomeViewModel provider) {
+    final value = parseFormattedCurrency(moneyconversionController.text);
+    if (value == null || value <= 0) {
+      showFloatingMessage(
+          context: context,
+          message: 'Ingrese una tasa de cambio válida mayor a 0',
+          color: AppColors.red);
+      return false;
+    }
+    provider.setMoneyConversion(value);
+    Prefs.setMoneyConversion(value);
+    moneyconversionController.clear();
+    FocusScope.of(context).unfocus();
+    return true;
   }
 
   Future<void> onAddItemProduct(HomeViewModel provider, int index) async {
@@ -111,12 +131,29 @@ class _AdminDashboardState extends State<AdminDashboard> {
     context.read<CartViewModel>().getMoneyConversion();
   }
 
-  void onSetPrice(HomeViewModel provider) {
-    double value = parseFormattedCurrency(moneyconversionController.value.text);
+  void onSetPrice(HomeViewModel provider) => _saveMoneyConversion(provider);
 
-    provider.setMoneyConversion(value);
-    Prefs.setMoneyConversion(value);
-    moneyconversionController.clear();
+  /// Creates the client typed in [clientController] in Firestore.
+  Future<void> _onCreateClient(HomeViewModel provider) async {
+    final name = clientController.text.trim();
+    if (name.isEmpty) return;
+
+    if (provider.clientExists(name)) {
+      showFloatingMessage(
+          context: context,
+          message: "lbl_user_exists".translate,
+          color: AppColors.red);
+      return;
+    }
+
+    clientController.clear();
+    provider.toggleIsActive();
+    final failure = await provider.createClient(name: name);
+    if (!mounted) return;
+    showFloatingMessage(
+        context: context,
+        message: failure?.message ?? "lbl_user_add".translate,
+        color: failure == null ? AppColors.darkgreen : AppColors.red);
   }
 
   @override
@@ -169,7 +206,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       hintText: 'lbl_name_or_id'.translate,
                       hintStyle: Theme.of(context).textTheme.bodySmall,
                       filled: true,
-                      fillColor: Theme.of(context).inputDecorationTheme.fillColor,
+                      fillColor:
+                          Theme.of(context).inputDecorationTheme.fillColor,
                       focusedBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: AppColors.green,
@@ -186,31 +224,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onTap: () {
-                      if (clientController.text.isNotEmpty && clientController.text != "") {
-                        bool exists = provider.listClients.any(
-                            (element) => element.name == clientController.text);
-
-                        if (!exists) {
-                          provider
-                              .createClient(name: clientController.text)
-                              .then((_) {
-                            provider.getClients();
-                            clientController.clear();
-                          });
-                          provider.toggleIsActive();
-                          showFloatingMessage(
-                              context: context,
-                              message: "lbl_user_add".translate,
-                              color: AppColors.darkgreen);
-                        } else {
-                          showFloatingMessage(
-                              context: context,
-                              message: "lbl_user_exists".translate,
-                              color: AppColors.red);
-                        }
-                      }
-                    },
+                    onTap: () => _onCreateClient(provider),
                   ),
                 //GridViewButtons
                 Flexible(
@@ -224,7 +238,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            SearchBarProductsWidget(searchController: searchController, provider: provider),
+                            SearchBarProductsWidget(
+                                searchController: searchController,
+                                provider: provider),
                             IconButton(
                               icon: Container(
                                   decoration: BoxDecoration(
@@ -251,7 +267,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                         ProductsListWidget(
                             listProducts: provider.listFilterProducts,
-                            onPressed: (index) async => await onAddItemProduct(provider, index),
+                            onPressed: (index) async =>
+                                await onAddItemProduct(provider, index),
                             onClose: () => provider.getProducts(),
                             moneyConversion: provider.moneyConversion,
                             onDeleteProduct: (index) => provider.deleteProduct(
@@ -288,13 +305,14 @@ class SearchBarProductsWidget extends StatelessWidget {
         margin: const EdgeInsets.all(8),
         child: SearchBar(
           hintText: "lbl_search".translate,
-          hintStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
-          textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
+          hintStyle:
+              WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
+          textStyle:
+              WidgetStatePropertyAll(Theme.of(context).textTheme.bodySmall),
           backgroundColor: Theme.of(context).searchBarTheme.backgroundColor,
           controller: searchController,
           leading: const Icon(Icons.search),
-          shape: const WidgetStatePropertyAll(
-              RoundedRectangleBorder(
+          shape: const WidgetStatePropertyAll(RoundedRectangleBorder(
             borderRadius: BorderRadius.all(
               Radius.circular(10),
             ),
@@ -319,7 +337,6 @@ class SearchBarProductsWidget extends StatelessWidget {
 }
 
 class DropSelectClientWidget extends StatelessWidget {
-
   final HomeViewModel provider;
   const DropSelectClientWidget({
     super.key,
@@ -335,7 +352,7 @@ class DropSelectClientWidget extends StatelessWidget {
           color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(10),
         ),
-        child: DropdownMenu<int>(
+        child: DropdownMenu<String>(
           width: double.infinity,
           enableSearch: true,
           enableFilter: true,
@@ -348,7 +365,8 @@ class DropSelectClientWidget extends StatelessWidget {
             suffixIconColor: AppColors.white,
           ),
           menuStyle: MenuStyle(
-            backgroundColor: WidgetStateProperty.all(Theme.of(context).colorScheme.surface),
+            backgroundColor:
+                WidgetStateProperty.all(Theme.of(context).colorScheme.surface),
             shape: WidgetStateProperty.all(
               RoundedRectangleBorder(
                 side: BorderSide.none,
@@ -357,16 +375,23 @@ class DropSelectClientWidget extends StatelessWidget {
             ),
           ),
           dropdownMenuEntries: provider.listClients.map((client) {
-            return DropdownMenuEntry<int>(
+            return DropdownMenuEntry<String>(
               value: client.id,
               label: client.name,
-              leadingIcon: Icon(Icons.person, color: Theme.of(context).colorScheme.onSurface),
+              leadingIcon: Icon(Icons.person,
+                  color: Theme.of(context).colorScheme.onSurface),
               style: MenuItemButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.onSurface,
               ),
               trailingIcon: IconButton(
-                  onPressed: () {
-                    provider.deletedClient(client.id);
+                  onPressed: () async {
+                    final failure = await provider.deletedClient(client.id);
+                    if (failure != null && context.mounted) {
+                      showFloatingMessage(
+                          context: context,
+                          message: failure.message,
+                          color: AppColors.red);
+                    }
                   },
                   icon: const Icon(
                     Icons.remove_circle,
@@ -375,11 +400,11 @@ class DropSelectClientWidget extends StatelessWidget {
             );
           }).toList(),
           onSelected: (value) {
-            final selectedClient =
-                provider.listClients.firstWhere(
+            if (value == null) return;
+            final selectedClient = provider.listClients.firstWhere(
               (element) => element.id == value,
             );
-            provider.clientId = value!;
+            provider.clientId = value;
             provider.setClientName = selectedClient.name;
           },
         ),

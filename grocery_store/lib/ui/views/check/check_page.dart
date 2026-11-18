@@ -33,11 +33,56 @@ class _CheckPageState extends State<CheckPage> {
 
   Future<void> saveAndShareImage(Uint8List image) async {
     final time = DateTime.now().toIso8601String().replaceAll(".", "_");
-    final directory = await getExternalStorageDirectory();
-    final imagePath = File('${directory?.path}/$time.png');
+    // getExternalStorageDirectory() is Android-only (null on iOS).
+    final directory = await getExternalStorageDirectory() ??
+        await getApplicationDocumentsDirectory();
+    final imagePath = File('${directory.path}/$time.png');
 
     await imagePath.writeAsBytes(image);
     await Share.shareXFiles([XFile(imagePath.path)]);
+  }
+
+  bool _isProcessingPayment = false;
+
+  /// Charges the cart FIRST (atomic stock validation in Firestore) and only
+  /// if it succeeds captures and shares the paid receipt. This way a receipt
+  /// is never shared for a sale that was rejected (e.g. insufficient stock).
+  Future<void> _payAndShare(CartViewModel provider) async {
+    if (_isProcessingPayment) return; // avoid double charge on double tap
+    final cartId = provider.selectedCartForCheckout?.id;
+    if (cartId == null) return;
+
+    setState(() => _isProcessingPayment = true);
+    try {
+      final failure = await provider.markCartAsPaid(cartId);
+      if (!mounted) return;
+
+      if (failure != null) {
+        // Payment rejected: show the cart again so it can be corrected.
+        provider.restoreCartToList(cartId);
+        showFloatingMessage(
+            context: context, message: failure.message, color: AppColors.red);
+        return;
+      }
+
+      // Payment OK: render the "paid" receipt, capture it and share it.
+      provider.setIsPaid(true);
+      await WidgetsBinding.instance.endOfFrame;
+      final image = await screenshotController.capture();
+      if (image != null) {
+        try {
+          await saveAndShareImage(image);
+        } catch (e) {
+          debugPrint('Error sharing receipt: $e');
+        }
+      }
+
+      discountController.text = "0";
+      deliveryController.text = "0";
+      provider.clearData();
+    } finally {
+      if (mounted) setState(() => _isProcessingPayment = false);
+    }
   }
 
   @override
@@ -103,7 +148,8 @@ class _CheckPageState extends State<CheckPage> {
                   cart: provider.selectedCartForCheckout,
                   subToTal: provider.subTotal,
                   moneyConversion: provider.moneyConversion,
-                  iva: double.parse(Prefs.getString(PrefKeys.iva) ?? "0"),
+                  iva:
+                      double.tryParse(Prefs.getString(PrefKeys.iva) ?? "") ?? 0,
                   discount: provider.discount,
                   delivery: provider.delivery,
                   onTap: () {
@@ -179,33 +225,7 @@ class _CheckPageState extends State<CheckPage> {
                     child: GestureDetector(
                       onTap: () {
                         if (provider.selectedCartForCheckout != null) {
-                          provider.setIsPaid(true);
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            screenshotController.capture().then((image) async {
-                              if (image != null) {
-                                final directory =
-                                    await getApplicationDocumentsDirectory();
-                                final imagePath =
-                                    await File('${directory.path}/image.png')
-                                        .create();
-                                await imagePath.writeAsBytes(image);
-                                saveAndShareImage(image);
-                                // Save to history
-                                if (provider.selectedCartForCheckout != null) {
-                                  provider
-                                      .markCartAsPaid(
-                                          provider.selectedCartForCheckout!.id)
-                                      .then((value) {
-                                    discountController.text = "0";
-                                    deliveryController.text = "0";
-                                    provider.clearData();
-                                  });
-                                }
-                              }
-                            }).catchError((onError) {
-                              print(onError);
-                            });
-                          });
+                          _payAndShare(provider);
                         } else {
                           showFloatingMessage(
                               context: context,

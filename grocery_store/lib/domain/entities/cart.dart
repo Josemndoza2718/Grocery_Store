@@ -3,7 +3,7 @@ import 'package:grocery_store/domain/entities/product.dart';
 class Cart {
   final String id;
   final String userId; // Firebase Auth UID for user isolation
-  final int ownerId;
+  final String ownerId;
   final String? ownerCarName;
   String status;
   int payPart;
@@ -52,8 +52,10 @@ class Cart {
     return Cart(
       id: json['id'] as String,
       userId: json['userId'] as String? ?? '',
-      ownerId: json['ownerId'] as int,
-      ownerCarName: json['ownerCarName'] as String?,
+      ownerId:
+          json['ownerId']?.toString() ?? json['owner_id']?.toString() ?? '',
+      ownerCarName:
+          json['ownerCarName'] as String? ?? json['owner_car_name'] as String?,
       status: json['status'] as String? ?? 'pending',
       payPart: json['payPart'] as int? ?? 0,
       total: (json['total'] as num?)?.toDouble() ?? 0.0,
@@ -77,7 +79,7 @@ class Cart {
   Cart copyWith({
     String? id,
     String? userId,
-    int? ownerId,
+    String? ownerId,
     String? ownerCarName,
     String? status,
     int? payPart,

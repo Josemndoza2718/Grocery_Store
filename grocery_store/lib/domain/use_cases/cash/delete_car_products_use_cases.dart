@@ -1,4 +1,3 @@
-
 import 'package:grocery_store/data/repositories/local/cash_product_repository_impl.dart';
 
 class DeleteCashProductsUseCases {

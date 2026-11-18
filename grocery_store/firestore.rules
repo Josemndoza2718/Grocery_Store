@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ──────────── PRODUCTOS ────────────
+    match /products/{productId} {
+      // Solo el dueño puede leer sus productos
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      // Al crear, el userId del documento debe coincidir con el usuario autenticado
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      // Al actualizar/eliminar, verificar que el documento pertenece al usuario
+      allow update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ──────────── CARRITOS ────────────
+    match /carts/{cartId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ──────────── CLIENTES ────────────
+    match /clients/{clientId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      // El dueño no puede "regalar" el cliente a otro usuario cambiando userId
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // ──────────── HISTORIAL DE VENTAS ────────────
+    match /sales-history/{saleId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      // No permitir editar ni borrar ventas (inmutables)
+      allow update, delete: if false;
+    }
+
+    // ──────────── PERFIL DE USUARIO ────────────
+    match /users/{userId} {
+      // Solo el propio usuario puede leer/editar su perfil
+      allow read, update: if request.auth != null
+        && request.auth.uid == userId;
+
+      // Permitir crear al registrarse
+      allow create: if request.auth != null
+        && request.auth.uid == userId;
+
+      allow delete: if false;
+    }
+  }
+}

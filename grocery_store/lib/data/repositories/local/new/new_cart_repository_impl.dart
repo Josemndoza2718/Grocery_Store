@@ -25,13 +25,13 @@ class NewCartRepositoryImpl implements NewCartRepository {
   Stream<List<Cart>> getAllCartsStream({String? userId}) {
     // 1. Escuchar la colección 'carts' en tiempo real, filtered by userId
     var query = _db.collection('carts');
-    
-    return (userId != null && userId.isNotEmpty 
-        ? query.where('userId', isEqualTo: userId)
-        : query)
+
+    return (userId != null && userId.isNotEmpty
+            ? query.where('userId', isEqualTo: userId)
+            : query)
         .snapshots()
         .map((snapshot) {
-       // 2. Mapear los documentos a una lista de objetos Cart
+      // 2. Mapear los documentos a una lista de objetos Cart
       final carts = snapshot.docs.map((doc) {
         final data = doc.data();
         // Usar el ID del documento directamente (ya es String)

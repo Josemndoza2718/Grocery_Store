@@ -9,7 +9,4 @@ class GetCashProductsUseCases {
   Future<List<Product>> call() async {
     return await repository.getAllCashProducts();
   }
-
-  
-
 }

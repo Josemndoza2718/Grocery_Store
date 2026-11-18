@@ -54,6 +54,10 @@ class Prefs {
   //deletes..
   static Future<bool?> remove(String key) async => await _prefs?.remove(key);
 
+  /// Removes the session data on logout.
+  ///
+  /// Business settings (IVA and money conversion rate) are intentionally kept:
+  /// they belong to the device/store, not to the session.
   static Future<void> clear() async {
     await remove(PrefKeys.userData);
     await remove(PrefKeys.token);
@@ -61,8 +65,6 @@ class Prefs {
     await remove(PrefKeys.userId);
     await remove(PrefKeys.fullName);
     await remove(PrefKeys.userRole);
-    await remove(PrefKeys.iva);
-    await remove(PrefKeys.moneyConversion);
 
   }
 }

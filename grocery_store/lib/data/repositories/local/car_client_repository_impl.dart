@@ -9,11 +9,7 @@ class ClientRepositoryImpl implements ClientRepository {
   String dbPath = 'my_database.db';
   DatabaseFactory dbFactory = databaseFactoryIo;
   //late final Database db;
-  var store = intMapStoreFactory.store('car_clients');
-
-  /* ProductRepositoryImpl() {
-    initDatabase();
-  } */
+  var store = stringMapStoreFactory.store('car_clients');
 
   Future<Database> initDatabase() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -35,11 +31,11 @@ class ClientRepositoryImpl implements ClientRepository {
       name: client.name,
     );
 
-    await store.record(client.id).add(db, (clientModel.toJson()));
+    await store.record(client.id).put(db, (clientModel.toJson()));
   }
 
   @override
-  Future<void> deleteClient(int id) async {
+  Future<void> deleteClient(String id) async {
     final db = await initDatabase();
     await store.record(id).delete(db);
   }
@@ -56,7 +52,7 @@ class ClientRepositoryImpl implements ClientRepository {
   }
 
   @override
-  Future<Client?> getClientById(int id) async {
+  Future<Client?> getClientById(String id) async {
     final db = await initDatabase();
     return store.record(id).get(db).then((record) {
       if (record == null) return null;

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
@@ -27,12 +28,21 @@ class MainPage extends StatelessWidget {
     SettingsPage(),
   ];
 
-  static final List<String> _pageNames = [
-    "${"lbl_welcome".translate}, ${Prefs.getString(PrefKeys.userName)}",
-    "lbl_cart".translate,
-    "lbl_check".translate,
-    "lbl_settings".translate,
-  ];
+  /// Computed on every build (not `static final`) so the title reflects the
+  /// current user and the current locale.
+  List<String> _pageNames() {
+    final userName = FirebaseAuth.instance.currentUser?.displayName ??
+        Prefs.getString(PrefKeys.userName) ??
+        '';
+    return [
+      userName.isEmpty
+          ? "lbl_welcome".translate
+          : "${"lbl_welcome".translate}, $userName",
+      "lbl_cart".translate,
+      "lbl_check".translate,
+      "lbl_settings".translate,
+    ];
+  }
 
   List<Widget> _pageIcons(BuildContext context) {
     return [
@@ -73,7 +83,7 @@ class MainPage extends StatelessWidget {
               bottomRight: Radius.circular(20),
             ),
           ),
-          title: Text(_pageNames[provider.selectedIndex],
+          title: Text(_pageNames()[provider.selectedIndex],
               style: Theme.of(context).textTheme.displaySmall),
           actions: [_pageIcons(context)[provider.selectedIndex]],
         ),

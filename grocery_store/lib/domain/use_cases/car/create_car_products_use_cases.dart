@@ -9,6 +9,4 @@ class CreateCarProductsUseCases {
   Future<void> call(Cart cart) async {
     await repository.addCarProduct(cart);
   }
-
-  
 }

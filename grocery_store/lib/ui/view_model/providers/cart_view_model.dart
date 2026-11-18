@@ -1,21 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:grocery_store/core/errors/failure.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
-import 'package:grocery_store/domain/entities/client.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_delete_cart_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_get_carts_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_update_cart_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/sales/create_sale_use_case.dart';
+import 'package:grocery_store/domain/use_cases/sales/process_payment_use_case.dart';
 import 'package:uuid/uuid.dart';
 
 class CartViewModel extends ChangeNotifier {
@@ -24,20 +21,23 @@ class CartViewModel extends ChangeNotifier {
   final Duration _debounceDuration = const Duration(milliseconds: 1500);
 
   CartViewModel({
+    required this.userId,
     required this.getProductsUseCases,
     required this.getCartsUseCases,
     required this.createCartUseCases,
     required this.deleteCartUseCases,
     required this.updateCartUseCases,
     required this.updateProductsUseCases,
-    required this.createClientUseCases,
-    required this.getClientsUseCases,
-    required this.deleteClientsUseCases,
     required this.createSaleUseCase,
+    required this.processPaymentUseCase,
   }) {
     getAllCarts();
     getMoneyConversion();
   }
+
+  /// Firebase Auth UID of the session owner. The view model is recreated
+  /// on every login, so this never changes during its lifetime.
+  final String userId;
 
   //Products
   final NewGetProductsUseCases getProductsUseCases;
@@ -49,19 +49,14 @@ class CartViewModel extends ChangeNotifier {
   final NewDeleteCartUseCases deleteCartUseCases;
   final NewUpdateCartUseCases updateCartUseCases;
 
-  //Clients
-  final CreateClientUseCases createClientUseCases;
-  final GetClientsUseCases getClientsUseCases;
-  final DeleteClientsUseCases deleteClientsUseCases;
-
   //Sales
   final CreateSaleUseCase createSaleUseCase;
+  final ProcessPaymentUseCase processPaymentUseCase;
 
   List<Product> listProducts = [];
   List<Cart> listCarts = [];
   List<Cart> filterlistCarts = [];
   List<Cart> paymentlistCarts = [];
-  List<Client> listClients = [];
   List<Product> listProductsAddCart = [];
   Cart? _selectedCartForCheckout;
   double _subTotal = 0;
@@ -70,9 +65,9 @@ class CartViewModel extends ChangeNotifier {
 
   double _moneyConversion = 0;
 
-  List<String> _hiddenCartIds = [];
+  final List<String> _hiddenCartIds = [];
 
-  int _payPart = 0;
+  final int _payPart = 0;
   double _discount = 0;
   double _delivery = 0;
   bool _isPaid = false;
@@ -115,7 +110,7 @@ class CartViewModel extends ChangeNotifier {
 
   void onSetQuantityProduct(int id, int value) {
     for (var element in listProducts) {
-      if (element.id == id) {
+      if (element.id.toString() == id.toString()) {
         if (element.stockQuantity > 0 &&
             element.quantityToBuy < element.stockQuantity) {
           element.quantityToBuy = value;
@@ -285,7 +280,7 @@ class CartViewModel extends ChangeNotifier {
 
   //Car_Products
   Future<void> createCart({
-    required int ownerId,
+    required String ownerId,
     required String ownerCarName,
     required Product products,
   }) async {
@@ -295,7 +290,6 @@ class CartViewModel extends ChangeNotifier {
 
     if (listProductsInCart.isNotEmpty && ownerCarName.isNotEmpty) {
       final cartId = const Uuid().v4();
-      final userId = Prefs.getString(PrefKeys.userId) ?? '';
 
       final result = await createCartUseCases.call(
         Cart(
@@ -322,7 +316,7 @@ class CartViewModel extends ChangeNotifier {
 
   Future<bool> updateCart({
     required String cartId,
-    required int ownerId,
+    required String ownerId,
     required String ownerCarName,
     required Product products,
   }) async {
@@ -366,16 +360,18 @@ class CartViewModel extends ChangeNotifier {
   }
 
   Future<void> getAllCarts() async {
-    final userId = Prefs.getString(PrefKeys.userId) ?? '';
-
     // Subscribe to carts stream for real-time updates
-    _cartsSubscription?.cancel();
-    _cartsSubscription =
-        getCartsUseCases.callStream(userId: userId).listen((carts) {
-      listCarts = carts;
-      _isActivePanel = List.filled(listCarts.length, false);
-      notifyListeners();
-    });
+    await _cartsSubscription?.cancel();
+    _cartsSubscription = getCartsUseCases.callStream(userId: userId).listen(
+      (carts) {
+        listCarts = carts;
+        _isActivePanel = List.filled(listCarts.length, false);
+        notifyListeners();
+      },
+      onError: (Object error) {
+        debugPrint('Error listening carts: $error');
+      },
+    );
 
     final result = await getProductsUseCases.call();
     result.fold(
@@ -422,40 +418,40 @@ class CartViewModel extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> markCartAsPaid(String cartId) async {
-    for (var element in listCarts) {
-      if (element.id == cartId) {
-        // Update product stock globally
-        for (var product in element.products) {
-          if (product.quantityToBuy > 0) {
-            final int newStock = product.stockQuantity - product.quantityToBuy;
-            final updatedProduct = product.copyWith(stockQuantity: newStock);
-            await updateProductsUseCases.call(updatedProduct);
-          }
-        }
-
-        final updatedCart = element.copyWith(
-          status: 'paid',
-          payAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-
-        // 1. Move to sales-history
-        final saleResult = await createSaleUseCase.call(updatedCart);
-
-        saleResult.fold(
-          onSuccess: (_) async {
-            // 2. Delete from active carts
-            await deleteCartUseCases.call(cartId);
-            _hiddenCartIds.remove(cartId);
-            notifyListeners();
-          },
-          onError: (failure) =>
-              print('Error creating sale: ${failure.message}'),
-        );
-        break;
-      }
+  /// Processes the payment of [cartId] atomically (stock, sale, cart).
+  ///
+  /// Returns `null` on success or the [Failure] that prevented the payment
+  /// (e.g. [StockFailure] when there is not enough stock), so the UI can
+  /// inform the user.
+  Future<Failure?> markCartAsPaid(String cartId) async {
+    final index = listCarts.indexWhere((c) => c.id == cartId);
+    if (index == -1) {
+      return const UnknownFailure(
+          message: 'No se encontró el carrito a cobrar');
     }
+
+    // Flush any pending debounced quantity change so it is not lost/overwritten.
+    _debounceTimer?.cancel();
+
+    final result = await processPaymentUseCase.call(listCarts[index]);
+
+    return result.fold(
+      onSuccess: (_) {
+        _hiddenCartIds.remove(cartId);
+        notifyListeners();
+        return null;
+      },
+      onError: (failure) {
+        debugPrint('Error processing payment: ${failure.message}');
+        return failure;
+      },
+    );
+  }
+
+  /// Makes a cart visible again in the cart list (e.g. after a failed payment).
+  void restoreCartToList(String cartId) {
+    _hiddenCartIds.remove(cartId);
+    notifyListeners();
   }
 
   void clearData() {

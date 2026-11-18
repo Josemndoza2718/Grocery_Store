@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/data/repositories/local/new/new_product_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
@@ -47,9 +46,29 @@ class _UserDashboardState extends State<UserDashboard> {
     viewModel.moneyConversion = await Prefs.getMoneyConversion();
   }
 
-  double parseFormattedCurrency(String text) {
-    final cleaned = text.replaceAll('.', '').replaceAll(',', '.');
-    return double.parse(cleaned);
+  /// Parses a value formatted as "1.234,56". Returns `null` when the text is
+  /// empty or invalid, instead of throwing a FormatException.
+  double? parseFormattedCurrency(String text) {
+    final cleaned = text.trim().replaceAll('.', '').replaceAll(',', '.');
+    return double.tryParse(cleaned);
+  }
+
+  /// Validates and saves the conversion rate. Returns false (and warns the
+  /// user) when the value is empty, invalid or not greater than 0.
+  bool _saveMoneyConversion(HomeViewModel provider) {
+    final value = parseFormattedCurrency(moneyconversionController.text);
+    if (value == null || value <= 0) {
+      showFloatingMessage(
+          context: context,
+          message: 'Ingrese una tasa de cambio válida mayor a 0',
+          color: AppColors.red);
+      return false;
+    }
+    provider.setMoneyConversion(value);
+    Prefs.setMoneyConversion(value);
+    moneyconversionController.clear();
+    FocusScope.of(context).unfocus();
+    return true;
   }
 
   Future<void> onAddItemProduct(HomeViewModel viewModel, int index) async {
@@ -106,6 +125,29 @@ class _UserDashboardState extends State<UserDashboard> {
     context.read<CartViewModel>().getMoneyConversion();
   }
 
+  /// Creates the client typed in [clientController] in Firestore.
+  Future<void> _onCreateClient(HomeViewModel provider) async {
+    final name = clientController.text.trim();
+    if (name.isEmpty) return;
+
+    if (provider.clientExists(name)) {
+      showFloatingMessage(
+          context: context,
+          message: "Username already exists",
+          color: AppColors.red);
+      return;
+    }
+
+    clientController.clear();
+    provider.toggleIsActive();
+    final failure = await provider.createClient(name: name);
+    if (!mounted) return;
+    showFloatingMessage(
+        context: context,
+        message: failure?.message ?? "User added",
+        color: failure == null ? AppColors.darkgreen : AppColors.red);
+  }
+
   @override
   Widget build(BuildContext context) {
     //final uid = FirebaseAuth.instance.currentUser!.uid;
@@ -118,7 +160,7 @@ class _UserDashboardState extends State<UserDashboard> {
       child: SafeArea(
         child: StreamBuilder<List<Product>>(
             stream: NewProductRepositoryImpl().getAllProductsStream(
-                userId: Prefs.getString(PrefKeys.userId) ?? ''),
+                userId: context.read<HomeViewModel>().userId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -175,14 +217,7 @@ class _UserDashboardState extends State<UserDashboard> {
                         label: 'Tasa en Uso',
                         price: provider.moneyConversion,
                         controller: moneyconversionController,
-                        onTap: () {
-                          double value = parseFormattedCurrency(
-                              moneyconversionController.value.text);
-
-                          provider.setMoneyConversion(value);
-                          Prefs.setMoneyConversion(value);
-                          moneyconversionController.clear();
-                        },
+                        onTap: () => _saveMoneyConversion(provider),
                       ),
                       //Client Menu
                       Row(
@@ -214,7 +249,7 @@ class _UserDashboardState extends State<UserDashboard> {
                                 color: AppColors.green,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: DropdownMenu<int>(
+                              child: DropdownMenu<String>(
                                 width: double.infinity,
                                 enableSearch: true,
                                 enableFilter: true,
@@ -240,15 +275,23 @@ class _UserDashboardState extends State<UserDashboard> {
                                 ),
                                 dropdownMenuEntries:
                                     provider.listClients.map((client) {
-                                  return DropdownMenuEntry<int>(
+                                  return DropdownMenuEntry<String>(
                                     value: client.id,
                                     label: client.name,
                                     style: MenuItemButton.styleFrom(
                                       foregroundColor: AppColors.black,
                                     ),
                                     trailingIcon: IconButton(
-                                        onPressed: () {
-                                          provider.deletedClient(client.id);
+                                        onPressed: () async {
+                                          final failure = await provider
+                                              .deletedClient(client.id);
+                                          if (failure != null &&
+                                              context.mounted) {
+                                            showFloatingMessage(
+                                                context: context,
+                                                message: failure.message,
+                                                color: AppColors.red);
+                                          }
                                         },
                                         icon: const Icon(
                                           Icons.remove_circle,
@@ -257,11 +300,12 @@ class _UserDashboardState extends State<UserDashboard> {
                                   );
                                 }).toList(),
                                 onSelected: (value) {
+                                  if (value == null) return;
                                   final selectedClient =
                                       provider.listClients.firstWhere(
                                     (element) => element.id == value,
                                   );
-                                  provider.clientId = value!;
+                                  provider.clientId = value;
                                   provider.setClientName = selectedClient.name;
                                 },
                               ),
@@ -293,33 +337,7 @@ class _UserDashboardState extends State<UserDashboard> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          onTap: () {
-                            if (clientController.text.isNotEmpty &&
-                                clientController.text != "") {
-                              bool exists = provider.listClients.any(
-                                  (element) =>
-                                      element.name == clientController.text);
-
-                              if (!exists) {
-                                provider
-                                    .createClient(name: clientController.text)
-                                    .then((_) {
-                                  provider.getClients();
-                                  clientController.clear();
-                                });
-                                provider.toggleIsActive();
-                                showFloatingMessage(
-                                    context: context,
-                                    message: "User added",
-                                    color: AppColors.darkgreen);
-                              } else {
-                                showFloatingMessage(
-                                    context: context,
-                                    message: "Username already exists",
-                                    color: AppColors.red);
-                              }
-                            }
-                          },
+                          onTap: () => _onCreateClient(provider),
                         ),
                       //GridViewButtons
                       Flexible(

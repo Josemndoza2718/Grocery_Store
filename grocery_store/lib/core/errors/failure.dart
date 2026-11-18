@@ -131,6 +131,15 @@ class AuthFailure extends Failure {
   }
 }
 
+/// Failure raised when a sale cannot be completed because of stock problems
+/// (insufficient quantity or a product that no longer exists).
+class StockFailure extends Failure {
+  const StockFailure({
+    required super.message,
+    super.code = 'insufficient-stock',
+  });
+}
+
 /// Failure related to local cache/storage (Sembast).
 class CacheFailure extends Failure {
   const CacheFailure({

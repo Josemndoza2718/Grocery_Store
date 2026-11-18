@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/domain/use_cases/sales/get_sales_use_case.dart';
 
@@ -13,7 +12,10 @@ enum CurrencyType { bs, usd }
 class SalesHistoryViewModel extends ChangeNotifier {
   final GetSalesUseCase getSalesUseCase;
 
-  SalesHistoryViewModel({required this.getSalesUseCase}) {
+  /// Firebase Auth UID of the session owner.
+  final String userId;
+
+  SalesHistoryViewModel({required this.userId, required this.getSalesUseCase}) {
     _loadSales();
   }
 
@@ -89,14 +91,18 @@ class SalesHistoryViewModel extends ChangeNotifier {
   void _loadSales() async {
     _moneyConversion = await Prefs.getMoneyConversion();
 
-    final userId = Prefs.getString(PrefKeys.userId) ?? '';
-
-    _salesSubscription =
-        getSalesUseCase.callStream(userId: userId).listen((salesList) {
-      _sales = salesList;
-      _isLoading = false;
-      notifyListeners();
-    });
+    _salesSubscription = getSalesUseCase.callStream(userId: userId).listen(
+      (salesList) {
+        _sales = salesList;
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (Object error) {
+        debugPrint('Error listening sales history: $error');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
   @override

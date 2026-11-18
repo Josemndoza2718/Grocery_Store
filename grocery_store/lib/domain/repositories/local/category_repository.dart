@@ -1,5 +1,3 @@
-
-
 import 'package:grocery_store/domain/entities/category.dart';
 
 abstract class CategoryRepository {

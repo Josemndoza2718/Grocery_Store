@@ -9,7 +9,4 @@ class GetCategoriesUseCases {
   Future<List<Category>> call() async {
     return await repository.getAllCategories();
   }
-
-  
-
 }

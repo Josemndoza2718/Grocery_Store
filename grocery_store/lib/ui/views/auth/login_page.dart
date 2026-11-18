@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/ui/views/auth/forgot_password_page.dart';
 import 'package:grocery_store/ui/views/auth/register_page.dart';
-import 'package:grocery_store/ui/views/origin/main_page.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -24,38 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final RegExp _passwordRegExp = RegExp(
       r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]).{8,}$');
 
-  // Aquí agregamos el listener
-  late LoginProvider _loginProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loginProvider = Provider.of<LoginProvider>(context, listen: false);
-      _loginProvider.addListener(_onLoginChanged);
-    });
-  }
-
-  void _onLoginChanged() {
-    if (!mounted) return;
-    if (_loginProvider.isLoggedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const MainPage(selectedIndex: 0)),
-      );
-    }
-  }
-
   @override
   void dispose() {
-    // Verificar si _loginProvider fue inicializado antes de intentar remover el listener
-    // Dado que se inicializa en postFrameCallback, podría ser nulo si se hace dispose muy rápido
-    try {
-      _loginProvider.removeListener(_onLoginChanged);
-    } catch (e) {
-      // Ignorar si falla por no estar inicializado
-    }
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();

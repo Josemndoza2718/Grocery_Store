@@ -83,9 +83,9 @@ class Product {
       description: description ?? this.description,
       price: price ?? this.price,
       idStock: idStock ?? this.idStock,
-        stockQuantity: stockQuantity ?? this.stockQuantity,
-        quantityToBuy: quantity ?? this.quantityToBuy,
-        createdAt: createdAt ?? this.createdAt,
-      );
+      stockQuantity: stockQuantity ?? this.stockQuantity,
+      quantityToBuy: quantity ?? this.quantityToBuy,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
 }

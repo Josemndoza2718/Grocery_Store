@@ -5,8 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
@@ -298,7 +296,7 @@ class _AddProductPageState extends State<AddProductPage> {
                             GeneralButton(
                               onTap: widget.product != null
                                   ? () async {
-                                      final userId = Prefs.getString(PrefKeys.userId) ?? '';
+                                      final userId = provider.userId;
                                       final price = priceEditController.text.replaceAll('.', '').replaceAll(',', '.');
 
                                       _updateProduct(
@@ -317,7 +315,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                       ));
                                     }
                                   : () async {
-                                      final userId = Prefs.getString(PrefKeys.userId) ?? '';
+                                      final userId = provider.userId;
 
                                       final price = _priceController.text.replaceAll('.', '').replaceAll(',', '.');
 

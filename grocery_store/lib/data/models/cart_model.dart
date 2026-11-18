@@ -15,8 +15,8 @@ class CartModel extends Cart {
     return CartModel(
       id: json['id'],
       userId: json['userId'] ?? '',
-      ownerId: json['owner_id'],
-      ownerCarName: json['owner_car_name'],
+      ownerId: (json['owner_id'] ?? json['ownerId'] ?? '').toString(),
+      ownerCarName: json['owner_car_name'] ?? json['ownerCarName'],
       status: json['status'],
       products: (json['products'] as List)
           .map((item) => ProductModel.fromJson(item))

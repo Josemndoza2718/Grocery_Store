@@ -9,6 +9,4 @@ class CreateCategoriesUseCases {
   Future<void> call(Category category) async {
     await repository.addCategory(category);
   }
-
-  
 }

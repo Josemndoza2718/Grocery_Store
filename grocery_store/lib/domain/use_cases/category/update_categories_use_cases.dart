@@ -6,7 +6,6 @@ class UpdateCategoriesUseCases {
 
   final CategoryRepositoryImpl repository;
 
- 
   Future<void> updateCategory(Category category) async {
     await repository.updateCategory(category);
   }

@@ -25,10 +25,10 @@ class NewProductRepositoryImpl implements NewProductRepository {
   Stream<List<Product>> getAllProductsStream({String? userId}) {
     // 1. Escuchar la colección 'products' en tiempo real, filtered by userId
     var query = _db.collection('products');
-    
-    return (userId != null && userId.isNotEmpty 
-        ? query.where('userId', isEqualTo: userId)
-        : query)
+
+    return (userId != null && userId.isNotEmpty
+            ? query.where('userId', isEqualTo: userId)
+            : query)
         .snapshots()
         .map((snapshot) {
       // 2. Mapear los documentos a una lista de objetos Product

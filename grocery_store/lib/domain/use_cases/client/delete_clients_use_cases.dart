@@ -1,12 +1,12 @@
-
-import 'package:grocery_store/data/repositories/local/car_client_repository_impl.dart';
+import 'package:grocery_store/core/errors/result.dart';
+import 'package:grocery_store/domain/repositories/local/new/new_client_repository.dart';
 
 class DeleteClientsUseCases {
   const DeleteClientsUseCases({required this.repository});
 
-  final ClientRepositoryImpl repository;
+  final NewClientRepository repository;
 
-  Future<void> deleteClient(int id) async {
-    await repository.deleteClient(id);
+  Future<Result<void>> deleteClient(String id) {
+    return repository.deleteClient(id);
   }
 }

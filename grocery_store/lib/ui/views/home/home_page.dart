@@ -39,8 +39,9 @@ class HomePage extends StatelessWidget {
         final data = snapshot.data!.data() as Map<String, dynamic>;
         final isAdmin = data['isAdmin'] ?? false; // Leer el rol, por defecto false
 
-        // Guardar datos localmente para acceso offline/rápido
-        Prefs.setString(PrefKeys.userId, uid);
+        // Guardar datos localmente para acceso offline/rápido.
+        // (El uid ya no se guarda aquí: se inyecta a los view models desde
+        // FirebaseAuth en main.dart)
         if (data['name'] != null) {
           Prefs.setString(PrefKeys.userName, data['name']);
         }

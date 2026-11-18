@@ -70,7 +70,8 @@ class FakeGetClientsUseCases implements GetClientsUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Future<List<Client>> call() async => [];
+  Stream<List<Client>> callStream({required String userId}) =>
+      const Stream.empty();
 }
 
 class FakeDeleteClientsUseCases implements DeleteClientsUseCases {
@@ -86,6 +87,7 @@ void main() {
     fakeGetProductsUseCases = FakeGetProductsUseCases();
 
     viewModel = HomeViewModel(
+      userId: 'test-user',
       getProductsUseCases: fakeGetProductsUseCases,
       sendProductsToFirebaseUseCases: FakeSendProductFirebaseUseCases(),
       createProductsUseCases: FakeCreateProductsUseCases(),

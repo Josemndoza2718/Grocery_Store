@@ -9,7 +9,4 @@ class GetAllCartsUseCases {
   Future<List<Cart>> call() async {
     return await repository.getAllCarProducts();
   }
-
-  
-
 }
