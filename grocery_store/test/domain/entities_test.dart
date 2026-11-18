@@ -3,6 +3,7 @@ import 'package:grocery_store/core/errors/failure.dart';
 import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/domain/entities/client.dart';
+import 'package:grocery_store/domain/entities/invitation.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 
 Product _product({String id = 'p1', int stock = 10, int qty = 2}) => Product(
@@ -177,6 +178,46 @@ void main() {
       final legacy = Cart(id: 'old', ownerId: 'cl1', products: [_product()]);
       expect(legacy.total, 0);
       expect(legacy.effectiveTotal, 3.0);
+    });
+  });
+
+  group('Invitation', () {
+    test('generated codes are 8 chars from the unambiguous alphabet', () {
+      for (var i = 0; i < 200; i++) {
+        final code = Invitation.generateCode();
+        expect(Invitation.isWellFormed(code), isTrue, reason: code);
+        expect(code, isNot(matches(RegExp('[01OIL]'))));
+      }
+    });
+
+    test('normalize and format', () {
+      expect(Invitation.normalize(' k7m4-qxpa '), 'K7M4QXPA');
+      expect(Invitation.format('K7M4QXPA'), 'K7M4-QXPA');
+      expect(Invitation.isWellFormed('K7M4QXP'), isFalse);
+    });
+
+    test('pending until used or expired', () {
+      final now = DateTime(2026, 1, 1, 12);
+      final invitation = Invitation(
+        code: 'K7M4QXPA',
+        storeId: 's1',
+        createdBy: 'boss',
+        createdAt: now,
+        expiresAt: now.add(Invitation.validity),
+      );
+      expect(invitation.isPending(now), isTrue);
+      expect(invitation.isPending(now.add(const Duration(hours: 48))), isFalse);
+      expect(
+        Invitation(
+          code: 'K7M4QXPA',
+          storeId: 's1',
+          createdBy: 'boss',
+          createdAt: now,
+          expiresAt: now.add(Invitation.validity),
+          usedBy: 'erin',
+        ).isPending(now),
+        isFalse,
+      );
     });
   });
 }

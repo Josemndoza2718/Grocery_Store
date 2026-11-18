@@ -80,10 +80,12 @@ class MyApp extends StatelessWidget {
               userName: user.displayName?.trim().isNotEmpty == true
                   ? user.displayName!.trim()
                   : (user.email ?? ''),
+              userEmail: user.email ?? '',
               storeRepository: storeRepository,
               employeeRepository: employeeRepository,
               userProfileRepository: userProfileRepository,
               legacyMigrationRepository: legacyMigrationRepository,
+              invitationRepository: invitationRepository,
               loadDeviceSettings: () async => (
                 iva: double.tryParse(Prefs.getString(PrefKeys.iva) ?? '') ?? 0,
                 exchangeRate: await Prefs.getMoneyConversion(),

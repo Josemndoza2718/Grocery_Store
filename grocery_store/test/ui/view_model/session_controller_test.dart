@@ -5,8 +5,10 @@ import 'package:grocery_store/core/errors/failure.dart';
 import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/app_session.dart';
 import 'package:grocery_store/domain/entities/employee.dart';
+import 'package:grocery_store/domain/entities/invitation.dart';
 import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/domain/repositories/remote/employee_repository.dart';
+import 'package:grocery_store/domain/repositories/remote/invitation_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/legacy_migration_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/store_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/user_profile_repository.dart';
@@ -124,6 +126,62 @@ class FakeMigrationRepository implements LegacyMigrationRepository {
   }
 }
 
+class FakeInvitationRepository implements InvitationRepository {
+  final invitations = <String, Invitation>{};
+  final accepted = <({Invitation invitation, Employee employee})>[];
+  Failure? acceptFailure;
+
+  @override
+  Future<Result<Invitation?>> getInvitation(String code) async =>
+      Success(invitations[code]);
+
+  @override
+  Future<Result<void>> acceptInvitation(
+      Invitation invitation, Employee employee) async {
+    if (acceptFailure != null) return Error(acceptFailure!);
+    accepted.add((invitation: invitation, employee: employee));
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<Invitation>> createInvitation({
+    required String storeId,
+    required String storeName,
+    required String createdBy,
+  }) =>
+      throw UnimplementedError();
+
+  @override
+  Stream<List<Invitation>> watchStoreInvitations({
+    required String storeId,
+    required String createdBy,
+  }) =>
+      const Stream.empty();
+
+  @override
+  Future<Result<void>> revokeInvitation(String code) async =>
+      const Success(null);
+}
+
+final _now = DateTime(2026, 11, 18, 12);
+
+Invitation _invitation(
+  String code, {
+  String storeId = 'boss-store',
+  String createdBy = 'boss',
+  Duration expiresIn = const Duration(hours: 24),
+  String? usedBy,
+}) =>
+    Invitation(
+      code: code,
+      storeId: storeId,
+      storeName: 'Abasto Central',
+      createdBy: createdBy,
+      createdAt: _now,
+      expiresAt: _now.add(expiresIn),
+      usedBy: usedBy,
+    );
+
 Future<void> _flush() => Future<void>.delayed(Duration.zero);
 
 void main() {
@@ -135,6 +193,7 @@ void main() {
   SessionController build({
     String? lastStoreId,
     LegacyMigrationRepository? migration,
+    InvitationRepository? invitations,
     bool migrated = false,
   }) {
     profiles = FakeUserProfileRepository(lastStoreId, migrated);
@@ -145,6 +204,9 @@ void main() {
       employeeRepository: employees,
       userProfileRepository: profiles,
       legacyMigrationRepository: migration,
+      invitationRepository: invitations,
+      userEmail: 'ana@example.com',
+      clock: () => _now,
       loadDeviceSettings: () async => (iva: 16.0, exchangeRate: 36.5),
     );
   }
@@ -421,6 +483,89 @@ void main() {
 
       expect(migration.migratedInto, ['a']);
       expect(controller.status, SessionStatus.ready);
+    });
+  });
+
+  group('joinStore', () {
+    late FakeInvitationRepository invitations;
+
+    Future<void> startWithoutStore() async {
+      controller = build(invitations: invitations);
+      employees.employee.add(null);
+      stores.owned.add([]);
+      await _flush();
+    }
+
+    setUp(() => invitations = FakeInvitationRepository());
+
+    test('accepts a valid code typed in lowercase and with a dash', () async {
+      invitations.invitations['ABCD2345'] = _invitation('ABCD2345');
+      await startWithoutStore();
+
+      final failure = await controller.joinStore(' abcd-2345 ');
+
+      expect(failure, isNull);
+      final accepted = invitations.accepted.single;
+      expect(accepted.invitation.code, 'ABCD2345');
+      expect(accepted.employee.uid, _uid);
+      expect(accepted.employee.storeId, 'boss-store');
+      expect(accepted.employee.name, 'Ana');
+      expect(accepted.employee.email, 'ana@example.com');
+      expect(accepted.employee.invitationCode, 'ABCD2345');
+    });
+
+    test('malformed or unknown codes are invalid', () async {
+      await startWithoutStore();
+      expect(await controller.joinStore('123'), InvitationFailure.invalid);
+      // 0 and O are not in the alphabet.
+      expect(await controller.joinStore('ABCD0O00'), InvitationFailure.invalid);
+      expect(await controller.joinStore('ABCD2345'), InvitationFailure.invalid);
+      expect(invitations.accepted, isEmpty);
+    });
+
+    test('used and expired codes are rejected', () async {
+      invitations.invitations['USED2345'] =
+          _invitation('USED2345', usedBy: 'someone');
+      invitations.invitations['PAST2345'] =
+          _invitation('PAST2345', expiresIn: const Duration(hours: -1));
+      await startWithoutStore();
+
+      expect(await controller.joinStore('USED2345'), InvitationFailure.used);
+      expect(await controller.joinStore('PAST2345'), InvitationFailure.expired);
+      expect(invitations.accepted, isEmpty);
+    });
+
+    test('cannot join your own store', () async {
+      invitations.invitations['MYST2345'] =
+          _invitation('MYST2345', storeId: 'a', createdBy: _uid);
+      controller = build(invitations: invitations);
+      employees.employee.add(null);
+      stores.owned.add([_store('a')]);
+      await _flush();
+
+      expect(
+          await controller.joinStore('MYST2345'), InvitationFailure.ownStore);
+    });
+
+    test('an employee cannot join another store', () async {
+      invitations.invitations['ABCD2345'] = _invitation('ABCD2345');
+      controller = build(invitations: invitations);
+      employees.employee.add(Employee(uid: _uid, storeId: 's1'));
+      stores.owned.add([]);
+      await _flush();
+
+      expect(await controller.joinStore('ABCD2345'),
+          InvitationFailure.alreadyEmployee);
+    });
+
+    test('a rejected write (rules) is returned to the UI', () async {
+      invitations.invitations['ABCD2345'] = _invitation('ABCD2345');
+      invitations.acceptFailure =
+          const FirestoreFailure(message: 'sin permiso');
+      await startWithoutStore();
+
+      final failure = await controller.joinStore('ABCD2345');
+      expect(failure?.message, 'sin permiso');
     });
   });
 }

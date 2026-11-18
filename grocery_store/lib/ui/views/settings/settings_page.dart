@@ -7,6 +7,7 @@ import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/domain/entities/app_session.dart';
 import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
+import 'package:grocery_store/ui/views/employees/employees_page.dart';
 import 'package:grocery_store/ui/views/session/store_form_page.dart';
 import 'package:provider/provider.dart';
 
@@ -210,6 +211,14 @@ class SettingsPage extends StatelessWidget {
               builder: (_) => StoreFormPage(store: store),
             ));
           },
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.groups_outlined,
+          title: 'Empleados',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const EmployeesPage()),
+          ),
         ),
         _buildSettingsTile(
           context,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
+import 'package:grocery_store/ui/views/session/join_store_page.dart';
 import 'package:grocery_store/ui/views/session/store_form_page.dart';
 import 'package:provider/provider.dart';
 
@@ -65,9 +66,8 @@ class NoStorePage extends StatelessWidget {
                 OutlinedButton.icon(
                   icon: const Icon(Icons.vpn_key_outlined),
                   label: const Text('Tengo un código de invitación'),
-                  // Fase 3 del plan multi-tienda.
-                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Disponible próximamente')),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const JoinStorePage()),
                   ),
                 ),
               ],

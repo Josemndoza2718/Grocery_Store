@@ -4,8 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:grocery_store/core/errors/failure.dart';
 import 'package:grocery_store/domain/entities/app_session.dart';
 import 'package:grocery_store/domain/entities/employee.dart';
+import 'package:grocery_store/domain/entities/invitation.dart';
 import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/domain/repositories/remote/employee_repository.dart';
+import 'package:grocery_store/domain/repositories/remote/invitation_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/legacy_migration_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/store_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/user_profile_repository.dart';
@@ -47,12 +49,17 @@ class SessionController extends ChangeNotifier {
   SessionController({
     required this.uid,
     this.userName = '',
+    this.userEmail = '',
     required StoreRepository storeRepository,
     required EmployeeRepository employeeRepository,
     required UserProfileRepository userProfileRepository,
     LegacyMigrationRepository? legacyMigrationRepository,
+    InvitationRepository? invitationRepository,
     Future<DeviceStoreSettings> Function()? loadDeviceSettings,
+    DateTime Function()? clock,
   })  : _stores = storeRepository,
+        _invitations = invitationRepository,
+        _clock = clock ?? DateTime.now,
         _employees = employeeRepository,
         _profiles = userProfileRepository,
         _migration = legacyMigrationRepository,
@@ -64,6 +71,12 @@ class SessionController extends ChangeNotifier {
 
   /// Display name of the user (seller name in sales).
   final String userName;
+
+  /// Email of the user (shown to the owner in the employees list).
+  final String userEmail;
+
+  final InvitationRepository? _invitations;
+  final DateTime Function() _clock;
 
   final StoreRepository _stores;
   final EmployeeRepository _employees;
@@ -224,6 +237,52 @@ class SessionController extends ChangeNotifier {
   /// Updates the active store (owner): name, description, IVA, rate.
   Future<Failure?> updateStore(Store store) async {
     final result = await _stores.updateStore(store);
+    return result.fold(onSuccess: (_) => null, onError: (f) => f);
+  }
+
+  /// Joins a store as employee with an invitation [rawCode] (as typed).
+  ///
+  /// On success the employee link appears through the real-time stream and
+  /// the session switches to that store by itself.
+  Future<Failure?> joinStore(String rawCode) async {
+    final repository = _invitations;
+    if (repository == null) {
+      return const UnknownFailure(message: 'Invitaciones no disponibles');
+    }
+    if (_employee != null) return InvitationFailure.alreadyEmployee;
+
+    final code = Invitation.normalize(rawCode);
+    if (!Invitation.isWellFormed(code)) return InvitationFailure.invalid;
+
+    final read = await repository.getInvitation(code);
+    Failure? readFailure;
+    final invitation = read.fold<Invitation?>(
+      onSuccess: (data) => data,
+      onError: (failure) {
+        readFailure = failure;
+        return null;
+      },
+    );
+    if (readFailure != null) return readFailure;
+    if (invitation == null) return InvitationFailure.invalid;
+    if (invitation.isUsed) return InvitationFailure.used;
+    if (invitation.isExpired(_clock())) return InvitationFailure.expired;
+    if (invitation.createdBy == uid ||
+        _ownedStores.any((s) => s.id == invitation.storeId)) {
+      return InvitationFailure.ownStore;
+    }
+
+    final result = await repository.acceptInvitation(
+      invitation,
+      Employee(
+        uid: uid,
+        storeId: invitation.storeId,
+        name: userName,
+        email: userEmail,
+        invitationCode: code,
+        createdAt: _clock(),
+      ),
+    );
     return result.fold(onSuccess: (_) => null, onError: (f) => f);
   }
 

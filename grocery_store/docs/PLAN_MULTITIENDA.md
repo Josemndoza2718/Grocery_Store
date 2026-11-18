@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **Fases 0, 1 y 2 completadas**, publicadas y probadas en dispositivo (2026-11-18) · Siguiente: Fase 3 · Rama: `feature/multi-tienda`
+> Estado: **Fases 0, 1 y 2** publicadas y probadas · **Fase 3 completada** (pendiente de publicar y probar) · Rama: `feature/multi-tienda`
 
 ---
 
@@ -268,15 +268,16 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
 - [x] Índices compuestos (`sales`: soldBy + updatedAt).
 - [x] Unificar dashboards en `HomeDashboard` con permisos por rol.
 
-### Fase 3 — Empleados e invitaciones · tamaño M
-- [ ] Dueño: "Invitar empleado" → genera código (alfabeto sin caracteres ambiguos,
-      p. ej. sin `0/O/1/I`), crea `invitations/{code}` y abre el menú de compartir.
-- [ ] Dueño: lista de invitaciones pendientes (revocar) y de empleados (desvincular).
-- [ ] Empleado: pantalla "Tengo un código" → valida y ejecuta **batch**:
-      crear `employees/{uid}` + marcar `invitations/{code}.usedBy`.
-- [ ] Empleado: opción "Abandonar tienda".
-- [ ] Mensajes claros: código inválido, caducado, ya usado, ya perteneces a una tienda.
-- [ ] Reglas de `invitations` + tests (código caducado, reutilizado, de otra tienda…).
+### Fase 3 — Empleados e invitaciones · tamaño M · ✅ completada
+- [x] Dueño: "Invitar empleado" → genera código de 8 caracteres (`Random.secure`,
+      sin `0/O/1/I/L`), crea `invitations/{code}` en una transacción (sin colisiones)
+      y lo muestra para copiar o compartir (`SharePlus`).
+- [x] Dueño: pantalla **Empleados** (Ajustes → Tienda) con empleados (desvincular) e invitaciones pendientes (compartir / revocar).
+- [x] Empleado: pantalla "Tengo un código" (`JoinStorePage`) → valida y ejecuta
+      **batch**: crear `employees/{uid}` + marcar `invitations/{code}.usedBy`.
+- [x] Empleado: opción "Abandonar tienda" (ya existía desde la Fase 1).
+- [x] Mensajes claros: código inválido, caducado, ya usado, ya perteneces a una tienda, tu propia tienda (`InvitationFailure`).
+- [x] Reglas de `invitations` y alta de `employees` + 13 tests nuevos (55 en emulador); 9 tests unitarios nuevos (40 en total).
 
 ### Fase 4 — CRUD de tienda y configuración · tamaño M
 - [ ] Pantalla de la tienda: editar nombre/descripción, IVA, tasa de cambio.

@@ -22,6 +22,8 @@ import {
   updateDoc,
   where,
   writeBatch,
+  Timestamp,
+  serverTimestamp,
 } from 'firebase/firestore';
 
 const PROJECT_ID = 'demo-grocery-store';
@@ -199,7 +201,7 @@ describe('/employees', () => {
     await assertFails(getDoc(doc(db(BOB), `employees/${CAROL}`)));
   });
 
-  test('links cannot be created or edited yet (Phase 3: invitation codes)', async () => {
+  test('links cannot be created without an invitation, nor edited', async () => {
     await seed('stores/s1', storeData(ALICE));
     await assertFails(setDoc(doc(db(CAROL), `employees/${CAROL}`), { storeId: 's1' }));
     await assertFails(setDoc(doc(db(ALICE), `employees/${CAROL}`), { storeId: 's1' }));
@@ -403,5 +405,171 @@ describe('legacy migration (same writes as LegacyMigrationRepositoryImpl)', () =
         { merge: true },
       ),
     );
+  });
+});
+
+// ───────────────────────── Invitations (Phase 3) ─────────────────────────
+
+const ERIN = 'erin'; // a user without store who wants to join
+
+const HOUR = 60 * 60 * 1000;
+const inHours = (h) => Timestamp.fromMillis(Date.now() + h * HOUR);
+
+const invitationData = (storeId, createdBy, extra = {}) => ({
+  storeId,
+  storeName: 'Abasto Central',
+  createdBy,
+  createdAt: Timestamp.now(),
+  expiresAt: inHours(48),
+  usedBy: null,
+  usedAt: null,
+  ...extra,
+});
+
+/** The same batch the app commits in InvitationRepositoryImpl.acceptInvitation. */
+function joinBatch(uid, code, storeId) {
+  const fs = db(uid);
+  const batch = writeBatch(fs);
+  batch.set(doc(fs, `employees/${uid}`), {
+    storeId,
+    name: 'Erin',
+    email: 'erin@example.com',
+    invitationCode: code,
+    createdAt: '2026-11-18T00:00:00.000',
+  });
+  batch.update(doc(fs, `invitations/${code}`), {
+    usedBy: uid,
+    usedAt: serverTimestamp(),
+  });
+  return batch.commit();
+}
+
+describe('/invitations', () => {
+  test('the owner can create an invitation for their store', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await assertSucceeds(
+      setDoc(doc(db(ALICE), 'invitations/ABCD2345'), invitationData('s1', ALICE)),
+    );
+  });
+
+  test('nobody else can create invitations for the store', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertFails(
+      setDoc(doc(db(CAROL), 'invitations/ABCD2345'), invitationData('s1', CAROL)),
+    );
+    await assertFails(
+      setDoc(doc(db(BOB), 'invitations/ABCD2345'), invitationData('s1', BOB)),
+    );
+    // Not even pretending to be the owner.
+    await assertFails(
+      setDoc(doc(db(BOB), 'invitations/ABCD2345'), invitationData('s1', ALICE)),
+    );
+  });
+
+  test('invitations must be pending, short-lived and have an 8-char code', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    const fs = db(ALICE);
+    await assertFails(
+      setDoc(doc(fs, 'invitations/ABCD2345'), invitationData('s1', ALICE, { expiresAt: inHours(24 * 30) })),
+    );
+    await assertFails(
+      setDoc(doc(fs, 'invitations/ABCD2345'), invitationData('s1', ALICE, { expiresAt: inHours(-1) })),
+    );
+    await assertFails(
+      setDoc(doc(fs, 'invitations/ABCD2345'), invitationData('s1', ALICE, { usedBy: BOB })),
+    );
+    await assertFails(setDoc(doc(fs, 'invitations/ABC'), invitationData('s1', ALICE)));
+  });
+
+  test('any user can read a code, but cannot list invitations of others', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await assertSucceeds(getDoc(doc(db(ERIN), 'invitations/ABCD2345')));
+    await assertFails(getDocs(collection(db(ERIN), 'invitations')));
+    await assertSucceeds(
+      getDocs(
+        query(
+          collection(db(ALICE), 'invitations'),
+          where('createdBy', '==', ALICE),
+          where('storeId', '==', 's1'),
+        ),
+      ),
+    );
+  });
+
+  test('the owner can revoke; others cannot', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await assertFails(deleteDoc(doc(db(ERIN), 'invitations/ABCD2345')));
+    await assertSucceeds(deleteDoc(doc(db(ALICE), 'invitations/ABCD2345')));
+  });
+});
+
+describe('joining a store with a code', () => {
+  test('a valid code links the user to the store, and they can work there', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('stores/s1/products/p1', { name: 'Harina', stockQuantity: 10 });
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+
+    await assertSucceeds(joinBatch(ERIN, 'ABCD2345', 's1'));
+    await assertSucceeds(getDoc(doc(db(ERIN), 'stores/s1')));
+    await assertSucceeds(getDoc(doc(db(ERIN), 'stores/s1/products/p1')));
+  });
+
+  test('a code can only be used once', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await assertSucceeds(joinBatch(ERIN, 'ABCD2345', 's1'));
+    await assertFails(joinBatch(BOB, 'ABCD2345', 's1'));
+  });
+
+  test('expired codes are rejected', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE, { expiresAt: inHours(-1) }));
+    await assertFails(joinBatch(ERIN, 'ABCD2345', 's1'));
+  });
+
+  test('a code cannot be used to join a different store', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('stores/s2', storeData(BOB));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await assertFails(joinBatch(ERIN, 'ABCD2345', 's2'));
+  });
+
+  test('the employee link cannot be created without consuming the code', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await assertFails(
+      setDoc(doc(db(ERIN), `employees/${ERIN}`), {
+        storeId: 's1',
+        invitationCode: 'ABCD2345',
+      }),
+    );
+  });
+
+  test('the code cannot be marked as used without joining', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await assertFails(
+      updateDoc(doc(db(ERIN), 'invitations/ABCD2345'), { usedBy: ERIN }),
+    );
+  });
+
+  test('someone already working in a store cannot join another one', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('stores/s2', storeData(BOB));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await seed('invitations/ABCD2345', invitationData('s2', BOB));
+    await assertFails(joinBatch(CAROL, 'ABCD2345', 's2'));
+  });
+
+  test('after leaving, the user can join with a new code', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('stores/s2', storeData(BOB));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await seed('invitations/WXYZ2345', invitationData('s2', BOB));
+    await deleteDoc(doc(db(CAROL), `employees/${CAROL}`));
+    await assertSucceeds(joinBatch(CAROL, 'WXYZ2345', 's2'));
   });
 });

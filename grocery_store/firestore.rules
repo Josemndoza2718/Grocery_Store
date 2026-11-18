@@ -11,6 +11,9 @@ service cloud.firestore {
     function employeePath(uid) {
       return /databases/$(database)/documents/employees/$(uid);
     }
+    function invitationPath(code) {
+      return /databases/$(database)/documents/invitations/$(code);
+    }
     // ¿El usuario está vinculado como empleado a alguna tienda?
     function isEmployeeAny() { return exists(employeePath(me())); }
     function isOwner(storeId) {
@@ -100,12 +103,62 @@ service cloud.firestore {
       allow read: if signedIn()
         && (me() == employeeId || isOwner(resource.data.storeId));
 
-      // Se habilita en la Fase 3 (unirse con código de invitación).
-      allow create, update: if false;
+      // Unirse con un código de invitación válido: se crea en el MISMO batch
+      // que marca la invitación como usada por este usuario.
+      allow create: if signedIn() && me() == employeeId
+        && request.resource.data.storeId is string
+        && request.resource.data.invitationCode is string
+        && invitationAcceptedBy(
+             request.resource.data.invitationCode,
+             request.resource.data.storeId);
+
+      // El vínculo no se edita (para cambiar de tienda: abandonar + nueva invitación).
+      allow update: if false;
 
       // Desvincular (dueño de la tienda) o abandonar (el propio empleado).
       allow delete: if signedIn()
         && (me() == employeeId || isOwner(resource.data.storeId));
+    }
+
+    // La invitación era válida antes de esta escritura (de esa tienda, sin
+    // usar y vigente) y queda marcada como usada por el usuario actual.
+    function invitationAcceptedBy(code, storeId) {
+      let before = get(invitationPath(code)).data;
+      let after = getAfter(invitationPath(code)).data;
+      return before.storeId == storeId
+        && before.usedBy == null
+        && request.time < before.expiresAt
+        && after.usedBy == me();
+    }
+
+    // ──────────── INVITACIONES ────────────
+    // El id del documento es el código (8 caracteres, un solo uso, 48 h).
+    match /invitations/{code} {
+      // Cualquiera con sesión puede consultar UN código (para validarlo),
+      // pero no listar invitaciones ajenas.
+      allow get: if signedIn();
+      allow list: if signedIn() && resource.data.createdBy == me();
+
+      allow create: if signedIn()
+        && code.size() == 8
+        && request.resource.data.createdBy == me()
+        && isOwner(request.resource.data.storeId)
+        && request.resource.data.usedBy == null
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(49, 'h');
+
+      // Solo para marcarla como usada, junto con la creación del empleado.
+      allow update: if signedIn()
+        && resource.data.usedBy == null
+        && request.time < resource.data.expiresAt
+        && onlyChanges(['usedBy', 'usedAt'])
+        && request.resource.data.usedBy == me()
+        && existsAfter(employeePath(me()))
+        && getAfter(employeePath(me())).data.storeId == resource.data.storeId;
+
+      // El dueño puede revocarla.
+      allow delete: if signedIn() && isOwner(resource.data.storeId);
     }
 
     // ──────────── COLECCIONES DEL MODELO ANTERIOR (por usuario) ────────────
