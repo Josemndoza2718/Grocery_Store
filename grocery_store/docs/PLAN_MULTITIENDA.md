@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **Fases 0–3** publicadas y probadas · **Fase 4 completada** (pendiente de probar; no cambia reglas) · Rama: `feature/multi-tienda`
+> Estado: **Plan completado** (fases 0–5) · Rama: `feature/multi-tienda`
 
 ---
 
@@ -290,13 +290,17 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
 - [x] Ajustes: "Cambiar de tienda" (dueño), "Abandonar tienda" (empleado).
 - [x] Ocultar en la UI todo lo que el rol no permite (las reglas ya lo bloquean).
 
-### Fase 5 — Limpieza y endurecimiento · tamaño S
-- [ ] Tras confirmar que todos los dispositivos migraron: borrar los documentos de
-      las colecciones legadas (`products`, `carts`, `clients`, `sales-history`),
-      sus reglas, su índice y el código de migración.
-- [ ] Eliminar `isAdmin` de `users`, `PrefKeys.userId/userRole`, `ClientRepositoryImpl`
-      (Sembast) y `MigrateLocalClientsUseCase`.
-- [ ] Revisión final de reglas con el emulador y checklist de pruebas manuales (§7).
+### Fase 5 — Limpieza y endurecimiento · tamaño S · ✅ completada
+- [x] Decisión 2026-11-18: borrar todo el respaldo (todas las cuentas ya migradas).
+- [x] Borrar los documentos de las colecciones legadas (`products`, `carts`,
+      `clients`, `sales-history`) desde el servidor, sus reglas y su índice.
+- [x] Eliminar el código de migración (`LegacyMigrationRepository`, estado
+      `migrating`, `users/{uid}.migratedAt`), `ClientRepositoryImpl` (Sembast),
+      `ClientModel`, `MigrateLocalClientsUseCase` y la dependencia `sembast`.
+- [x] Eliminar `PrefKeys.userId` / `userRole`. `isAdmin` ya no se escribe ni se lee
+      (el campo queda inerte en perfiles antiguos).
+- [x] Reglas: las rutas antiguas quedan denegadas por defecto (pruebas incluidas).
+      48 pruebas en emulador, 38 en Flutter.
 
 ---
 

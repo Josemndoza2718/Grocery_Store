@@ -60,32 +60,13 @@ async function seed(path, data) {
   });
 }
 
-// Collections of the old per-user model: read-only backup for their owner
-// (the app only reads them to migrate them into a store).
+// The collections of the old per-user model were removed (phase 5): with no
+// rule for them, Firestore denies everything by default.
 for (const name of ['products', 'carts', 'clients', 'sales-history']) {
-  describe(`legacy /${name}`, () => {
-    test('owner can read their documents and query them by userId', async () => {
-      await seed(`${name}/d1`, { userId: ALICE });
-      await seed(`${name}/d2`, { userId: BOB });
-      await assertSucceeds(getDoc(doc(db(ALICE), `${name}/d1`)));
-      await assertSucceeds(
-        getDocs(query(collection(db(ALICE), name), where('userId', '==', ALICE))),
-      );
-    });
-
-    test("cannot read another user's documents or list everything", async () => {
-      await seed(`${name}/d1`, { userId: ALICE });
-      await assertFails(getDoc(doc(db(BOB), `${name}/d1`)));
-      await assertFails(getDocs(collection(db(ALICE), name)));
-      await assertFails(getDoc(doc(anon(), `${name}/d1`)));
-    });
-
-    test('nobody can write anymore (old app versions are blocked)', async () => {
-      await seed(`${name}/d1`, { userId: ALICE });
-      await assertFails(setDoc(doc(db(ALICE), `${name}/d2`), { userId: ALICE }));
-      await assertFails(updateDoc(doc(db(ALICE), `${name}/d1`), { x: 1 }));
-      await assertFails(deleteDoc(doc(db(ALICE), `${name}/d1`)));
-    });
+  test(`old top-level /${name} is closed`, async () => {
+    await seed(`${name}/d1`, { userId: ALICE });
+    await assertFails(getDoc(doc(db(ALICE), `${name}/d1`)));
+    await assertFails(setDoc(doc(db(ALICE), `${name}/d2`), { userId: ALICE }));
   });
 }
 
@@ -366,46 +347,6 @@ describe('checkout in a store (same writes as PaymentRepositoryImpl)', () => {
     batch.set(doc(fs, 'stores/s1/sales/c1'), { soldBy: DAVE, status: 'paid' });
     batch.delete(doc(fs, 'stores/s1/carts/c1'));
     await assertFails(batch.commit());
-  });
-});
-
-describe('legacy migration (same writes as LegacyMigrationRepositoryImpl)', () => {
-  test('the owner can copy legacy data into their store keeping the ids', async () => {
-    await seedStores();
-    await seed('products/p1', { userId: ALICE, name: 'Harina', stockQuantity: 3 });
-    await seed('sales-history/v1', { userId: ALICE, total: 5 });
-
-    const fs = db(ALICE);
-    const products = await getDocs(
-      query(collection(fs, 'products'), where('userId', '==', ALICE)),
-    );
-    const sales = await getDocs(
-      query(collection(fs, 'sales-history'), where('userId', '==', ALICE)),
-    );
-    const batch = writeBatch(fs);
-    products.forEach((d) => batch.set(doc(fs, `stores/s1/products/${d.id}`), d.data()));
-    sales.forEach((d) =>
-      batch.set(doc(fs, `stores/s1/sales/${d.id}`), { ...d.data(), soldBy: ALICE }),
-    );
-    batch.set(doc(fs, 'stores/s1/clients/cl1'), { name: 'Ana', userId: ALICE });
-    batch.set(doc(fs, 'stores/s1/carts/c1'), { ownerId: 'cl1', createdBy: ALICE });
-    await assertSucceeds(batch.commit());
-
-    // Retrying is safe for everything except sales (immutable): the app skips
-    // the ids that already exist in the store.
-    await assertFails(
-      setDoc(doc(fs, 'stores/s1/sales/v1'), { userId: ALICE, total: 5, soldBy: ALICE }),
-    );
-  });
-
-  test('the migrated-at mark is saved in the own profile', async () => {
-    await assertSucceeds(
-      setDoc(
-        doc(db(ALICE), `users/${ALICE}`),
-        { migratedAt: '2026-11-18', migratedToStoreId: 's1' },
-        { merge: true },
-      ),
-    );
   });
 });
 

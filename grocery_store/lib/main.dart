@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/app_theme.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/dependencies/di.dart';
 import 'package:grocery_store/ui/views/auth/login_page.dart';
@@ -84,12 +83,7 @@ class MyApp extends StatelessWidget {
               storeRepository: storeRepository,
               employeeRepository: employeeRepository,
               userProfileRepository: userProfileRepository,
-              legacyMigrationRepository: legacyMigrationRepository,
               invitationRepository: invitationRepository,
-              loadDeviceSettings: () async => (
-                iva: double.tryParse(Prefs.getString(PrefKeys.iva) ?? '') ?? 0,
-                exchangeRate: await Prefs.getMoneyConversion(),
-              ),
             ),
             child: SessionGate(
               buildApp: ({Key? key, required Widget home}) =>

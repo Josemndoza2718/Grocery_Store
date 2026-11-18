@@ -10,10 +10,7 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
   @override
   Future<UserProfile> getProfile(String uid) async {
     final data = (await _user(uid).get()).data() ?? const {};
-    return UserProfile(
-      lastStoreId: data['lastStoreId'] as String?,
-      migratedAt: DateTime.tryParse(data['migratedAt']?.toString() ?? ''),
-    );
+    return UserProfile(lastStoreId: data['lastStoreId'] as String?);
   }
 
   @override
@@ -21,13 +18,5 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
     // merge: creates the profile if it does not exist (e.g. users created
     // from the Firebase console) without touching the other fields.
     return _user(uid).set({'lastStoreId': storeId}, SetOptions(merge: true));
-  }
-
-  @override
-  Future<void> markMigrated(String uid, {String? storeId}) {
-    return _user(uid).set({
-      'migratedAt': DateTime.now().toIso8601String(),
-      if (storeId != null) 'migratedToStoreId': storeId,
-    }, SetOptions(merge: true));
   }
 }

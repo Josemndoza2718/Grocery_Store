@@ -8,9 +8,8 @@ abstract class StoreRepository {
   /// Real-time store document; emits `null` if it does not exist.
   Stream<Store?> watchStore(String storeId);
 
-  /// Creates a store and returns it. Uses [id] when given (deterministic id,
-  /// e.g. for the migration), otherwise a new random id.
-  Future<Result<Store>> createStore(Store store, {String? id});
+  /// Creates a store with a new id and returns it.
+  Future<Result<Store>> createStore(Store store);
 
   Future<Result<void>> updateStore(Store store);
 

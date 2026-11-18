@@ -38,9 +38,9 @@ class StoreRepositoryImpl implements StoreRepository {
   }
 
   @override
-  Future<Result<Store>> createStore(Store store, {String? id}) {
+  Future<Result<Store>> createStore(Store store) {
     return FirebaseErrorHandler.guard(() async {
-      final ref = id == null ? _stores.doc() : _stores.doc(id);
+      final ref = _stores.doc();
       final now = DateTime.now();
       final created = store.copyWith(
         id: ref.id,

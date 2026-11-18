@@ -32,11 +32,6 @@ class SessionGate extends StatelessWidget {
           key: const ValueKey('session-loading'),
           home: const SessionLoadingPage(),
         );
-      case SessionStatus.migrating:
-        return buildApp(
-          key: const ValueKey('session-migrating'),
-          home: const SessionMigratingPage(),
-        );
       case SessionStatus.error:
         return buildApp(
           key: const ValueKey('session-error'),

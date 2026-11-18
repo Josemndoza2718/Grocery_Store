@@ -62,8 +62,6 @@ class Prefs {
     await remove(PrefKeys.userData);
     await remove(PrefKeys.token);
     await remove(PrefKeys.userName);
-    await remove(PrefKeys.userId);
     await remove(PrefKeys.fullName);
-    await remove(PrefKeys.userRole);
   }
 }

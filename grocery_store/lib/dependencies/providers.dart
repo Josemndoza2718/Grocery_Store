@@ -1,4 +1,3 @@
-import 'package:grocery_store/data/repositories/local/car_client_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_cart_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_client_repository_impl.dart';
 import 'package:grocery_store/data/repositories/local/new/new_product_repository_impl.dart';
@@ -6,7 +5,6 @@ import 'package:grocery_store/data/repositories/local/new/payment_repository_imp
 import 'package:grocery_store/data/repositories/local/new/sales_history_repository_impl.dart';
 import 'package:grocery_store/data/repositories/remote/employee_repository_impl.dart';
 import 'package:grocery_store/data/repositories/remote/invitation_repository_impl.dart';
-import 'package:grocery_store/data/repositories/remote/legacy_migration_repository_impl.dart';
 import 'package:grocery_store/data/repositories/remote/store_repository_impl.dart';
 import 'package:grocery_store/data/repositories/remote/user_profile_repository_impl.dart';
 import 'package:grocery_store/domain/entities/app_session.dart';
@@ -38,12 +36,6 @@ final storeRepository = StoreRepositoryImpl();
 final employeeRepository = EmployeeRepositoryImpl();
 final userProfileRepository = UserProfileRepositoryImpl();
 final invitationRepository = InvitationRepositoryImpl();
-
-/// Copies the per-user data of the old model into a store (one-time).
-final legacyMigrationRepository = LegacyMigrationRepositoryImpl(
-  // Legacy local (Sembast) clients store, only read by the migration.
-  localClients: ClientRepositoryImpl(),
-);
 
 /// Providers that live for the whole app lifetime (independent of the session).
 final List<SingleChildWidget> globalProviders = [

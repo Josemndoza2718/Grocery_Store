@@ -160,25 +160,5 @@ service cloud.firestore {
       // El dueño puede revocarla.
       allow delete: if signedIn() && isOwner(resource.data.storeId);
     }
-
-    // ──────────── COLECCIONES DEL MODELO ANTERIOR (por usuario) ────────────
-    // Solo lectura para su dueño: se conservan como respaldo y la app las lee
-    // únicamente para migrarlas a su tienda. Se eliminan en la Fase 5.
-    match /products/{productId} {
-      allow read: if signedIn() && resource.data.userId == me();
-      allow write: if false;
-    }
-    match /carts/{cartId} {
-      allow read: if signedIn() && resource.data.userId == me();
-      allow write: if false;
-    }
-    match /clients/{clientId} {
-      allow read: if signedIn() && resource.data.userId == me();
-      allow write: if false;
-    }
-    match /sales-history/{saleId} {
-      allow read: if signedIn() && resource.data.userId == me();
-      allow write: if false;
-    }
   }
 }

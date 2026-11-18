@@ -9,7 +9,6 @@ import 'package:grocery_store/domain/entities/invitation.dart';
 import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/domain/repositories/remote/employee_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/invitation_repository.dart';
-import 'package:grocery_store/domain/repositories/remote/legacy_migration_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/store_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/user_profile_repository.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
@@ -42,9 +41,9 @@ class FakeStoreRepository implements StoreRepository {
   final created = <Store>[];
 
   @override
-  Future<Result<Store>> createStore(Store store, {String? id}) async {
+  Future<Result<Store>> createStore(Store store) async {
     if (createFailure != null) return Error(createFailure!);
-    final result = store.copyWith(id: id ?? 'new-${_nextId++}');
+    final result = store.copyWith(id: 'new-${_nextId++}');
     created.add(result);
     return Success(result);
   }
@@ -88,53 +87,18 @@ class FakeEmployeeRepository implements EmployeeRepository {
 }
 
 class FakeUserProfileRepository implements UserProfileRepository {
-  FakeUserProfileRepository([this.lastStoreId, this.migrated = false]);
+  FakeUserProfileRepository([this.lastStoreId]);
 
   String? lastStoreId;
-  bool migrated;
-  String? migratedToStoreId;
   final saved = <String>[];
 
   @override
-  Future<UserProfile> getProfile(String uid) async => UserProfile(
-        lastStoreId: lastStoreId,
-        migratedAt: migrated ? DateTime(2026, 1, 1) : null,
-      );
+  Future<UserProfile> getProfile(String uid) async =>
+      UserProfile(lastStoreId: lastStoreId);
 
   @override
   Future<void> setLastStoreId(String uid, String storeId) async {
     saved.add(storeId);
-  }
-
-  @override
-  Future<void> markMigrated(String uid, {String? storeId}) async {
-    migrated = true;
-    migratedToStoreId = storeId;
-  }
-}
-
-class FakeMigrationRepository implements LegacyMigrationRepository {
-  FakeMigrationRepository({this.hasData = true});
-
-  bool hasData;
-  Object? failWith;
-  final migratedInto = <String>[];
-  final completer = Completer<void>();
-  bool waitForCompleter = false;
-
-  @override
-  Future<bool> hasLegacyData(String uid) async => hasData;
-
-  @override
-  Future<MigrationReport> migrate({
-    required String uid,
-    required String storeId,
-    required String userName,
-  }) async {
-    if (waitForCompleter) await completer.future;
-    if (failWith != null) throw failWith!;
-    migratedInto.add(storeId);
-    return const MigrationReport(products: 3, clients: 2);
   }
 }
 
@@ -204,22 +168,18 @@ void main() {
 
   SessionController build({
     String? lastStoreId,
-    LegacyMigrationRepository? migration,
     InvitationRepository? invitations,
-    bool migrated = false,
   }) {
-    profiles = FakeUserProfileRepository(lastStoreId, migrated);
+    profiles = FakeUserProfileRepository(lastStoreId);
     return SessionController(
       uid: _uid,
       userName: 'Ana',
       storeRepository: stores,
       employeeRepository: employees,
       userProfileRepository: profiles,
-      legacyMigrationRepository: migration,
       invitationRepository: invitations,
       userEmail: 'ana@example.com',
       clock: () => _now,
-      loadDeviceSettings: () async => (iva: 16.0, exchangeRate: 36.5),
     );
   }
 
@@ -390,112 +350,6 @@ void main() {
     stores.owned.add([_store('a')]);
     await _flush();
     expect(controller.status, SessionStatus.ready);
-  });
-
-  group('legacy data migration', () {
-    test('user without legacy data is marked as migrated and sees noStore',
-        () async {
-      final migration = FakeMigrationRepository(hasData: false);
-      controller = build(migration: migration);
-      employees.employee.add(null);
-      stores.owned.add([]);
-      await _flush();
-      await _flush();
-
-      expect(controller.status, SessionStatus.noStore);
-      expect(profiles.migrated, isTrue);
-      expect(migration.migratedInto, isEmpty);
-    });
-
-    test('creates "Mi tienda" with device settings and enters it', () async {
-      final migration = FakeMigrationRepository()..waitForCompleter = true;
-      controller = build(migration: migration);
-      employees.employee.add(null);
-      stores.owned.add([]);
-      await _flush();
-      expect(controller.status, SessionStatus.migrating);
-
-      migration.completer.complete();
-      await _flush();
-      await _flush();
-
-      final created = stores.created.single;
-      expect(created.id, 'legacy_$_uid');
-      expect(created.name, 'Mi tienda');
-      expect(created.iva, 16.0);
-      expect(created.exchangeRate, 36.5);
-      expect(migration.migratedInto, ['legacy_$_uid']);
-      expect(profiles.migratedToStoreId, 'legacy_$_uid');
-
-      stores.owned.add([created]);
-      await _flush();
-      expect(controller.status, SessionStatus.ready);
-      expect(controller.session!.storeId, 'legacy_$_uid');
-      expect(controller.session!.userName, 'Ana');
-    });
-
-    test('migrates into the first store the user already created', () async {
-      final migration = FakeMigrationRepository();
-      controller = build(migration: migration);
-      employees.employee.add(null);
-      stores.owned.add([_store('b', day: 2), _store('a')]
-        ..sort((x, y) => x.createdAt.compareTo(y.createdAt)));
-      await _flush();
-      await _flush();
-
-      expect(stores.created, isEmpty);
-      expect(migration.migratedInto, ['a']);
-      expect(controller.session!.storeId, 'a');
-    });
-
-    test('already migrated users skip the migration', () async {
-      final migration = FakeMigrationRepository();
-      controller = build(migration: migration, migrated: true);
-      employees.employee.add(null);
-      stores.owned.add([_store('a')]);
-      await _flush();
-      await _flush();
-
-      expect(migration.migratedInto, isEmpty);
-      expect(controller.status, SessionStatus.ready);
-    });
-
-    test('employees never run the migration', () async {
-      final migration = FakeMigrationRepository();
-      controller = build(migration: migration);
-      employees.employee.add(Employee(uid: _uid, storeId: 's1'));
-      stores.owned.add([]);
-      await _flush();
-      stores.storeController('s1').add(_store('s1'));
-      await _flush();
-
-      expect(migration.migratedInto, isEmpty);
-      expect(profiles.migrated, isFalse);
-      expect(controller.status, SessionStatus.ready);
-    });
-
-    test('a failure shows the error state and retry migrates again', () async {
-      final migration = FakeMigrationRepository()
-        ..failWith = Exception('offline');
-      controller = build(migration: migration);
-      employees.employee.add(null);
-      stores.owned.add([_store('a')]);
-      await _flush();
-      await _flush();
-
-      expect(controller.status, SessionStatus.error);
-      expect(profiles.migrated, isFalse);
-
-      migration.failWith = null;
-      controller.retry();
-      employees.employee.add(null);
-      stores.owned.add([_store('a')]);
-      await _flush();
-      await _flush();
-
-      expect(migration.migratedInto, ['a']);
-      expect(controller.status, SessionStatus.ready);
-    });
   });
 
   group('joinStore', () {
