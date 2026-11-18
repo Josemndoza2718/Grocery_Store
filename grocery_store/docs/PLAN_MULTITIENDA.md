@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **Fases 0, 1 y 2 completadas** (Fase 2 pendiente de publicar y probar en dispositivo) · Rama: `feature/multi-tienda`
+> Estado: **Fases 0, 1 y 2 completadas**, publicadas y probadas en dispositivo (2026-11-18) · Siguiente: Fase 3 · Rama: `feature/multi-tienda`
 
 ---
 
