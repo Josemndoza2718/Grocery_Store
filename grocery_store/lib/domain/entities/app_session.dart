@@ -9,10 +9,14 @@ class AppSession {
   final String storeId;
   final StoreRole role;
 
+  /// Display name of the user (shown e.g. as the seller of a sale).
+  final String userName;
+
   const AppSession({
     required this.uid,
     required this.storeId,
     required this.role,
+    this.userName = '',
   });
 
   bool get isOwner => role == StoreRole.owner;

@@ -20,7 +20,7 @@ class FakeGetProductsUseCases implements NewGetProductsUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Stream<List<Product>> callStream({String? userId}) {
+  Stream<List<Product>> callStream() {
     return _controller.stream;
   }
 
@@ -64,8 +64,7 @@ class FakeGetClientsUseCases implements GetClientsUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Stream<List<Client>> callStream({required String userId}) =>
-      const Stream.empty();
+  Stream<List<Client>> callStream() => const Stream.empty();
 }
 
 class FakeDeleteClientsUseCases implements DeleteClientsUseCases {

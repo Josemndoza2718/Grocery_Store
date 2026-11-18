@@ -123,7 +123,6 @@ class AppTheme {
       expansionTileTheme: const ExpansionTileThemeData(
         backgroundColor: AppColors.white,
       ),
-      
       searchBarTheme: const SearchBarThemeData(
         backgroundColor: WidgetStatePropertyAll(AppColors.white),
       ),

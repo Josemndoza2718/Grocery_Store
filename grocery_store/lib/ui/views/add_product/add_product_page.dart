@@ -247,7 +247,9 @@ class _AddProductPageState extends State<AddProductPage> {
                                 DecimalInputFormatter(),
                               ],
                               validator: (value) {
-                                final cleaned = value?.replaceAll('.', '').replaceAll(',', '.');
+                                final cleaned = value
+                                    ?.replaceAll('.', '')
+                                    .replaceAll(',', '.');
                                 final price = double.tryParse(cleaned ?? '');
                                 if (price == null || price <= 0) {
                                   return 'lbl_product_price_>_0'.translate;
@@ -297,19 +299,25 @@ class _AddProductPageState extends State<AddProductPage> {
                               onTap: widget.product != null
                                   ? () async {
                                       final userId = provider.userId;
-                                      final price = priceEditController.text.replaceAll('.', '').replaceAll(',', '.');
+                                      final price = priceEditController.text
+                                          .replaceAll('.', '')
+                                          .replaceAll(',', '.');
 
                                       _updateProduct(
                                           product: Product(
                                         id: widget.product!.id,
                                         name: nameEditController.text,
-                                        description: descriptionEditController.text,
+                                        description:
+                                            descriptionEditController.text,
                                         price: double.tryParse(price) ?? 0.0,
                                         image: provider.urlImage.isEmpty
                                             ? provider.galleryImage?.path ?? ''
                                             : provider.urlImage,
                                         idStock: _idStockController.text,
-                                        stockQuantity: int.tryParse(_stockEditQuantityController.text) ?? 0,
+                                        stockQuantity: int.tryParse(
+                                                _stockEditQuantityController
+                                                    .text) ??
+                                            0,
                                         quantityToBuy: 0,
                                         userId: userId,
                                       ));
@@ -317,20 +325,25 @@ class _AddProductPageState extends State<AddProductPage> {
                                   : () async {
                                       final userId = provider.userId;
 
-                                      final price = _priceController.text.replaceAll('.', '').replaceAll(',', '.');
-
+                                      final price = _priceController.text
+                                          .replaceAll('.', '')
+                                          .replaceAll(',', '.');
 
                                       _createProduct(
                                           product: Product(
                                         id: _uuid.v4(),
                                         name: _nameController.text,
-                                        description: _descriptionController.text,
+                                        description:
+                                            _descriptionController.text,
                                         price: double.tryParse(price) ?? 0.0,
                                         image: provider.urlImage.isEmpty
                                             ? provider.galleryImage?.path ?? ''
                                             : provider.urlImage,
                                         idStock: _idStockController.text,
-                                        stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
+                                        stockQuantity: int.tryParse(
+                                                _stockQuantityController
+                                                    .text) ??
+                                            0,
                                         quantityToBuy: 0,
                                         userId: userId,
                                       ));

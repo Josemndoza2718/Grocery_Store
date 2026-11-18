@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/errors/failure.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/domain/use_cases/cart/new/new_create_cart_use_cases.dart';
@@ -21,6 +20,7 @@ class CartViewModel extends ChangeNotifier {
 
   CartViewModel({
     required this.userId,
+    this.userName = '',
     required this.getProductsUseCases,
     required this.getCartsUseCases,
     required this.createCartUseCases,
@@ -30,12 +30,14 @@ class CartViewModel extends ChangeNotifier {
     required this.processPaymentUseCase,
   }) {
     getAllCarts();
-    getMoneyConversion();
   }
 
-  /// Firebase Auth UID of the session owner. The view model is recreated
-  /// on every login, so this never changes during its lifetime.
+  /// Firebase Auth UID of the logged-in store member. The view model is
+  /// recreated for every session (user + store).
   final String userId;
+
+  /// Display name of the logged-in member (stored as the seller of a sale).
+  final String userName;
 
   //Products
   final NewGetProductsUseCases getProductsUseCases;
@@ -60,8 +62,6 @@ class CartViewModel extends ChangeNotifier {
 
   List<bool> _isActivePanel = [];
 
-  double _moneyConversion = 0;
-
   final List<String> _hiddenCartIds = [];
 
   final int _payPart = 0;
@@ -69,7 +69,6 @@ class CartViewModel extends ChangeNotifier {
   double _delivery = 0;
   bool _isPaid = false;
 
-  double get moneyConversion => _moneyConversion;
   double get subTotal => _subTotal;
   int get payPart => _payPart;
   List<bool> get isActivePanel => _isActivePanel;
@@ -182,11 +181,6 @@ class CartViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set moneyConversion(double value) {
-    _moneyConversion = value;
-    notifyListeners();
-  }
-
   void onSetPayProduct(String id, int value) {
     for (var element in listCarts) {
       if (value > 0) {
@@ -264,15 +258,8 @@ class CartViewModel extends ChangeNotifier {
       if (cartIndex != -1) {
         final cart = listCarts[cartIndex];
         await updateCartUseCases.call(cart);
-        print('Carrito $cartId auto-guardado exitosamente.');
       }
     });
-  }
-
-  void getMoneyConversion() async {
-    double money = await Prefs.getMoneyConversion();
-    _moneyConversion = money;
-    notifyListeners();
   }
 
   //Car_Products
@@ -296,6 +283,7 @@ class CartViewModel extends ChangeNotifier {
           ownerCarName: ownerCarName,
           status: 'pending',
           products: listProductsInCart,
+          createdBy: userId,
         ),
       );
 
@@ -359,7 +347,7 @@ class CartViewModel extends ChangeNotifier {
   Future<void> getAllCarts() async {
     // Subscribe to carts stream for real-time updates
     await _cartsSubscription?.cancel();
-    _cartsSubscription = getCartsUseCases.callStream(userId: userId).listen(
+    _cartsSubscription = getCartsUseCases.callStream().listen(
       (carts) {
         listCarts = carts;
         _isActivePanel = List.filled(listCarts.length, false);
@@ -377,7 +365,7 @@ class CartViewModel extends ChangeNotifier {
         notifyListeners();
       },
       onError: (failure) {
-        print('Error fetching local products: ${failure.message}');
+        debugPrint('Error fetching products: ${failure.message}');
       },
     );
   }
@@ -417,20 +405,40 @@ class CartViewModel extends ChangeNotifier {
 
   /// Processes the payment of [cartId] atomically (stock, sale, cart).
   ///
+  /// The store's [iva] (%) and [exchangeRate] and the current discount (%)
+  /// and delivery (USD) are stored in the sale, together with the seller.
+  ///
   /// Returns `null` on success or the [Failure] that prevented the payment
   /// (e.g. [StockFailure] when there is not enough stock), so the UI can
   /// inform the user.
-  Future<Failure?> markCartAsPaid(String cartId) async {
+  Future<Failure?> markCartAsPaid(
+    String cartId, {
+    double iva = 0,
+    double exchangeRate = 0,
+  }) async {
     final index = listCarts.indexWhere((c) => c.id == cartId);
     if (index == -1) {
       return const UnknownFailure(
           message: 'No se encontró el carrito a cobrar');
     }
 
-    // Flush any pending debounced quantity change so it is not lost/overwritten.
+    // Drop any pending debounced save: the sale is built from the current state.
     _debounceTimer?.cancel();
 
-    final result = await processPaymentUseCase.call(listCarts[index]);
+    final cart = listCarts[index];
+    final sale = CheckoutData(
+      iva: iva,
+      discount: _discount,
+      delivery: _delivery,
+      exchangeRate: exchangeRate,
+    ).applyTo(
+      cart,
+      soldBy: userId,
+      soldByName: userName,
+      now: DateTime.now(),
+    );
+
+    final result = await processPaymentUseCase.call(cart, sale);
 
     return result.fold(
       onSuccess: (_) {
@@ -455,6 +463,8 @@ class CartViewModel extends ChangeNotifier {
     _selectedCartForCheckout = null;
     _subTotal = 0;
     _isPaid = false;
+    _discount = 0;
+    _delivery = 0;
     notifyListeners();
   }
 }

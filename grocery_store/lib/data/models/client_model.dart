@@ -26,6 +26,4 @@ class ClientModel extends Client {
       name: name,
     );
   }
-
-
 }

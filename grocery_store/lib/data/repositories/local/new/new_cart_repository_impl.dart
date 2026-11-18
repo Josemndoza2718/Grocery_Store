@@ -3,113 +3,47 @@ import 'package:grocery_store/core/errors/firebase_error_handler.dart';
 import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/domain/repositories/local/new/new_cart_repository.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sembast/sembast_io.dart';
-import 'package:path/path.dart';
 
 class NewCartRepositoryImpl implements NewCartRepository {
+  NewCartRepositoryImpl({required this.storeId});
+
+  final String storeId;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Configuración de Sembast (para persistencia local)
-  final String _dbName = 'carts.db';
-  final StoreRef<String, Map<String, dynamic>> _store =
-      stringMapStoreFactory.store('carts');
-
-  Future<Database> _getSembastDb() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final dbPath = join(dir.path, _dbName);
-    return await databaseFactoryIo.openDatabase(dbPath);
-  }
+  CollectionReference<Map<String, dynamic>> get _carts =>
+      _db.collection('stores').doc(storeId).collection('carts');
 
   @override
-  Stream<List<Cart>> getAllCartsStream({String? userId}) {
-    // 1. Escuchar la colección 'carts' en tiempo real, filtered by userId
-    var query = _db.collection('carts');
-
-    return (userId != null && userId.isNotEmpty
-            ? query.where('userId', isEqualTo: userId)
-            : query)
-        .snapshots()
-        .map((snapshot) {
-      // 2. Mapear los documentos a una lista de objetos Cart
+  Stream<List<Cart>> getAllCartsStream() {
+    return _carts.snapshots().map((snapshot) {
       final carts = snapshot.docs.map((doc) {
         final data = doc.data();
-        // Usar el ID del documento directamente (ya es String)
         data['id'] = doc.id;
         return Cart.fromJson(data);
       }).toList();
-
-      // 3. Sincronizar con Sembast en segundo plano
-      _syncCartsToLocal(carts);
-
+      carts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
       return carts;
     });
   }
 
-  // Método auxiliar para guardar los carritos en Sembast
-  Future<void> _syncCartsToLocal(List<Cart> carts) async {
-    final sembastDb = await _getSembastDb();
-
-    // Limpiar el almacén local antes de escribir los nuevos datos
-    await _store.drop(sembastDb);
-
-    for (final cart in carts) {
-      await _store.record(cart.id).put(sembastDb, cart.toJson());
-    }
-
-    print('Sincronización local de ${carts.length} carritos completada.');
-  }
-
   @override
-  Future<Result<void>> createCart(Cart cart) async {
-    final cartMap = cart.toJson();
-
-    // 1. Guardar en Sembast (Local) - Siempre inmediato
-    final sembastDb = await _getSembastDb();
-    await _store.record(cart.id).put(sembastDb, cartMap);
-
-    // 2. Intentar guardar en Firestore (Nube)
+  Future<Result<void>> createCart(Cart cart) {
     return FirebaseErrorHandler.guard(() async {
-      await _db.collection('carts').doc(cart.id).set(cartMap);
+      await _carts.doc(cart.id).set(cart.toJson());
     });
   }
 
   @override
-  Future<Result<void>> deleteCart(String id) async {
+  Future<Result<void>> deleteCart(String id) {
     return FirebaseErrorHandler.guard(() async {
-      // 1. Eliminar de Firestore
-      await _db.collection('carts').doc(id).delete();
-
-      // 2. Eliminar de Sembast
-      final sembastDb = await _getSembastDb();
-      await _store.record(id).delete(sembastDb);
+      await _carts.doc(id).delete();
     });
   }
 
   @override
-  Future<Result<void>> updateCart(Cart cart) async {
-    final cartMap = cart.toJson();
-
-    // 1. Actualizar en Sembast (Local) - Siempre inmediato
-    final sembastDb = await _getSembastDb();
-    await _store.record(cart.id).put(sembastDb, cartMap);
-
-    // 2. Intentar actualizar en Firestore (Nube)
+  Future<Result<void>> updateCart(Cart cart) {
     return FirebaseErrorHandler.guard(() async {
-      await _db.collection('carts').doc(cart.id).set(
-            cartMap,
-            SetOptions(merge: true),
-          );
-    });
-  }
-
-  @override
-  Future<Result<List<Cart>>> getLocalCarts() async {
-    return FirebaseErrorHandler.guard(() async {
-      final sembastDb = await _getSembastDb();
-      final records = await _store.find(sembastDb);
-
-      return records.map((r) => Cart.fromJson(r.value)).toList();
+      await _carts.doc(cart.id).set(cart.toJson(), SetOptions(merge: true));
     });
   }
 }

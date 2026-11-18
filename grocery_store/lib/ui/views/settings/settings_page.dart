@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 import 'package:grocery_store/ui/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/domain/entities/app_session.dart';
+import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
 import 'package:grocery_store/ui/views/session/store_form_page.dart';
 import 'package:provider/provider.dart';
@@ -76,45 +75,57 @@ class SettingsPage extends StatelessWidget {
               ); */
           },
         ),
-        _buildSettingsTile(
-          context,
-          icon: Icons.percent_outlined,
-          title: 'Definir Impuestos',
-          onTap: () {
-            CustomDialgos.showAlertDialog(
-              context: context,
-              title: 'Definir Impuestos',
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GeneralTextformfield(
-                    controller: _ivaController,
-                    hintText: 'IVA',
-                    keyboardType:
-                        const TextInputType.numberWithOptions(signed: false),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa un valor';
-                      }
-                      return null;
-                    },
-                  )
-                ],
-              ),
-              onConfirm: () {
-                Prefs.setString(PrefKeys.iva, _ivaController.text)
-                    .then((value) {
-                  Navigator.pop(context);
-                  if (value) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Impuestos guardados')));
+        if (context.watch<AppSession>().canManageStoreSettings)
+          _buildSettingsTile(
+            context,
+            icon: Icons.percent_outlined,
+            title:
+                'Definir Impuestos (IVA: ${context.watch<Store>().iva.toStringAsFixed(0)}%)',
+            onTap: () {
+              _ivaController.text =
+                  context.read<Store>().iva.toStringAsFixed(0);
+              CustomDialgos.showAlertDialog(
+                context: context,
+                title: 'Definir Impuestos',
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GeneralTextformfield(
+                      controller: _ivaController,
+                      hintText: 'IVA',
+                      keyboardType:
+                          const TextInputType.numberWithOptions(signed: false),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, ingresa un valor';
+                        }
+                        return null;
+                      },
+                    )
+                  ],
+                ),
+                onConfirm: () async {
+                  final iva = double.tryParse(_ivaController.text);
+                  final messenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
+                  if (iva == null || iva < 0 || iva > 100) {
+                    messenger.showSnackBar(const SnackBar(
+                        content: Text('Ingresa un IVA entre 0 y 100')));
+                    return;
                   }
-                });
-              },
-            );
-          },
-        ),
+                  final store = context.read<Store>();
+                  final failure = await context
+                      .read<SessionController>()
+                      .updateStore(store.copyWith(iva: iva));
+                  navigator.pop();
+                  messenger.showSnackBar(SnackBar(
+                      content:
+                          Text(failure?.message ?? 'Impuestos guardados')));
+                },
+              );
+            },
+          ),
 
         const SizedBox(height: 24),
 

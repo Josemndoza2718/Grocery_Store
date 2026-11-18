@@ -12,7 +12,7 @@ class FinalTextFormField extends StatelessWidget {
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
   final InputDecoration? decoration;
-  
+
   // Action button properties (from CustomTextFormField)
   final bool isButtonActive;
   final IconData buttonIcon;
@@ -41,7 +41,8 @@ class FinalTextFormField extends StatelessWidget {
       labelText: labelText,
       hintText: hintText,
       hintStyle: Theme.of(context).textTheme.bodyLarge,
-      contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
       filled: true,
       fillColor: Theme.of(context).inputDecorationTheme.fillColor,
       border: OutlineInputBorder(

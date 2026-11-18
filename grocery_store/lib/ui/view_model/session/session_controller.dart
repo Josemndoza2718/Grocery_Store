@@ -6,12 +6,16 @@ import 'package:grocery_store/domain/entities/app_session.dart';
 import 'package:grocery_store/domain/entities/employee.dart';
 import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/domain/repositories/remote/employee_repository.dart';
+import 'package:grocery_store/domain/repositories/remote/legacy_migration_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/store_repository.dart';
 import 'package:grocery_store/domain/repositories/remote/user_profile_repository.dart';
 
 enum SessionStatus {
   /// Still resolving the user's stores / employee link.
   loading,
+
+  /// Copying the data of the old per-user model into the user's store.
+  migrating,
 
   /// The user has no store to work in (must create one or join with a code).
   noStore,
@@ -26,29 +30,49 @@ enum SessionStatus {
   error,
 }
 
+/// Store settings stored on the device before multi-store (IVA, rate). They
+/// become the initial settings of the stores created on this device.
+typedef DeviceStoreSettings = ({double iva, double exchangeRate});
+
 /// Resolves, for the logged-in user [uid], which store they work in and with
 /// which role. One instance per authenticated user (recreated on login).
 ///
 /// Rules:
 /// - If `employees/{uid}` exists → employee of that store (it has priority).
-/// - Otherwise → owner: auto-enters the selected / last used store, or the
-///   only one; with several stores and no valid choice → [SessionStatus.pickStore].
+/// - Otherwise → owner. Before entering, the data of the old per-user model
+///   is migrated once (see [LegacyMigrationRepository]). Then the owner
+///   auto-enters the selected / last used / only store; with several stores
+///   and no valid choice → [SessionStatus.pickStore].
 class SessionController extends ChangeNotifier {
   SessionController({
     required this.uid,
+    this.userName = '',
     required StoreRepository storeRepository,
     required EmployeeRepository employeeRepository,
     required UserProfileRepository userProfileRepository,
+    LegacyMigrationRepository? legacyMigrationRepository,
+    Future<DeviceStoreSettings> Function()? loadDeviceSettings,
   })  : _stores = storeRepository,
         _employees = employeeRepository,
-        _profiles = userProfileRepository {
+        _profiles = userProfileRepository,
+        _migration = legacyMigrationRepository,
+        _loadDeviceSettings = loadDeviceSettings {
     _start();
   }
 
   final String uid;
+
+  /// Display name of the user (seller name in sales).
+  final String userName;
+
   final StoreRepository _stores;
   final EmployeeRepository _employees;
   final UserProfileRepository _profiles;
+  final LegacyMigrationRepository? _migration;
+  final Future<DeviceStoreSettings> Function()? _loadDeviceSettings;
+
+  /// Id of the store created by the migration when the user had none.
+  String get legacyStoreId => 'legacy_$uid';
 
   StreamSubscription<Employee?>? _employeeSub;
   StreamSubscription<List<Store>>? _ownedStoresSub;
@@ -64,7 +88,12 @@ class SessionController extends ChangeNotifier {
   bool _ownedStoresLoaded = false;
 
   String? _lastStoreId;
-  bool _lastStoreLoaded = false;
+  bool _profileLoaded = false;
+
+  /// Legacy data migration: done (or nothing to migrate) / in progress.
+  bool _migrated = false;
+  bool _migrationStarted = false;
+  bool _migrating = false;
 
   String? _selectedStoreId;
   bool _forcePicker = false;
@@ -102,7 +131,10 @@ class SessionController extends ChangeNotifier {
           : SessionStatus.noStore;
     }
 
-    if (!_ownedStoresLoaded || !_lastStoreLoaded) return SessionStatus.loading;
+    if (!_ownedStoresLoaded || !_profileLoaded) return SessionStatus.loading;
+    if (!_migrated) {
+      return _migrating ? SessionStatus.migrating : SessionStatus.loading;
+    }
     if (ownedStores.isEmpty) return SessionStatus.noStore;
     return _activeOwnedStore != null
         ? SessionStatus.ready
@@ -123,6 +155,7 @@ class SessionController extends ChangeNotifier {
       uid: uid,
       storeId: store.id,
       role: _employee != null ? StoreRole.employee : StoreRole.owner,
+      userName: userName,
     );
   }
 
@@ -188,7 +221,7 @@ class SessionController extends ChangeNotifier {
     );
   }
 
-  /// Updates name/description of the active store (owner).
+  /// Updates the active store (owner): name, description, IVA, rate.
   Future<Failure?> updateStore(Store store) async {
     final result = await _stores.updateStore(store);
     return result.fold(onSuccess: (_) => null, onError: (f) => f);
@@ -200,7 +233,7 @@ class SessionController extends ChangeNotifier {
     return result.fold(onSuccess: (_) => null, onError: (f) => f);
   }
 
-  /// Retries after an error.
+  /// Retries after an error (the migration is idempotent).
   void retry() {
     _cancelSubscriptions();
     _errorMessage = null;
@@ -208,7 +241,9 @@ class SessionController extends ChangeNotifier {
     _employeeLoaded = false;
     _employeeStoreLoaded = false;
     _ownedStoresLoaded = false;
-    _lastStoreLoaded = false;
+    _profileLoaded = false;
+    _migrationStarted = false;
+    _migrating = false;
     _notify();
     _start();
   }
@@ -224,7 +259,7 @@ class SessionController extends ChangeNotifier {
         if (employee?.storeId != previousStoreId) {
           _watchEmployeeStore(employee?.storeId);
         }
-        _notify();
+        _onStateChanged();
       },
       onError: _onError,
     );
@@ -233,20 +268,92 @@ class SessionController extends ChangeNotifier {
       (stores) {
         _ownedStores = stores;
         _ownedStoresLoaded = true;
-        _notify();
+        _onStateChanged();
       },
       onError: _onError,
     );
 
-    _profiles.getLastStoreId(uid).then((id) {
-      _lastStoreId = id;
+    _profiles.getProfile(uid).then((profile) {
+      _lastStoreId = profile.lastStoreId;
+      _migrated = profile.isMigrated || _migration == null;
+      _profileLoaded = true;
+      _onStateChanged();
     }).catchError((Object e) {
-      // Not critical: the user will just pick the store again.
-      debugPrint('Could not read last store: $e');
-    }).whenComplete(() {
-      _lastStoreLoaded = true;
-      _notify();
+      _onError(e);
     });
+  }
+
+  void _onStateChanged() {
+    _maybeMigrate();
+    _notify();
+  }
+
+  /// Starts the legacy migration once everything needed is known and the
+  /// user is an owner (employees work with their store's data only).
+  void _maybeMigrate() {
+    if (_migrated || _migrationStarted || _errorMessage != null) return;
+    if (!_employeeLoaded || !_ownedStoresLoaded || !_profileLoaded) return;
+    if (_employee != null) return;
+    _migrationStarted = true;
+    _runMigration();
+  }
+
+  Future<void> _runMigration() async {
+    final migration = _migration!;
+    try {
+      if (!await migration.hasLegacyData(uid)) {
+        await _profiles.markMigrated(uid);
+        _migrated = true;
+        _notify();
+        return;
+      }
+
+      _migrating = true;
+      _notify();
+
+      // Target: the first store the user created (e.g. while testing phase
+      // 1); otherwise a new store with a deterministic id (safe to retry).
+      final existing = ownedStores;
+      final String storeId;
+      if (existing.isNotEmpty) {
+        storeId = existing.first.id;
+      } else {
+        final settings =
+            await _loadDeviceSettings?.call() ?? (iva: 0.0, exchangeRate: 0.0);
+        final created = await _stores.createStore(
+          Store(
+            id: legacyStoreId,
+            name: 'Mi tienda',
+            ownerId: uid,
+            iva: settings.iva,
+            exchangeRate: settings.exchangeRate,
+          ),
+          id: legacyStoreId,
+        );
+        storeId = created.fold(
+          onSuccess: (store) => store.id,
+          onError: (failure) => throw StateError(failure.message),
+        );
+      }
+
+      final report = await migration.migrate(
+        uid: uid,
+        storeId: storeId,
+        userName: userName,
+      );
+      debugPrint('Legacy data migrated to $storeId: ${report.total} documents');
+
+      await _profiles.markMigrated(uid, storeId: storeId);
+      _migrated = true;
+      _migrating = false;
+      selectStore(storeId);
+    } catch (e) {
+      debugPrint('Legacy migration failed: $e');
+      _migrating = false;
+      _errorMessage = 'No se pudieron preparar los datos de tu tienda. '
+          'Verifica tu conexión e inténtalo de nuevo (no se perdió nada).';
+      _notify();
+    }
   }
 
   void _watchEmployeeStore(String? storeId) {

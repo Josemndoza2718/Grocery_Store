@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/dependencies/di.dart';
 import 'package:grocery_store/domain/entities/app_session.dart';
+import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
 import 'package:grocery_store/ui/views/origin/main_page.dart';
 import 'package:grocery_store/ui/views/session/no_store_page.dart';
@@ -31,6 +32,11 @@ class SessionGate extends StatelessWidget {
           key: const ValueKey('session-loading'),
           home: const SessionLoadingPage(),
         );
+      case SessionStatus.migrating:
+        return buildApp(
+          key: const ValueKey('session-migrating'),
+          home: const SessionMigratingPage(),
+        );
       case SessionStatus.error:
         return buildApp(
           key: const ValueKey('session-error'),
@@ -52,6 +58,8 @@ class SessionGate extends StatelessWidget {
           key: ValueKey('session-${session.key}'),
           providers: [
             Provider<AppSession>.value(value: session),
+            // Live store document (name, IVA, exchange rate...).
+            Provider<Store>.value(value: controller.currentStore!),
             ...sessionDi(session),
           ],
           child: buildApp(home: const MainPage(selectedIndex: 0)),

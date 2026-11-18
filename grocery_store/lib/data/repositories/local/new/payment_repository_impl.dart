@@ -12,10 +12,16 @@ class _StockException implements Exception {
 }
 
 class PaymentRepositoryImpl implements PaymentRepository {
+  PaymentRepositoryImpl({required this.storeId});
+
+  final String storeId;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  DocumentReference<Map<String, dynamic>> get _store =>
+      _db.collection('stores').doc(storeId);
+
   @override
-  Future<Result<void>> processPayment(Cart cart) async {
+  Future<Result<void>> processPayment(Cart cart, Cart sale) async {
     // Group the quantities per product (defensive: a product could appear twice).
     final Map<String, int> quantities = {};
     final Map<String, String> names = {};
@@ -36,9 +42,9 @@ class PaymentRepositoryImpl implements PaymentRepository {
       );
     }
 
-    // Set when the transaction is aborted for stock reasons. We keep it in a
-    // local variable because the error thrown inside the transaction may be
-    // wrapped by the plugin/guard before reaching us.
+    // Set when the transaction is aborted for stock reasons. Kept in a local
+    // variable because the error thrown inside the transaction may be wrapped
+    // by the plugin/guard before reaching us.
     String? stockError;
 
     final result = await FirebaseErrorHandler.guard(() async {
@@ -47,7 +53,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
         stockError = null;
         final productRefs = {
           for (final id in quantities.keys)
-            id: _db.collection('products').doc(id),
+            id: _store.collection('products').doc(id),
         };
 
         // 1. Read the CURRENT stock of every product (all reads before writes).
@@ -73,7 +79,8 @@ class PaymentRepositoryImpl implements PaymentRepository {
           newStocks[entry.key] = currentStock - requested;
         }
 
-        // 2. Update stock based on the real values read above.
+        // 2. Update stock based on the real values read above. Only the
+        //    stock field changes: the rules let employees DECREASE it only.
         for (final entry in newStocks.entries) {
           transaction.update(
             productRefs[entry.key]!,
@@ -81,20 +88,14 @@ class PaymentRepositoryImpl implements PaymentRepository {
           );
         }
 
-        // 3. Create sale history record.
-        final now = DateTime.now();
-        final paidCart = cart.copyWith(
-          status: 'paid',
-          payAt: now,
-          updatedAt: now,
-        );
+        // 3. Create the sale (immutable) with the checkout data.
         transaction.set(
-          _db.collection('sales-history').doc(cart.id),
-          paidCart.toJson(),
+          _store.collection('sales').doc(cart.id),
+          sale.toJson(),
         );
 
-        // 4. Delete active cart.
-        transaction.delete(_db.collection('carts').doc(cart.id));
+        // 4. Delete the active cart.
+        transaction.delete(_store.collection('carts').doc(cart.id));
       });
     });
 

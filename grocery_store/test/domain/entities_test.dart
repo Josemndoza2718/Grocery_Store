@@ -126,4 +126,57 @@ void main() {
       expect(ko.getOrElse(0), 0);
     });
   });
+
+  group('CheckoutData', () {
+    test('computes subtotal, IVA, discount and delivery in USD', () {
+      final cart = Cart(
+        id: 'c1',
+        ownerId: 'cl1',
+        products: [
+          _product(id: 'p1', qty: 2), // 2 x 1.5 = 3.0
+          _product(id: 'p2', qty: 0), // ignored
+          _product(id: 'p3', qty: 4), // 4 x 1.5 = 6.0
+        ],
+      );
+      final sale = const CheckoutData(
+        iva: 16,
+        discount: 10,
+        delivery: 2,
+        exchangeRate: 40,
+      ).applyTo(cart,
+          soldBy: 'u1', soldByName: 'Ana', now: DateTime(2026, 2, 1));
+
+      expect(sale.subtotal, 9.0);
+      // 9 + 16% (1.44) + 2 - 10% (0.9) = 11.54
+      expect(sale.total, closeTo(11.54, 1e-9));
+      expect(sale.totalItems, 6);
+      expect(sale.status, 'paid');
+      expect(sale.soldBy, 'u1');
+      expect(sale.soldByName, 'Ana');
+      expect(sale.exchangeRate, 40);
+      expect(sale.payAt, DateTime(2026, 2, 1));
+    });
+
+    test('sale fields survive the JSON round trip', () {
+      final sale = const CheckoutData(iva: 16, exchangeRate: 40).applyTo(
+        Cart(id: 'c1', ownerId: 'cl1', products: [_product()], createdBy: 'u2'),
+        soldBy: 'u1',
+        soldByName: 'Ana',
+        now: DateTime(2026, 2, 1),
+      );
+      final copy = Cart.fromJson(sale.toJson());
+      expect(copy.createdBy, 'u2');
+      expect(copy.soldBy, 'u1');
+      expect(copy.total, sale.total);
+      expect(copy.iva, 16);
+      expect(copy.exchangeRate, 40);
+    });
+
+    test('legacy sales without stored total fall back to the products subtotal',
+        () {
+      final legacy = Cart(id: 'old', ownerId: 'cl1', products: [_product()]);
+      expect(legacy.total, 0);
+      expect(legacy.effectiveTotal, 3.0);
+    });
+  });
 }

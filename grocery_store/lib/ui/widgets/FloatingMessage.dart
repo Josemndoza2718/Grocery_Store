@@ -9,7 +9,10 @@ void showFloatingMessage({
     SnackBar(
       dismissDirection: DismissDirection.up,
       behavior: SnackBarBehavior.floating,
-      content: Text(message, style: Theme.of(context).textTheme.displaySmall,),
+      content: Text(
+        message,
+        style: Theme.of(context).textTheme.displaySmall,
+      ),
       duration: const Duration(seconds: 2),
       backgroundColor: color,
       margin: EdgeInsets.only(

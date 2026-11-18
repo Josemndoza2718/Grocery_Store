@@ -1,5 +1,5 @@
 /// Base class for all failures in the application.
-/// 
+///
 /// All specific failure types extend this class to maintain consistency
 /// across the application's error handling.
 abstract class Failure {

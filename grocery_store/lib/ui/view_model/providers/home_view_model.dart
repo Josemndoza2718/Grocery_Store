@@ -7,7 +7,6 @@ import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/domain/use_cases/client/create_client_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/delete_clients_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/client/get_clients_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/client/migrate_local_clients_use_case.dart';
 import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
@@ -28,10 +27,7 @@ class HomeViewModel extends ChangeNotifier {
   final GetClientsUseCases getClientsUseCases;
   final DeleteClientsUseCases deleteClientsUseCases;
 
-  /// Optional: moves the clients stored only on the device to Firestore.
-  final MigrateLocalClientsUseCase? migrateLocalClientsUseCase;
-
-  /// Firebase Auth UID of the session owner.
+  /// Firebase Auth UID of the logged-in store member.
   final String userId;
 
   HomeViewModel({
@@ -45,11 +41,9 @@ class HomeViewModel extends ChangeNotifier {
     required this.createClientUseCases,
     required this.getClientsUseCases,
     required this.deleteClientsUseCases,
-    this.migrateLocalClientsUseCase,
   }) {
     getProducts();
     getClients();
-    _migrateLocalClients();
   }
 
   List<Product> listProducts = [];
@@ -63,13 +57,11 @@ class HomeViewModel extends ChangeNotifier {
 
   int _selectedIndexGrid = -1;
   int _pressedIndex = -1;
-  double _moneyConversion = 0;
 
   String _searchQuery = '';
 
   bool _isFilterList = false;
 
-  double get moneyConversion => _moneyConversion;
   int get pressedIndex => _pressedIndex;
   int get selectedIndexGrid => _selectedIndexGrid;
   bool get isFilterList => _isFilterList;
@@ -82,7 +74,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   //Create Client
-  /// Creates a client in Firestore for the current user. The list updates by
+  /// Creates a client in the active store. The list updates by
   /// itself through the real-time stream. Returns the [Failure] if any.
   Future<Failure?> createClient({
     required String name,
@@ -106,10 +98,10 @@ class HomeViewModel extends ChangeNotifier {
     );
   }
 
-  /// Subscribes to the real-time list of clients of the current user.
+  /// Subscribes (once) to the real-time list of clients of the store.
   Future<void> getClients() async {
-    await _clientsSubscription?.cancel();
-    _clientsSubscription = getClientsUseCases.callStream(userId: userId).listen(
+    if (_clientsSubscription != null) return;
+    _clientsSubscription = getClientsUseCases.callStream().listen(
       (clients) {
         listClients = clients;
         notifyListeners();
@@ -118,20 +110,6 @@ class HomeViewModel extends ChangeNotifier {
         debugPrint('Error listening clients: $error');
       },
     );
-  }
-
-  Future<void> _migrateLocalClients() async {
-    final migrate = migrateLocalClientsUseCase;
-    if (migrate == null) return;
-    try {
-      final migrated = await migrate(userId: userId);
-      if (migrated > 0) {
-        debugPrint('Migrated $migrated local clients to Firestore');
-      }
-    } catch (e) {
-      // Never block the app because of the migration: it is retried next login.
-      debugPrint('Error migrating local clients: $e');
-    }
   }
 
   Future<Failure?> deletedClient(String id) async {
@@ -168,11 +146,6 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set moneyConversion(double value) {
-    _moneyConversion = value;
-    notifyListeners();
-  }
-
   void initList() {
     listFilterProducts.clear();
     listFilterProducts.addAll(listProducts);
@@ -205,11 +178,6 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setMoneyConversion(double value) {
-    _moneyConversion = value;
-    notifyListeners();
-  }
-
   void setPressedIndex(int index) {
     _pressedIndex = index;
     notifyListeners();
@@ -221,10 +189,10 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   //Products
+  /// Subscribes (once) to the real-time list of products of the store.
   Future<void> getProducts() async {
-    await _productsSubscription?.cancel();
-    _productsSubscription =
-        getProductsUseCases.callStream(userId: userId).listen(
+    if (_productsSubscription != null) return;
+    _productsSubscription = getProductsUseCases.callStream().listen(
       (products) {
         listProducts = products;
         // Re-apply current filter instead of just resetting to full list
@@ -236,19 +204,26 @@ class HomeViewModel extends ChangeNotifier {
     );
   }
 
-  Future<void> deleteProduct(String id) async {
+  /// Deletes a product (owner). Returns the [Failure] if any.
+  Future<Failure?> deleteProduct(String id) async {
     final result = await deleteProductsUseCases.deleteProduct(id);
-    result.fold(
-      onSuccess: (_) {},
-      onError: (failure) => print('Error deleting product: ${failure.message}'),
+    return result.fold(
+      onSuccess: (_) => null,
+      onError: (failure) {
+        debugPrint('Error deleting product: ${failure.message}');
+        return failure;
+      },
     );
   }
 
-  Future<void> updateProduct(Product product) async {
+  Future<Failure?> updateProduct(Product product) async {
     final result = await updateProductsUseCases.call(product);
-    result.fold(
-      onSuccess: (_) {},
-      onError: (failure) => print('Error updating product: ${failure.message}'),
+    return result.fold(
+      onSuccess: (_) => null,
+      onError: (failure) {
+        debugPrint('Error updating product: ${failure.message}');
+        return failure;
+      },
     );
   }
 

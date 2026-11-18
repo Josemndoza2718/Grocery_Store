@@ -6,8 +6,6 @@ class GetClientsUseCases {
 
   final NewClientRepository repository;
 
-  /// Real-time list of the clients owned by [userId].
-  Stream<List<Client>> callStream({required String userId}) {
-    return repository.getClientsStream(userId: userId);
-  }
+  /// Real-time list of the clients of the store.
+  Stream<List<Client>> callStream() => repository.getClientsStream();
 }

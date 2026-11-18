@@ -17,7 +17,11 @@ class ProductsListWidget extends StatelessWidget {
     required this.onClose,
     this.moneyConversion,
     required this.onDeleteProduct,
+    this.canEdit = true,
   });
+
+  /// Whether the user can edit (tap) and delete (long press) products.
+  final bool canEdit;
 
   final List<Product>? listProducts;
   final Function(int) onPressed;
@@ -69,29 +73,33 @@ class ProductsListWidget extends StatelessWidget {
                     Theme.of(context).textTheme.bodySmall!;
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddProductPage(
-                          product: listProducts![index],
-                        ),
-                      ),
-                    ).then((_) {
-                      onClose();
-                    });
-                  },
-                  onLongPress: () {
-                    HapticFeedback.mediumImpact();
-                    CustomDialgos.showAlertDialog(
-                      context: context,
-                      title: 'lbl_delete_product'.translate,
-                      onConfirm: () {
-                        onDeleteProduct(index);
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
+                  onTap: !canEdit
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddProductPage(
+                                product: listProducts![index],
+                              ),
+                            ),
+                          ).then((_) {
+                            onClose();
+                          });
+                        },
+                  onLongPress: !canEdit
+                      ? null
+                      : () {
+                          HapticFeedback.mediumImpact();
+                          CustomDialgos.showAlertDialog(
+                            context: context,
+                            title: 'lbl_delete_product'.translate,
+                            onConfirm: () {
+                              onDeleteProduct(index);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
                   child: //Products List
                       Container(
                     margin: const EdgeInsets.all(8),

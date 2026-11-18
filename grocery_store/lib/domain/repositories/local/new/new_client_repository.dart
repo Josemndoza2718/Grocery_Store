@@ -1,11 +1,11 @@
 import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/client.dart';
 
-/// Clients of the store, persisted in Firestore (`clients` collection) and
-/// isolated per Firebase Auth user through the `userId` field.
+/// Clients of the active store (`stores/{storeId}/clients`), shared by all
+/// its members.
 abstract class NewClientRepository {
-  /// Real-time list of the clients owned by [userId], ordered by name.
-  Stream<List<Client>> getClientsStream({required String userId});
+  /// Real-time list of the clients, ordered by name.
+  Stream<List<Client>> getClientsStream();
 
   /// Creates (or overwrites) a client. The document id is [Client.id], so
   /// writing the same client twice is idempotent.

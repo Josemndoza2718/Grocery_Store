@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:grocery_store/core/resource/colors.dart';
+import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/ui/views/cart/widgets/shop_list_widget.dart';
 import 'package:grocery_store/ui/view_model/providers/cart_view_model.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
@@ -26,13 +27,17 @@ class CartPage extends StatelessWidget {
                   listCarts: provider.visibleCarts.reversed.toList(),
                   listProducts: provider.listProducts,
                   isActivePanel: provider.isActivePanel,
-                  moneyConversion: provider.moneyConversion,
+                  moneyConversion: context.watch<Store>().exchangeRate,
                   onTapPanel: (index) => provider.isActiveListPanel(index),
                   onRemoveCart: (index) => provider.deletedCart(index),
-                  onAddProduct: (value, cartId) => provider.addQuantityProduct(value, cartId),
-                  onRemoveProduct: (value, cartId) =>provider.removeQuantityProduct(value, cartId),
-                  onSetQuantityProduct: (id, value) =>provider.onSetQuantityProduct(id, value),
-                  onChanged: (value, productId, cartId) =>provider.updateQuantityManually(value, productId, cartId),
+                  onAddProduct: (value, cartId) =>
+                      provider.addQuantityProduct(value, cartId),
+                  onRemoveProduct: (value, cartId) =>
+                      provider.removeQuantityProduct(value, cartId),
+                  onSetQuantityProduct: (id, value) =>
+                      provider.onSetQuantityProduct(id, value),
+                  onChanged: (value, productId, cartId) =>
+                      provider.updateQuantityManually(value, productId, cartId),
                   onDeleteProduct: (cartId, productId) {
                     provider.updateProductCart(cartId, productId.toString());
                     showFloatingMessage(
@@ -45,8 +50,6 @@ class CartPage extends StatelessWidget {
                     // Preparar los productos del carrito para checkout
                     provider.prepareCartForCheckout(cartId);
                     provider.getSubTotal(cartId);
-                    
-      
                   },
                 ),
               const SizedBox(height: 80),

@@ -1,9 +1,11 @@
 // ignore_for_file: must_be_immutable, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
+import 'package:grocery_store/domain/entities/app_session.dart';
+import 'package:grocery_store/domain/entities/store.dart';
+import 'package:grocery_store/ui/view_model/session/session_controller.dart';
 import 'package:grocery_store/ui/views/add_product/add_product_page.dart';
 import 'package:grocery_store/ui/views/home/widgets/asig_price_widget.dart';
 import 'package:grocery_store/ui/views/home/widgets/products_list_widget.dart';
@@ -13,14 +15,16 @@ import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/widgets/custom_textformfield.dart';
 import 'package:provider/provider.dart';
 
-class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+/// Home of the store for owners and employees. Actions the role is not
+/// allowed to do are hidden (and also blocked by the Firestore rules).
+class HomeDashboard extends StatefulWidget {
+  const HomeDashboard({super.key});
 
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  State<HomeDashboard> createState() => _HomeDashboardState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard> {
+class _HomeDashboardState extends State<HomeDashboard> {
   TextEditingController searchController = TextEditingController();
   TextEditingController moneyconversionController = TextEditingController();
   TextEditingController clientController = TextEditingController();
@@ -30,16 +34,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      initMoney();
       var provider = Provider.of<HomeViewModel>(context, listen: false);
       await provider.getProducts();
       provider.initList();
     });
-  }
-
-  void initMoney() async {
-    var provider = context.read<HomeViewModel>();
-    provider.moneyConversion = await Prefs.getMoneyConversion();
   }
 
   /// Parses a value formatted as "1.234,56". Returns `null` when the text is
@@ -49,22 +47,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return double.tryParse(cleaned);
   }
 
-  /// Validates and saves the conversion rate. Returns false (and warns the
-  /// user) when the value is empty, invalid or not greater than 0.
-  bool _saveMoneyConversion(HomeViewModel provider) {
+  /// Validates and saves the store's conversion rate (owner). Warns the user
+  /// when the value is empty, invalid or not greater than 0.
+  Future<void> _saveExchangeRate(Store store) async {
     final value = parseFormattedCurrency(moneyconversionController.text);
     if (value == null || value <= 0) {
       showFloatingMessage(
           context: context,
           message: 'Ingrese una tasa de cambio válida mayor a 0',
           color: AppColors.red);
-      return false;
+      return;
     }
-    provider.setMoneyConversion(value);
-    Prefs.setMoneyConversion(value);
     moneyconversionController.clear();
     FocusScope.of(context).unfocus();
-    return true;
+    final failure = await context
+        .read<SessionController>()
+        .updateStore(store.copyWith(exchangeRate: value));
+    if (failure != null && mounted) {
+      showFloatingMessage(
+          context: context, message: failure.message, color: AppColors.red);
+    }
   }
 
   Future<void> onAddItemProduct(HomeViewModel provider, int index) async {
@@ -124,14 +126,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             color: AppColors.red);
       }
     }
-
-    //Revisar esto, con la intención de hacerlo en otra parte
-    context.read<HomeViewModel>().getProducts();
-    context.read<CartViewModel>().getAllCarts();
-    context.read<CartViewModel>().getMoneyConversion();
   }
-
-  void onSetPrice(HomeViewModel provider) => _saveMoneyConversion(provider);
 
   /// Creates the client typed in [clientController] in Firestore.
   Future<void> _onCreateClient(HomeViewModel provider) async {
@@ -158,6 +153,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final session = context.watch<AppSession>();
+    final store = context.watch<Store>();
+    final exchangeRate = store.exchangeRate;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.opaque,
@@ -169,13 +168,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
               spacing: 16,
               children: [
                 const SizedBox(height: 8),
-                //Money Conversion
-                AsignPriceWidget(
-                  label: 'lbl_money_rate'.translate,
-                  price: provider.moneyConversion,
-                  controller: moneyconversionController,
-                  onTap: () => onSetPrice(provider),
-                ),
+                //Money Conversion (stored in the store; only the owner edits it)
+                if (session.canManageStoreSettings)
+                  AsignPriceWidget(
+                    label: 'lbl_money_rate'.translate,
+                    price: exchangeRate,
+                    controller: moneyconversionController,
+                    onTap: () => _saveExchangeRate(store),
+                  )
+                else
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "${'lbl_money_rate'.translate}: ${exchangeRate.toStringAsFixed(2)}",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
                 //Client Menu
                 Row(
                   spacing: 8,
@@ -241,38 +249,48 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             SearchBarProductsWidget(
                                 searchController: searchController,
                                 provider: provider),
-                            IconButton(
-                              icon: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: AppColors.green,
-                                  ),
-                                  width: 50,
-                                  height: 50,
-                                  child: const Icon(
-                                    Icons.add_circle,
-                                    color: AppColors.white,
-                                  )),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AddProductPage(),
-                                  ),
-                                );
-                              },
-                            ),
+                            if (session.canManageProducts)
+                              IconButton(
+                                icon: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: AppColors.green,
+                                    ),
+                                    width: 50,
+                                    height: 50,
+                                    child: const Icon(
+                                      Icons.add_circle,
+                                      color: AppColors.white,
+                                    )),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const AddProductPage(),
+                                    ),
+                                  );
+                                },
+                              ),
                           ],
                         ),
                         ProductsListWidget(
                             listProducts: provider.listFilterProducts,
+                            canEdit: session.canManageProducts,
                             onPressed: (index) async =>
                                 await onAddItemProduct(provider, index),
-                            onClose: () => provider.getProducts(),
-                            moneyConversion: provider.moneyConversion,
-                            onDeleteProduct: (index) => provider.deleteProduct(
-                                provider.listFilterProducts[index].id)),
+                            onClose: () {},
+                            moneyConversion: exchangeRate,
+                            onDeleteProduct: (index) async {
+                              final failure = await provider.deleteProduct(
+                                  provider.listFilterProducts[index].id);
+                              if (failure != null && context.mounted) {
+                                showFloatingMessage(
+                                    context: context,
+                                    message: failure.message,
+                                    color: AppColors.red);
+                              }
+                            }),
                       ],
                     ),
                   ),

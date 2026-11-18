@@ -22,7 +22,7 @@ class Prefs {
     _prefs = await SharedPreferences.getInstance();
     return _prefs!;
   }
-  ///////////////// 
+  /////////////////
 
   //sets
   static Future<bool> setBool(String key, bool value) async =>
@@ -65,6 +65,5 @@ class Prefs {
     await remove(PrefKeys.userId);
     await remove(PrefKeys.fullName);
     await remove(PrefKeys.userRole);
-
   }
 }

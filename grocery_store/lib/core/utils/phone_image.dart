@@ -13,11 +13,11 @@ class PhoneImage {
 
       // Crear una ruta destino
       final fileName = pickedFile.name; // ej: imagen.jpg
-      final savedImage = await File(pickedFile.path).copy('${appDir.path}/$fileName');
+      final savedImage =
+          await File(pickedFile.path).copy('${appDir.path}/$fileName');
 
       return File(savedImage.path);
     }
     return null;
   }
-
 }

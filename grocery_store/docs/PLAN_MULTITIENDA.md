@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **Fases 0 y 1 completadas** · Rama: `feature/multi-tienda`
+> Estado: **Fases 0, 1 y 2 completadas** (Fase 2 pendiente de publicar y probar en dispositivo) · Rama: `feature/multi-tienda`
 
 ---
 
@@ -254,19 +254,19 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
       según el rol de la sesión.
 - [x] Ajustes: sección "Tienda" (dueño: editar / cambiar de tienda; empleado: abandonar).
 
-### Fase 2 — Datos dentro de la tienda + migración · tamaño L
-- [ ] Repositorios con `storeId`: productos, clientes, carritos, ventas, cobro.
-- [ ] Cobro (`PaymentRepositoryImpl`): rutas nuevas + `soldBy`, `soldByName` y totales
-      finales (subtotal, IVA, descuento, delivery, tasa, total).
-- [ ] Carritos: `createdBy`.
-- [ ] IVA y tasa leídos/escritos en `stores/{storeId}` (quitar de `Prefs`).
-- [ ] Quitar espejos Sembast de los repositorios nuevos.
-- [ ] Historial: dueño → todas las ventas (filtro opcional por empleado);
-      empleado → `where soldBy == uid`.
-- [ ] **Migración automática** de los datos actuales (ver §6).
-- [ ] Reglas de subcolecciones + reglas legadas de solo lectura/borrado + tests.
-- [ ] Índices compuestos.
-- [ ] Unificar dashboards en `HomeDashboard` con permisos por rol.
+### Fase 2 — Datos dentro de la tienda + migración · tamaño L · ✅ completada
+- [x] Repositorios con `storeId`: productos, clientes, carritos, ventas, cobro (creados por sesión).
+- [x] Cobro (`PaymentRepositoryImpl`): rutas nuevas + `soldBy`, `soldByName` y totales
+      finales (subtotal, IVA, descuento, delivery, tasa, total) vía `CheckoutData`.
+- [x] Carritos: `createdBy`.
+- [x] IVA y tasa leídos/escritos en `stores/{storeId}` (`Provider<Store>` en vivo; `Prefs` solo da los valores iniciales).
+- [x] Quitar espejos Sembast de los repositorios nuevos.
+- [x] Historial: dueño → todas las ventas (filtro por vendedor);
+      empleado → `where soldBy == uid`. Totales con la tasa guardada en cada venta.
+- [x] **Migración automática** de los datos actuales (ver §6), sin borrar los originales.
+- [x] Reglas de subcolecciones + colecciones legadas en solo lectura + tests (42 en emulador).
+- [x] Índices compuestos (`sales`: soldBy + updatedAt).
+- [x] Unificar dashboards en `HomeDashboard` con permisos por rol.
 
 ### Fase 3 — Empleados e invitaciones · tamaño M
 - [ ] Dueño: "Invitar empleado" → genera código (alfabeto sin caracteres ambiguos,
@@ -286,8 +286,9 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
 - [ ] Ocultar en la UI todo lo que el rol no permite (las reglas ya lo bloquean).
 
 ### Fase 5 — Limpieza y endurecimiento · tamaño S
-- [ ] Tras confirmar que todos los dispositivos migraron: eliminar reglas de
-      colecciones legadas y el código de migración.
+- [ ] Tras confirmar que todos los dispositivos migraron: borrar los documentos de
+      las colecciones legadas (`products`, `carts`, `clients`, `sales-history`),
+      sus reglas, su índice y el código de migración.
 - [ ] Eliminar `isAdmin` de `users`, `PrefKeys.userId/userRole`, `ClientRepositoryImpl`
       (Sembast) y `MigrateLocalClientsUseCase`.
 - [ ] Revisión final de reglas con el emulador y checklist de pruebas manuales (§7).
@@ -308,11 +309,13 @@ Se ejecuta en la app (sin servidor), una vez por usuario, desde `SessionGate`:
    siguen enlazados a sus clientes por `ownerId`), en batches de ≤ 400 escrituras.
    En las ventas añade `soldBy = uid`; en los carritos `createdBy = uid`.
 4. Verifica conteos (origen = destino).
-5. Marca `users/{uid}.migratedAt`.
-6. Borra los documentos legados y los clientes locales de Sembast.
+5. Marca `users/{uid}.migratedAt` (y `migratedToStoreId`).
+6. **No borra** los documentos legados (decisión 2026-11-18): quedan como respaldo
+   en solo lectura y se eliminan en la Fase 5, cuando se confirme que todo está bien.
 
-Es **idempotente**: si se interrumpe (sin red, app cerrada), al reintentar escribe
-los mismos ids en la misma tienda y continúa. Muestra `MigrationScreen` con progreso.
+Es **idempotente**: si se interrumpe (sin red, app cerrada), al reintentar omite los
+ids que ya están en la tienda y continúa. Muestra `SessionMigratingPage`.
+Los empleados nunca ejecutan la migración.
 
 ⚠️ Las versiones antiguas de la app seguirían escribiendo en las colecciones
 legadas: hay que **instalar la versión nueva en todos los dispositivos** antes de

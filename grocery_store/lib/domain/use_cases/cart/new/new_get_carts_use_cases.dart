@@ -1,4 +1,3 @@
-import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 import 'package:grocery_store/domain/repositories/local/new/new_cart_repository.dart';
 
@@ -7,13 +6,6 @@ class NewGetCartsUseCases {
 
   final NewCartRepository repository;
 
-  // Para obtener el stream en tiempo real
-  Stream<List<Cart>> callStream({String? userId}) {
-    return repository.getAllCartsStream(userId: userId);
-  }
-
-  // Para obtener caché local (sin conexión)
-  Future<Result<List<Cart>>> call() async {
-    return await repository.getLocalCarts();
-  }
+  /// Real-time carts of the store.
+  Stream<List<Cart>> callStream() => repository.getAllCartsStream();
 }

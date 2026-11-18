@@ -5,10 +5,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
+import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/ui/views/check/widget/check_widget.dart';
 import 'package:grocery_store/ui/widgets/FloatingMessage.dart';
 import 'package:grocery_store/ui/widgets/general_textformfield.dart';
@@ -54,7 +53,12 @@ class _CheckPageState extends State<CheckPage> {
 
     setState(() => _isProcessingPayment = true);
     try {
-      final failure = await provider.markCartAsPaid(cartId);
+      final store = context.read<Store>();
+      final failure = await provider.markCartAsPaid(
+        cartId,
+        iva: store.iva,
+        exchangeRate: store.exchangeRate,
+      );
       if (!mounted) return;
 
       if (failure != null) {
@@ -147,9 +151,11 @@ class _CheckPageState extends State<CheckPage> {
                   isPaid: provider.isPaid,
                   cart: provider.selectedCartForCheckout,
                   subToTal: provider.subTotal,
-                  moneyConversion: provider.moneyConversion,
-                  iva:
-                      double.tryParse(Prefs.getString(PrefKeys.iva) ?? "") ?? 0,
+                  // null = no rate set: amounts shown in USD only.
+                  moneyConversion: context.watch<Store>().exchangeRate > 0
+                      ? context.watch<Store>().exchangeRate
+                      : null,
+                  iva: context.watch<Store>().iva,
                   discount: provider.discount,
                   delivery: provider.delivery,
                   onTap: () {

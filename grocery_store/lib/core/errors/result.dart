@@ -1,7 +1,7 @@
 import 'package:grocery_store/core/errors/failure.dart';
 
 /// A sealed class representing the result of an operation.
-/// 
+///
 /// This implements the Either/Result pattern for functional error handling.
 /// Use [Success] for successful operations and [Error] for failures.
 sealed class Result<T> {
@@ -14,7 +14,7 @@ sealed class Result<T> {
   bool get isError => this is Error<T>;
 
   /// Pattern matches on this result.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// result.fold(

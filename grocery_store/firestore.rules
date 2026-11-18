@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ──────────── HELPERS (multi-tienda) ────────────
+    // ──────────── HELPERS ────────────
     function signedIn() { return request.auth != null; }
     function me() { return request.auth.uid; }
     function storePath(storeId) {
@@ -21,11 +21,21 @@ service cloud.firestore {
         && get(employeePath(me())).data.storeId == storeId;
     }
     function isMember(storeId) { return isOwner(storeId) || isEmployee(storeId); }
+    function onlyChanges(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
     function validStoreFields(data) {
       return data.name is string && data.name.size() > 0 && data.name.size() <= 80
         && data.description is string && data.description.size() <= 200
         && data.iva is number && data.iva >= 0
         && data.exchangeRate is number && data.exchangeRate >= 0;
+    }
+
+    // ──────────── PERFIL DE USUARIO ────────────
+    match /users/{userId} {
+      // Solo el propio usuario puede leer/crear/editar su perfil
+      allow read, create, update: if signedIn() && me() == userId;
+      allow delete: if false;
     }
 
     // ──────────── TIENDAS ────────────
@@ -50,6 +60,38 @@ service cloud.firestore {
 
       // Las tiendas no se borran: se archivan.
       allow delete: if false;
+
+      // ── Productos: todos los miembros los ven; solo el dueño los gestiona.
+      match /products/{productId} {
+        allow read: if isMember(storeId);
+        allow create, delete: if isOwner(storeId);
+        // El empleado solo puede DESCONTAR stock (al cobrar); reponer es
+        // cosa del dueño.
+        allow update: if isOwner(storeId)
+          || (isEmployee(storeId)
+              && onlyChanges(['stockQuantity'])
+              && request.resource.data.stockQuantity is int
+              && request.resource.data.stockQuantity >= 0
+              && request.resource.data.stockQuantity < resource.data.stockQuantity);
+      }
+
+      // ── Clientes y carritos: compartidos por todos los miembros.
+      match /clients/{clientId} {
+        allow read, write: if isMember(storeId);
+      }
+      match /carts/{cartId} {
+        allow read, write: if isMember(storeId);
+      }
+
+      // ── Ventas: el dueño ve todas; el empleado solo las que él cobró.
+      match /sales/{saleId} {
+        allow read: if isOwner(storeId)
+          || (isEmployee(storeId) && resource.data.soldBy == me());
+        allow create: if isMember(storeId)
+          && request.resource.data.soldBy == me();
+        // Las ventas son inmutables.
+        allow update, delete: if false;
+      }
     }
 
     // ──────────── EMPLEADOS ────────────
@@ -66,73 +108,24 @@ service cloud.firestore {
         && (me() == employeeId || isOwner(resource.data.storeId));
     }
 
-    // ──────────── PRODUCTOS ────────────
+    // ──────────── COLECCIONES DEL MODELO ANTERIOR (por usuario) ────────────
+    // Solo lectura para su dueño: se conservan como respaldo y la app las lee
+    // únicamente para migrarlas a su tienda. Se eliminan en la Fase 5.
     match /products/{productId} {
-      // Solo el dueño puede leer sus productos
-      allow read: if request.auth != null
-        && resource.data.userId == request.auth.uid;
-
-      // Al crear, el userId del documento debe coincidir con el usuario autenticado
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
-
-      // Al actualizar/eliminar, verificar que el documento pertenece al usuario
-      allow update, delete: if request.auth != null
-        && resource.data.userId == request.auth.uid;
+      allow read: if signedIn() && resource.data.userId == me();
+      allow write: if false;
     }
-
-    // ──────────── CARRITOS ────────────
     match /carts/{cartId} {
-      allow read: if request.auth != null
-        && resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
-
-      allow update, delete: if request.auth != null
-        && resource.data.userId == request.auth.uid;
+      allow read: if signedIn() && resource.data.userId == me();
+      allow write: if false;
     }
-
-    // ──────────── CLIENTES ────────────
     match /clients/{clientId} {
-      allow read: if request.auth != null
-        && resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
-
-      // El dueño no puede "regalar" el cliente a otro usuario cambiando userId
-      allow update: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && request.resource.data.userId == request.auth.uid;
-
-      allow delete: if request.auth != null
-        && resource.data.userId == request.auth.uid;
+      allow read: if signedIn() && resource.data.userId == me();
+      allow write: if false;
     }
-
-    // ──────────── HISTORIAL DE VENTAS ────────────
     match /sales-history/{saleId} {
-      allow read: if request.auth != null
-        && resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid;
-
-      // No permitir editar ni borrar ventas (inmutables)
-      allow update, delete: if false;
-    }
-
-    // ──────────── PERFIL DE USUARIO ────────────
-    match /users/{userId} {
-      // Solo el propio usuario puede leer/editar su perfil
-      allow read, update: if request.auth != null
-        && request.auth.uid == userId;
-
-      // Permitir crear al registrarse
-      allow create: if request.auth != null
-        && request.auth.uid == userId;
-
-      allow delete: if false;
+      allow read: if signedIn() && resource.data.userId == me();
+      allow write: if false;
     }
   }
 }

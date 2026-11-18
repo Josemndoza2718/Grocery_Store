@@ -1,13 +1,9 @@
-import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/cart.dart';
 
+/// Sales of the store (`stores/{storeId}/sales`). Sales are created by the
+/// checkout transaction (see PaymentRepository) and are immutable.
 abstract class SalesHistoryRepository {
-  /// Saves a paid cart to sales-history
-  Future<Result<void>> createSale(Cart cart);
-
-  /// Streams all sales for a specific user
-  Stream<List<Cart>> getSalesStream({String? userId});
-
-  /// Gets sales from local storage (offline)
-  Future<Result<List<Cart>>> getLocalSales();
+  /// Real-time sales, newest first. With [soldBy], only the sales charged by
+  /// that user (required for employees by the security rules).
+  Stream<List<Cart>> getSalesStream({String? soldBy});
 }

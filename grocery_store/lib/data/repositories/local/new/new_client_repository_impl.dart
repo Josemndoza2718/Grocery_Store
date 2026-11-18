@@ -6,28 +6,25 @@ import 'package:grocery_store/domain/repositories/local/new/new_client_repositor
 
 /// Firestore implementation of [NewClientRepository].
 ///
-/// Offline support relies on Firestore's built-in persistence (enabled by
-/// default on Android/iOS): writes made offline are queued and synced later,
-/// and the stream serves cached data while there is no connection.
+/// Offline support relies on Firestore's built-in persistence: writes made
+/// offline are queued and synced later, and the stream serves cached data.
 class NewClientRepositoryImpl implements NewClientRepository {
+  NewClientRepositoryImpl({required this.storeId});
+
+  final String storeId;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _clients =>
-      _db.collection('clients');
+      _db.collection('stores').doc(storeId).collection('clients');
 
   @override
-  Stream<List<Client>> getClientsStream({required String userId}) {
-    return _clients
-        .where('userId', isEqualTo: userId)
-        .snapshots()
-        .map((snapshot) {
+  Stream<List<Client>> getClientsStream() {
+    return _clients.snapshots().map((snapshot) {
       final clients = snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
         return Client.fromJson(data);
       }).toList();
-
-      // Sorted in memory to avoid requiring a composite index.
       clients
           .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       return clients;
@@ -44,10 +41,9 @@ class NewClientRepositoryImpl implements NewClientRepository {
   @override
   Future<Result<void>> updateClient(Client client) {
     return FirebaseErrorHandler.guard(() async {
-      await _clients.doc(client.id).set(
-            client.toJson(),
-            SetOptions(merge: true),
-          );
+      await _clients
+          .doc(client.id)
+          .set(client.toJson(), SetOptions(merge: true));
     });
   }
 

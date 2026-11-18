@@ -16,9 +16,9 @@ class FirebaseErrorHandler {
   }
 
   /// Executes [operation] and wraps the result in a [Result].
-  /// 
+  ///
   /// Catches Firebase and general exceptions, converting them to appropriate [Failure] types.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final result = await FirebaseErrorHandler.guard(() async {

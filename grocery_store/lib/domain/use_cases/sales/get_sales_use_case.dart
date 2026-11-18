@@ -6,7 +6,7 @@ class GetSalesUseCase {
 
   GetSalesUseCase(this.repository);
 
-  Stream<List<Cart>> callStream({String? userId}) {
-    return repository.getSalesStream(userId: userId);
-  }
+  /// All sales of the store, or only those charged by [soldBy].
+  Stream<List<Cart>> callStream({String? soldBy}) =>
+      repository.getSalesStream(soldBy: soldBy);
 }

@@ -23,8 +23,7 @@ class ClientRepositoryImpl implements ClientRepository {
 
   @override
   Future<void> addClient(Client client) async {
-
-    final db = await initDatabase(); 
+    final db = await initDatabase();
 
     ClientModel clientModel = ClientModel(
       id: client.id,
