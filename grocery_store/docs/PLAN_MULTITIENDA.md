@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **Fase 0 completada** · Rama: `feature/multi-tienda`
+> Estado: **Fases 0 y 1 completadas** · Rama: `feature/multi-tienda`
 
 ---
 
@@ -74,7 +74,7 @@ Notas:
 ### Índices compuestos necesarios
 - `stores/{id}/sales`: `soldBy ASC` + `updatedAt DESC` (historial del empleado).
 - `stores/{id}/sales`: `updatedAt DESC` (historial del dueño; índice simple, automático).
-- `stores`: `ownerId ASC` + `createdAt ASC` (lista de tiendas del dueño).
+- ~~`stores`: `ownerId ASC` + `createdAt ASC`~~ → no hace falta: se ordena en memoria.
 
 ---
 
@@ -240,15 +240,19 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
       dependencia `flutter_localization`.
 - [x] Reemplazar `test/widget_test.dart` por pruebas de entidades (`test/domain/entities_test.dart`).
 
-### Fase 1 — Tiendas y sesión · tamaño L
-- [ ] Entidades: `Store`, `Employee`, `Invitation`, `AppSession`.
-- [ ] `StoreRepository` (crear, editar, archivar, stream de "mis tiendas", leer una).
-- [ ] `EmployeeRepository` (stream de `employees/{uid}`, listar por tienda, borrar).
-- [ ] `SessionGate` + `NoStoreScreen` + `StorePickerScreen` + formulario crear/editar tienda.
-- [ ] `main.dart`: providers por `uid + storeId`; `sessionProviders(AppSession)`.
-- [ ] Recordar última tienda del dueño en `users/{uid}.lastStoreId`.
-- [ ] Reglas: `users`, `stores`, `employees` (lectura/borrado) + tests en emulador.
-- [ ] Registro: quitar el selector de rol `isAdmin`.
+### Fase 1 — Tiendas y sesión · tamaño L · ✅ completada
+- [x] Entidades: `Store`, `Employee`, `AppSession` (`Invitation` pasa a la Fase 3, donde se usa).
+- [x] `StoreRepository` (crear, editar, archivar, stream de "mis tiendas", leer una).
+- [x] `EmployeeRepository` (stream de `employees/{uid}`, listar por tienda, borrar).
+- [x] `SessionController` + `SessionGate` + `NoStorePage` + `StorePickerPage` +
+      `StoreFormPage` (crear/editar). 12 pruebas unitarias del `SessionController`.
+- [x] `main.dart`: providers por `uid + storeId`; `sessionProviders(AppSession)`;
+      `Provider<AppSession>` disponible en toda la sesión.
+- [x] Recordar última tienda del dueño en `users/{uid}.lastStoreId`.
+- [x] Reglas: `stores`, `employees` (lectura/borrado; alta en Fase 3) + 15 pruebas en emulador (40 en total).
+- [x] Registro: quitar el selector de rol `isAdmin`. `HomePage` elige el dashboard
+      según el rol de la sesión.
+- [x] Ajustes: sección "Tienda" (dueño: editar / cambiar de tienda; empleado: abandonar).
 
 ### Fase 2 — Datos dentro de la tienda + migración · tamaño L
 - [ ] Repositorios con `storeId`: productos, clientes, carritos, ventas, cobro.
@@ -294,11 +298,12 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
 
 Se ejecuta en la app (sin servidor), una vez por usuario, desde `SessionGate`:
 
-1. **Condición**: el usuario no es empleado, no tiene tiendas, no tiene
-   `users/{uid}.migratedAt` y tiene datos legados (`products`/`carts`/`clients`/
-   `sales-history` con su `userId`, o clientes en Sembast local).
-2. Crea la tienda con **id determinista** `legacy_{uid}`, nombre "Mi tienda"
-   (editable después), e IVA/tasa tomados de `Prefs` del dispositivo.
+1. **Condición**: el usuario no es empleado, no tiene `users/{uid}.migratedAt`
+   y tiene datos legados (`products`/`carts`/`clients`/`sales-history` con su
+   `userId`, o clientes en Sembast local).
+2. **Tienda destino**: si ya tiene tiendas (p. ej. creó una al probar la Fase 1),
+   la primera que creó; si no, crea una con **id determinista** `legacy_{uid}`,
+   nombre "Mi tienda" (editable después), e IVA/tasa tomados de `Prefs`.
 3. Copia cada colección a su subcolección **conservando los ids** (los carritos
    siguen enlazados a sus clientes por `ownerId`), en batches de ≤ 400 escrituras.
    En las ventas añade `soldBy = uid`; en los carritos `createdBy = uid`.

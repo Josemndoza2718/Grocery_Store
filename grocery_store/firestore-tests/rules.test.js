@@ -157,3 +157,135 @@ describe('/users', () => {
     await assertFails(deleteDoc(doc(db(ALICE), `users/${ALICE}`)));
   });
 });
+
+// ───────────────────────── Multi-store (Phase 1) ─────────────────────────
+
+const CAROL = 'carol'; // employee of Alice's store
+
+const storeData = (ownerId, extra = {}) => ({
+  name: 'Abasto Central',
+  description: '',
+  ownerId,
+  iva: 16,
+  exchangeRate: 36.5,
+  archived: false,
+  createdAt: '2026-11-18T00:00:00.000',
+  updatedAt: '2026-11-18T00:00:00.000',
+  ...extra,
+});
+
+describe('/stores', () => {
+  test('a user can create a store they own', async () => {
+    await assertSucceeds(setDoc(doc(db(ALICE), 'stores/s1'), storeData(ALICE)));
+  });
+
+  test('cannot create a store owned by someone else', async () => {
+    await assertFails(setDoc(doc(db(ALICE), 'stores/s1'), storeData(BOB)));
+  });
+
+  test('cannot create an archived store or with invalid fields', async () => {
+    await assertFails(
+      setDoc(doc(db(ALICE), 'stores/s1'), storeData(ALICE, { archived: true })),
+    );
+    await assertFails(setDoc(doc(db(ALICE), 'stores/s1'), storeData(ALICE, { name: '' })));
+    await assertFails(setDoc(doc(db(ALICE), 'stores/s1'), storeData(ALICE, { iva: -1 })));
+    await assertFails(
+      setDoc(doc(db(ALICE), 'stores/s1'), storeData(ALICE, { name: 'x'.repeat(81) })),
+    );
+  });
+
+  test('an employee linked to a store cannot create stores', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertFails(setDoc(doc(db(CAROL), 'stores/s2'), storeData(CAROL)));
+  });
+
+  test('owner can read and list their stores; others cannot', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('stores/s2', storeData(BOB));
+    await assertSucceeds(getDoc(doc(db(ALICE), 'stores/s1')));
+    await assertFails(getDoc(doc(db(BOB), 'stores/s1')));
+    await assertSucceeds(
+      getDocs(query(collection(db(ALICE), 'stores'), where('ownerId', '==', ALICE))),
+    );
+    await assertFails(getDocs(collection(db(ALICE), 'stores')));
+  });
+
+  test('employee can read their store but not another one', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed('stores/s2', storeData(BOB));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertSucceeds(getDoc(doc(db(CAROL), 'stores/s1')));
+    await assertFails(getDoc(doc(db(CAROL), 'stores/s2')));
+  });
+
+  test('only the owner can update, and ownership cannot be transferred', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertSucceeds(updateDoc(doc(db(ALICE), 'stores/s1'), { name: 'Nuevo nombre' }));
+    await assertSucceeds(updateDoc(doc(db(ALICE), 'stores/s1'), { archived: true }));
+    await assertFails(updateDoc(doc(db(ALICE), 'stores/s1'), { ownerId: BOB }));
+    await assertFails(updateDoc(doc(db(CAROL), 'stores/s1'), { name: 'Hack' }));
+    await assertFails(updateDoc(doc(db(BOB), 'stores/s1'), { name: 'Hack' }));
+  });
+
+  test('stores cannot be deleted', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await assertFails(deleteDoc(doc(db(ALICE), 'stores/s1')));
+  });
+});
+
+describe('/employees', () => {
+  test('a user can read their own link, even if it does not exist', async () => {
+    await assertSucceeds(getDoc(doc(db(CAROL), `employees/${CAROL}`)));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertSucceeds(getDoc(doc(db(CAROL), `employees/${CAROL}`)));
+  });
+
+  test("the store owner can read and list the store's employees", async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertSucceeds(getDoc(doc(db(ALICE), `employees/${CAROL}`)));
+    await assertSucceeds(
+      getDocs(query(collection(db(ALICE), 'employees'), where('storeId', '==', 's1'))),
+    );
+  });
+
+  test("other users cannot read someone else's link", async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertFails(getDoc(doc(db(BOB), `employees/${CAROL}`)));
+  });
+
+  test('links cannot be created or edited yet (Phase 3: invitation codes)', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await assertFails(setDoc(doc(db(CAROL), `employees/${CAROL}`), { storeId: 's1' }));
+    await assertFails(setDoc(doc(db(ALICE), `employees/${CAROL}`), { storeId: 's1' }));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertFails(updateDoc(doc(db(CAROL), `employees/${CAROL}`), { storeId: 's2' }));
+  });
+
+  test('the owner can unlink an employee and the employee can leave', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertFails(deleteDoc(doc(db(BOB), `employees/${CAROL}`)));
+    await assertSucceeds(deleteDoc(doc(db(ALICE), `employees/${CAROL}`)));
+
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertSucceeds(deleteDoc(doc(db(CAROL), `employees/${CAROL}`)));
+  });
+
+  test('after being unlinked the employee loses access to the store', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertSucceeds(getDoc(doc(db(CAROL), 'stores/s1')));
+    await deleteDoc(doc(db(ALICE), `employees/${CAROL}`));
+    await assertFails(getDoc(doc(db(CAROL), 'stores/s1')));
+  });
+
+  test('the last-store preference can be saved in the own profile', async () => {
+    await assertSucceeds(
+      setDoc(doc(db(ALICE), `users/${ALICE}`), { lastStoreId: 's1' }, { merge: true }),
+    );
+  });
+});

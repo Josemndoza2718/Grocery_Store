@@ -6,7 +6,9 @@ import 'package:grocery_store/core/resource/app_theme.dart';
 import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/dependencies/di.dart';
 import 'package:grocery_store/ui/views/auth/login_page.dart';
-import 'package:grocery_store/ui/views/origin/main_page.dart';
+import 'package:grocery_store/dependencies/providers.dart';
+import 'package:grocery_store/ui/view_model/session/session_controller.dart';
+import 'package:grocery_store/ui/views/session/session_gate.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -67,15 +69,20 @@ class MyApp extends StatelessWidget {
             );
           }
 
-          // Usuario autenticado: los view models se crean para ESTE uid.
-          // La key garantiza que al cambiar de usuario se desechen los
-          // anteriores (y sus suscripciones a Firestore).
-          return MultiProvider(
-            key: ValueKey('session-${user.uid}'),
-            providers: sessionDi(user.uid),
-            child: _buildApp(
-              context,
-              home: const MainPage(selectedIndex: 0),
+          // Usuario autenticado: el SessionController (uno por uid) resuelve
+          // en qué tienda trabaja y con qué rol; SessionGate muestra la
+          // pantalla correspondiente y monta los view models de esa tienda.
+          return ChangeNotifierProvider<SessionController>(
+            key: ValueKey('user-${user.uid}'),
+            create: (_) => SessionController(
+              uid: user.uid,
+              storeRepository: storeRepository,
+              employeeRepository: employeeRepository,
+              userProfileRepository: userProfileRepository,
+            ),
+            child: SessionGate(
+              buildApp: ({Key? key, required Widget home}) =>
+                  _buildApp(context, key: key, home: home),
             ),
           );
         },

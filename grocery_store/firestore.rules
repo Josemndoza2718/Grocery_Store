@@ -2,6 +2,70 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ──────────── HELPERS (multi-tienda) ────────────
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function storePath(storeId) {
+      return /databases/$(database)/documents/stores/$(storeId);
+    }
+    function employeePath(uid) {
+      return /databases/$(database)/documents/employees/$(uid);
+    }
+    // ¿El usuario está vinculado como empleado a alguna tienda?
+    function isEmployeeAny() { return exists(employeePath(me())); }
+    function isOwner(storeId) {
+      return signedIn() && get(storePath(storeId)).data.ownerId == me();
+    }
+    function isEmployee(storeId) {
+      return signedIn() && isEmployeeAny()
+        && get(employeePath(me())).data.storeId == storeId;
+    }
+    function isMember(storeId) { return isOwner(storeId) || isEmployee(storeId); }
+    function validStoreFields(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 80
+        && data.description is string && data.description.size() <= 200
+        && data.iva is number && data.iva >= 0
+        && data.exchangeRate is number && data.exchangeRate >= 0;
+    }
+
+    // ──────────── TIENDAS ────────────
+    match /stores/{storeId} {
+      // Se evalúa con resource.data.ownerId para que la consulta
+      // "mis tiendas" (where ownerId == uid) sea válida.
+      allow read: if signedIn()
+        && (resource.data.ownerId == me() || isEmployee(storeId));
+
+      // Un empleado vinculado a una tienda no puede crear tiendas.
+      allow create: if signedIn()
+        && request.resource.data.ownerId == me()
+        && request.resource.data.archived == false
+        && validStoreFields(request.resource.data)
+        && !isEmployeeAny();
+
+      // Solo el dueño, y sin poder cambiar el dueño.
+      allow update: if signedIn()
+        && resource.data.ownerId == me()
+        && request.resource.data.ownerId == resource.data.ownerId
+        && validStoreFields(request.resource.data);
+
+      // Las tiendas no se borran: se archivan.
+      allow delete: if false;
+    }
+
+    // ──────────── EMPLEADOS ────────────
+    // El id del documento es el UID → un empleado pertenece a una sola tienda.
+    match /employees/{employeeId} {
+      allow read: if signedIn()
+        && (me() == employeeId || isOwner(resource.data.storeId));
+
+      // Se habilita en la Fase 3 (unirse con código de invitación).
+      allow create, update: if false;
+
+      // Desvincular (dueño de la tienda) o abandonar (el propio empleado).
+      allow delete: if signedIn()
+        && (me() == employeeId || isOwner(resource.data.storeId));
+    }
+
     // ──────────── PRODUCTOS ────────────
     match /products/{productId} {
       // Solo el dueño puede leer sus productos
