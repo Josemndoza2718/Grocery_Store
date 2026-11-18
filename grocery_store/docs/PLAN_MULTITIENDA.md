@@ -4,7 +4,7 @@
 > varias tiendas; cada empleado pertenece a **una sola** tienda; los clientes son
 > datos de cada tienda (no inician sesión).
 >
-> Estado: **Fases 0–3** publicadas y probadas en dispositivo (2026-11-18) · Siguiente: Fase 4 · Rama: `feature/multi-tienda`
+> Estado: **Fases 0–3** publicadas y probadas · **Fase 4 completada** (pendiente de probar; no cambia reglas) · Rama: `feature/multi-tienda`
 
 ---
 
@@ -279,12 +279,16 @@ juntas** a los dispositivos (la Fase 1 sola deja la app en un estado intermedio)
 - [x] Mensajes claros: código inválido, caducado, ya usado, ya perteneces a una tienda, tu propia tienda (`InvitationFailure`).
 - [x] Reglas de `invitations` y alta de `employees` + 13 tests nuevos (55 en emulador); 9 tests unitarios nuevos (40 en total).
 
-### Fase 4 — CRUD de tienda y configuración · tamaño M
-- [ ] Pantalla de la tienda: editar nombre/descripción, IVA, tasa de cambio.
-- [ ] Archivar tienda (no se borra: borrar subcolecciones desde la app exige borrar
-      documento por documento). Al archivar, se desvincula a los empleados.
-- [ ] Ajustes: "Cambiar de tienda" (dueño), "Abandonar tienda" (empleado).
-- [ ] Ocultar en la UI todo lo que el rol no permite (las reglas ya lo bloquean).
+### Fase 4 — CRUD de tienda y configuración · tamaño M · ✅ completada
+- [x] Pantalla **Configuración de la tienda** (Ajustes → Tienda): nombre, descripción,
+      IVA y tasa. La tasa sigue editable también desde el inicio (uso diario).
+      Crear tienda también pide IVA y tasa (precargados con los del dispositivo).
+- [x] Archivar tienda (batch atómico: desvincula empleados, revoca invitaciones
+      pendientes y marca `archived`). Los datos se conservan.
+- [x] Restaurar tiendas archivadas (decisión 2026-11-18): "Tiendas archivadas" en el
+      selector de tiendas y en "Sin tienda"; los empleados no se re-vinculan.
+- [x] Ajustes: "Cambiar de tienda" (dueño), "Abandonar tienda" (empleado).
+- [x] Ocultar en la UI todo lo que el rol no permite (las reglas ya lo bloquean).
 
 ### Fase 5 — Limpieza y endurecimiento · tamaño S
 - [ ] Tras confirmar que todos los dispositivos migraron: borrar los documentos de

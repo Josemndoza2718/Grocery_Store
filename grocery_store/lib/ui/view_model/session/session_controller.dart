@@ -122,6 +122,10 @@ class SessionController extends ChangeNotifier {
   List<Store> get ownedStores =>
       _ownedStores.where((s) => !s.archived).toList(growable: false);
 
+  /// Archived stores owned by the user (they can be restored).
+  List<Store> get archivedStores =>
+      _ownedStores.where((s) => s.archived).toList(growable: false);
+
   /// Employee link, if the user is an employee.
   Employee? get employee => _employee;
 
@@ -284,6 +288,36 @@ class SessionController extends ChangeNotifier {
       ),
     );
     return result.fold(onSuccess: (_) => null, onError: (f) => f);
+  }
+
+  /// Archives the active store (owner): its employees are unlinked and the
+  /// user goes back to their other stores (or to "no store").
+  Future<Failure?> archiveCurrentStore() async {
+    final store = currentStore;
+    if (store == null || _employee != null) {
+      return const UnknownFailure(message: 'No hay una tienda propia activa');
+    }
+    final result = await _stores.archiveStore(store.id, ownerId: uid);
+    return result.fold(
+      onSuccess: (_) {
+        if (_selectedStoreId == store.id) _selectedStoreId = null;
+        _notify();
+        return null;
+      },
+      onError: (f) => f,
+    );
+  }
+
+  /// Restores an archived store and enters it.
+  Future<Failure?> restoreStore(String storeId) async {
+    final result = await _stores.restoreStore(storeId);
+    return result.fold(
+      onSuccess: (_) {
+        selectStore(storeId);
+        return null;
+      },
+      onError: (f) => f,
+    );
   }
 
   /// Leaves the store the user works in (employee).

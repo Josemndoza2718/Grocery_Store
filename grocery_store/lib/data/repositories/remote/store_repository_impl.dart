@@ -67,10 +67,40 @@ class StoreRepositoryImpl implements StoreRepository {
   }
 
   @override
-  Future<Result<void>> archiveStore(String storeId) {
+  Future<Result<void>> archiveStore(String storeId, {required String ownerId}) {
+    return FirebaseErrorHandler.guard(() async {
+      final employees = await _db
+          .collection('employees')
+          .where('storeId', isEqualTo: storeId)
+          .get();
+      final invitations = await _db
+          .collection('invitations')
+          .where('createdBy', isEqualTo: ownerId)
+          .where('storeId', isEqualTo: storeId)
+          .get();
+
+      // One atomic batch: nobody keeps access to an archived store.
+      final batch = _db.batch();
+      for (final doc in employees.docs) {
+        batch.delete(doc.reference);
+      }
+      for (final doc in invitations.docs) {
+        // Used invitations are kept as history; pending ones are revoked.
+        if (doc.data()['usedBy'] == null) batch.delete(doc.reference);
+      }
+      batch.update(_stores.doc(storeId), {
+        'archived': true,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
+      await batch.commit();
+    });
+  }
+
+  @override
+  Future<Result<void>> restoreStore(String storeId) {
     return FirebaseErrorHandler.guard(() async {
       await _stores.doc(storeId).update({
-        'archived': true,
+        'archived': false,
         'updatedAt': DateTime.now().toIso8601String(),
       });
     });

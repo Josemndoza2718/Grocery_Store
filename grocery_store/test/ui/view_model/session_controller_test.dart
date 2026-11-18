@@ -52,9 +52,21 @@ class FakeStoreRepository implements StoreRepository {
   @override
   Future<Result<void>> updateStore(Store store) async => const Success(null);
 
+  final archived = <String>[];
+  final restored = <String>[];
+
   @override
-  Future<Result<void>> archiveStore(String storeId) async =>
-      const Success(null);
+  Future<Result<void>> archiveStore(String storeId,
+      {required String ownerId}) async {
+    archived.add(storeId);
+    return const Success(null);
+  }
+
+  @override
+  Future<Result<void>> restoreStore(String storeId) async {
+    restored.add(storeId);
+    return const Success(null);
+  }
 }
 
 class FakeEmployeeRepository implements EmployeeRepository {
@@ -566,6 +578,70 @@ void main() {
 
       final failure = await controller.joinStore('ABCD2345');
       expect(failure?.message, 'sin permiso');
+    });
+  });
+
+  group('archive and restore', () {
+    test('archiving the active store leaves it and enters the other one',
+        () async {
+      controller = build(lastStoreId: 'a');
+      employees.employee.add(null);
+      stores.owned.add([_store('a'), _store('b', day: 2)]);
+      await _flush();
+      expect(controller.session!.storeId, 'a');
+
+      final failure = await controller.archiveCurrentStore();
+      expect(failure, isNull);
+      expect(stores.archived, ['a']);
+
+      // The stream reflects the archived flag.
+      stores.owned.add([_store('a', archived: true), _store('b', day: 2)]);
+      await _flush();
+      expect(controller.ownedStores.map((s) => s.id), ['b']);
+      expect(controller.archivedStores.map((s) => s.id), ['a']);
+      expect(controller.session!.storeId, 'b');
+    });
+
+    test('archiving the only store shows noStore with the archived one',
+        () async {
+      controller = build();
+      employees.employee.add(null);
+      stores.owned.add([_store('a')]);
+      await _flush();
+      await controller.archiveCurrentStore();
+      stores.owned.add([_store('a', archived: true)]);
+      await _flush();
+
+      expect(controller.status, SessionStatus.noStore);
+      expect(controller.archivedStores, hasLength(1));
+    });
+
+    test('restoring a store enters it', () async {
+      controller = build();
+      employees.employee.add(null);
+      stores.owned.add([_store('a', archived: true)]);
+      await _flush();
+
+      final failure = await controller.restoreStore('a');
+      expect(failure, isNull);
+      expect(stores.restored, ['a']);
+
+      stores.owned.add([_store('a')]);
+      await _flush();
+      expect(controller.status, SessionStatus.ready);
+      expect(controller.session!.storeId, 'a');
+    });
+
+    test('employees cannot archive their store', () async {
+      controller = build();
+      employees.employee.add(Employee(uid: _uid, storeId: 's1'));
+      stores.owned.add([]);
+      await _flush();
+      stores.storeController('s1').add(_store('s1'));
+      await _flush();
+
+      expect(await controller.archiveCurrentStore(), isNotNull);
+      expect(stores.archived, isEmpty);
     });
   });
 }

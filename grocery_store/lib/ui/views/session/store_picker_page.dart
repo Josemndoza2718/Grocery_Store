@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
+import 'package:grocery_store/ui/views/session/archived_stores_page.dart';
 import 'package:grocery_store/ui/views/session/store_form_page.dart';
 import 'package:provider/provider.dart';
 
@@ -12,6 +13,7 @@ class StorePickerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<SessionController>();
     final stores = controller.ownedStores;
+    final archivedCount = controller.archivedStores.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,9 +28,21 @@ class StorePickerPage extends StatelessWidget {
       ),
       body: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-        itemCount: stores.length,
+        itemCount: stores.length + (archivedCount > 0 ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
+          if (index == stores.length) {
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.archive_outlined),
+                label: Text('Tiendas archivadas ($archivedCount)'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ArchivedStoresPage()),
+                ),
+              ),
+            );
+          }
           final store = stores[index];
           return Card(
             child: ListTile(

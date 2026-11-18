@@ -25,7 +25,7 @@ class MainPage extends StatelessWidget {
     const HomePage(),
     const CartPage(),
     const CheckPage(),
-    SettingsPage(),
+    const SettingsPage(),
   ];
 
   /// Computed on every build (not `static final`) so the title reflects the

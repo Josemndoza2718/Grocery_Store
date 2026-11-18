@@ -4,6 +4,7 @@
 //   npm run test:emulator
 // (arranca el emulador con un proyecto "demo-" que nunca toca datos reales,
 //  corre las pruebas y lo apaga)
+import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, describe, test } from 'node:test';
 import {
@@ -573,3 +574,69 @@ describe('joining a store with a code', () => {
     await assertSucceeds(joinBatch(CAROL, 'WXYZ2345', 's2'));
   });
 });
+
+// ───────────────────────── Archive / restore (Phase 4) ─────────────────────────
+
+/** The same batch the app commits in StoreRepositoryImpl.archiveStore. */
+async function archiveBatch(uid, storeId) {
+  const fs = db(uid);
+  const employees = await getDocs(
+    query(collection(fs, 'employees'), where('storeId', '==', storeId)),
+  );
+  const invitations = await getDocs(
+    query(
+      collection(fs, 'invitations'),
+      where('createdBy', '==', uid),
+      where('storeId', '==', storeId),
+    ),
+  );
+  const batch = writeBatch(fs);
+  employees.forEach((d) => batch.delete(d.ref));
+  invitations.forEach((d) => {
+    if (d.data().usedBy == null) batch.delete(d.ref);
+  });
+  batch.update(doc(fs, `stores/${storeId}`), {
+    archived: true,
+    updatedAt: '2026-11-18T12:00:00.000',
+  });
+  return batch.commit();
+}
+
+describe('archiving a store', () => {
+  test('the owner archives: employees unlinked, pending invitations revoked', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await seed('invitations/ABCD2345', invitationData('s1', ALICE));
+    await seed('invitations/USED2345', invitationData('s1', ALICE, { usedBy: CAROL }));
+
+    await assertSucceeds(archiveBatch(ALICE, 's1'));
+
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const fs = ctx.firestore();
+      assert.equal((await getDoc(doc(fs, `employees/${CAROL}`))).exists(), false);
+      assert.equal((await getDoc(doc(fs, 'invitations/ABCD2345'))).exists(), false);
+      assert.equal((await getDoc(doc(fs, 'invitations/USED2345'))).exists(), true);
+      assert.equal((await getDoc(doc(fs, 'stores/s1'))).data().archived, true);
+    });
+    // The former employee no longer has access.
+    await assertFails(getDoc(doc(db(CAROL), 'stores/s1')));
+  });
+
+  test('employees and other users cannot archive the store', async () => {
+    await seed('stores/s1', storeData(ALICE));
+    await seed(`employees/${CAROL}`, { storeId: 's1' });
+    await assertFails(updateDoc(doc(db(CAROL), 'stores/s1'), { archived: true }));
+    await assertFails(updateDoc(doc(db(BOB), 'stores/s1'), { archived: true }));
+  });
+
+  test('the owner can restore an archived store and still reads its data', async () => {
+    await seed('stores/s1', storeData(ALICE, { archived: true }));
+    await seed('stores/s1/products/p1', { name: 'Harina', stockQuantity: 3 });
+    await assertSucceeds(
+      getDocs(query(collection(db(ALICE), 'stores'), where('ownerId', '==', ALICE))),
+    );
+    await assertSucceeds(updateDoc(doc(db(ALICE), 'stores/s1'), { archived: false }));
+    await assertSucceeds(getDoc(doc(db(ALICE), 'stores/s1/products/p1')));
+  });
+});
+

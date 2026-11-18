@@ -14,6 +14,12 @@ abstract class StoreRepository {
 
   Future<Result<void>> updateStore(Store store);
 
-  /// Stores are never deleted: they are archived.
-  Future<Result<void>> archiveStore(String storeId);
+  /// Stores are never deleted: they are archived. Archiving atomically
+  /// unlinks every employee of the store and deletes the pending invitations
+  /// created by [ownerId]. Products, clients, carts and sales are kept.
+  Future<Result<void>> archiveStore(String storeId, {required String ownerId});
+
+  /// Makes an archived store available again (its employees are not
+  /// re-linked: they need a new invitation).
+  Future<Result<void>> restoreStore(String storeId);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
 import 'package:grocery_store/ui/view_model/session/session_controller.dart';
+import 'package:grocery_store/ui/views/session/archived_stores_page.dart';
 import 'package:grocery_store/ui/views/session/join_store_page.dart';
 import 'package:grocery_store/ui/views/session/store_form_page.dart';
 import 'package:provider/provider.dart';
@@ -68,6 +69,18 @@ class NoStorePage extends StatelessWidget {
                   label: const Text('Tengo un código de invitación'),
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const JoinStorePage()),
+                  ),
+                ),
+              ],
+              if (!unavailable && controller.archivedStores.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                TextButton.icon(
+                  icon: const Icon(Icons.archive_outlined),
+                  label: Text(
+                      'Tiendas archivadas (${controller.archivedStores.length})'),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const ArchivedStoresPage()),
                   ),
                 ),
               ],
