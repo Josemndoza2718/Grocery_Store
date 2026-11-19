@@ -1,5 +1,5 @@
 /// Base class for all failures in the application.
-/// 
+///
 /// All specific failure types extend this class to maintain consistency
 /// across the application's error handling.
 abstract class Failure {
@@ -129,6 +129,41 @@ class AuthFailure extends Failure {
         );
     }
   }
+}
+
+/// Failure raised when a sale cannot be completed because of stock problems
+/// (insufficient quantity or a product that no longer exists).
+class StockFailure extends Failure {
+  const StockFailure({
+    required super.message,
+    super.code = 'insufficient-stock',
+  });
+}
+
+/// Failure when joining a store with an invitation code.
+class InvitationFailure extends Failure {
+  const InvitationFailure({required super.message, super.code});
+
+  static const invalid = InvitationFailure(
+    message: 'El código no existe. Revisa que lo hayas escrito bien.',
+    code: 'invitation-invalid',
+  );
+  static const used = InvitationFailure(
+    message: 'Este código ya fue usado. Pide uno nuevo al dueño de la tienda.',
+    code: 'invitation-used',
+  );
+  static const expired = InvitationFailure(
+    message: 'Este código caducó. Pide uno nuevo al dueño de la tienda.',
+    code: 'invitation-expired',
+  );
+  static const alreadyEmployee = InvitationFailure(
+    message: 'Ya perteneces a una tienda. Abandónala antes de unirte a otra.',
+    code: 'already-employee',
+  );
+  static const ownStore = InvitationFailure(
+    message: 'No puedes unirte como empleado a tu propia tienda.',
+    code: 'own-store',
+  );
 }
 
 /// Failure related to local cache/storage (Sembast).

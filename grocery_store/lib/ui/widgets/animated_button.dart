@@ -40,7 +40,10 @@ class AnimatedButton extends StatelessWidget {
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Icon(icon, color: isSelected ? selectTextColor : unSelectTextolor,),
+                  Icon(
+                    icon,
+                    color: isSelected ? selectTextColor : unSelectTextolor,
+                  ),
                   Text(label!, style: Theme.of(context).textTheme.titleSmall),
                 ],
               )

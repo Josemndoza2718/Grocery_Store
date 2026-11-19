@@ -11,20 +11,28 @@ class CustomDialgos {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title, style: Theme.of(context).textTheme.bodyMedium,),
+          title: Text(
+            title,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
           content: content,
           //actionsAlignment: MainAxisAlignment.center,
           actions: <Widget>[
             TextButton(
-              child: Text('cancelar', style: Theme.of(context).textTheme.bodyMedium,),
+              child: Text(
+                'cancelar',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('aceptar', style: Theme.of(context).textTheme.bodyMedium,),
-              onPressed: () => onConfirm()
-            ),
+                child: Text(
+                  'aceptar',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                onPressed: () => onConfirm()),
           ],
           backgroundColor: AppColors.white,
           shape: RoundedRectangleBorder(

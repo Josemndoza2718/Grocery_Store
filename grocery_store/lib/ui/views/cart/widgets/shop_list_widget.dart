@@ -126,14 +126,15 @@ class _ShopListWidgetState extends State<ShopListWidget> {
         totalPrice += cart.products
             .map((product) =>
                 product.price *
-                double.parse(
-                    _quantityControllers["${cart.id}_${product.id}"]?.text ??
-                        "0"))
-            .reduce((a, b) => a + b);
+                (double.tryParse(
+                        _quantityControllers["${cart.id}_${product.id}"]
+                                ?.text ??
+                            "") ??
+                    0))
+            // fold (not reduce): an empty cart must sum 0 instead of throwing
+            .fold<double>(0, (a, b) => a + b);
       }
     }
-
-
 
     if (widget.moneyConversion != 0) {
       return (totalPrice * widget.moneyConversion).toStringAsFixed(2);
@@ -147,9 +148,12 @@ class _ShopListWidgetState extends State<ShopListWidget> {
     for (Cart cart in widget.listCarts ?? []) {
       if (cart.id == cartId) {
         totalItems += cart.products
-            .map((product) => int.parse(
-                _quantityControllers["${cart.id}_${product.id}"]?.text ?? "0"))
-            .reduce((a, b) => a + b);
+            .map((product) =>
+                int.tryParse(
+                    _quantityControllers["${cart.id}_${product.id}"]?.text ??
+                        "") ??
+                0)
+            .fold<int>(0, (a, b) => a + b);
       }
     }
     return totalItems;
@@ -171,10 +175,12 @@ class _ShopListWidgetState extends State<ShopListWidget> {
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
           child: ExpansionPanelList(
-            expansionCallback: (panelIndex, isExpanded) => widget.onTapPanel(panelIndex),
+            expansionCallback: (panelIndex, isExpanded) =>
+                widget.onTapPanel(panelIndex),
             children: widget.listCarts!.map<ExpansionPanel>((Cart cart) {
               return ExpansionPanel(
-                backgroundColor: Theme.of(context).expansionTileTheme.backgroundColor,
+                backgroundColor:
+                    Theme.of(context).expansionTileTheme.backgroundColor,
                 canTapOnHeader: true,
                 isExpanded: widget.listCarts!.isNotEmpty &&
                         widget.isActivePanel.length >
@@ -449,7 +455,7 @@ class CardsProducts extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-        color: Theme.of(context).expansionTileTheme.backgroundColor,
+          color: Theme.of(context).expansionTileTheme.backgroundColor,
           border: const Border(
             bottom: BorderSide(
               width: 6,
@@ -554,16 +560,17 @@ class CardsProducts extends StatelessWidget {
                           "${'lbl_\$_uni'.translate}: ${product.price.toStringAsFixed(2)}\$",
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
-                        if(widget.moneyConversion != 0)
+                        if (widget.moneyConversion != 0)
+                          Text(
+                            "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        const Divider(
+                            height: 8, color: AppColors.grey, thickness: 1),
                         Text(
-                          "${'lbl_bs_uni'.translate}: ${((product.price) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                        const Divider(height: 8, color: AppColors.grey, thickness: 1),
-                        Text(
-                          widget.moneyConversion == 0 
-                          ? "${'lbl_total'.translate}: ${((product.price * int.parse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "0"))).toStringAsFixed(2)}\$"
-                          : "${'lbl_total'.translate}: ${((product.price * int.parse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "0")) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
+                          widget.moneyConversion == 0
+                              ? "${'lbl_total'.translate}: ${((product.price * (int.tryParse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "") ?? 0))).toStringAsFixed(2)}\$"
+                              : "${'lbl_total'.translate}: ${((product.price * (int.tryParse(quantityControllers["${cart.id}_${product.id}"]?.text ?? "") ?? 0)) * (widget.moneyConversion)).toStringAsFixed(2)}bs",
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         const SizedBox(height: 8),
@@ -581,7 +588,8 @@ class CardsProducts extends StatelessWidget {
                             SizedBox(
                               width: 50,
                               child: TextFormField(
-                                controller: quantityControllers["${cart.id}_${product.id}"],
+                                controller: quantityControllers[
+                                    "${cart.id}_${product.id}"],
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
                                 inputFormatters: [
@@ -629,6 +637,5 @@ class CardsProducts extends StatelessWidget {
         ),
       ),
     );
-    
   }
 }

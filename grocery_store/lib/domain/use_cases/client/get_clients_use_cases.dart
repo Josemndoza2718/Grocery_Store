@@ -1,15 +1,11 @@
-import 'package:grocery_store/data/repositories/local/car_client_repository_impl.dart';
 import 'package:grocery_store/domain/entities/client.dart';
+import 'package:grocery_store/domain/repositories/local/new/new_client_repository.dart';
 
 class GetClientsUseCases {
   const GetClientsUseCases({required this.repository});
 
-  final ClientRepositoryImpl repository;
+  final NewClientRepository repository;
 
-  Future<List<Client>> call() async {
-    return await repository.getAllClients();
-  }
-
-  
-
+  /// Real-time list of the clients of the store.
+  Stream<List<Client>> callStream() => repository.getClientsStream();
 }

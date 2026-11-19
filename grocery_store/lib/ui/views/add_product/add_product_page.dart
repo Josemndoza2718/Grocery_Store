@@ -5,8 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_store/core/resource/custom_dialgos.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/resource/images.dart';
@@ -249,7 +247,9 @@ class _AddProductPageState extends State<AddProductPage> {
                                 DecimalInputFormatter(),
                               ],
                               validator: (value) {
-                                final cleaned = value?.replaceAll('.', '').replaceAll(',', '.');
+                                final cleaned = value
+                                    ?.replaceAll('.', '')
+                                    .replaceAll(',', '.');
                                 final price = double.tryParse(cleaned ?? '');
                                 if (price == null || price <= 0) {
                                   return 'lbl_product_price_>_0'.translate;
@@ -298,41 +298,52 @@ class _AddProductPageState extends State<AddProductPage> {
                             GeneralButton(
                               onTap: widget.product != null
                                   ? () async {
-                                      final userId = Prefs.getString(PrefKeys.userId) ?? '';
-                                      final price = priceEditController.text.replaceAll('.', '').replaceAll(',', '.');
+                                      final userId = provider.userId;
+                                      final price = priceEditController.text
+                                          .replaceAll('.', '')
+                                          .replaceAll(',', '.');
 
                                       _updateProduct(
                                           product: Product(
                                         id: widget.product!.id,
                                         name: nameEditController.text,
-                                        description: descriptionEditController.text,
+                                        description:
+                                            descriptionEditController.text,
                                         price: double.tryParse(price) ?? 0.0,
                                         image: provider.urlImage.isEmpty
                                             ? provider.galleryImage?.path ?? ''
                                             : provider.urlImage,
                                         idStock: _idStockController.text,
-                                        stockQuantity: int.tryParse(_stockEditQuantityController.text) ?? 0,
+                                        stockQuantity: int.tryParse(
+                                                _stockEditQuantityController
+                                                    .text) ??
+                                            0,
                                         quantityToBuy: 0,
                                         userId: userId,
                                       ));
                                     }
                                   : () async {
-                                      final userId = Prefs.getString(PrefKeys.userId) ?? '';
+                                      final userId = provider.userId;
 
-                                      final price = _priceController.text.replaceAll('.', '').replaceAll(',', '.');
-
+                                      final price = _priceController.text
+                                          .replaceAll('.', '')
+                                          .replaceAll(',', '.');
 
                                       _createProduct(
                                           product: Product(
                                         id: _uuid.v4(),
                                         name: _nameController.text,
-                                        description: _descriptionController.text,
+                                        description:
+                                            _descriptionController.text,
                                         price: double.tryParse(price) ?? 0.0,
                                         image: provider.urlImage.isEmpty
                                             ? provider.galleryImage?.path ?? ''
                                             : provider.urlImage,
                                         idStock: _idStockController.text,
-                                        stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
+                                        stockQuantity: int.tryParse(
+                                                _stockQuantityController
+                                                    .text) ??
+                                            0,
                                         quantityToBuy: 0,
                                         userId: userId,
                                       ));

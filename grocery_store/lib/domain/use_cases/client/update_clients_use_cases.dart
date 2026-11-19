@@ -1,13 +1,13 @@
-import 'package:grocery_store/data/repositories/local/car_client_repository_impl.dart';
+import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/client.dart';
+import 'package:grocery_store/domain/repositories/local/new/new_client_repository.dart';
 
 class UpdateClientsUseCases {
   const UpdateClientsUseCases({required this.repository});
 
-  final ClientRepositoryImpl repository;
+  final NewClientRepository repository;
 
- 
-  Future<void> updateClient(Client client) async {
-    await repository.updateClient(client);
+  Future<Result<void>> updateClient(Client client) {
+    return repository.updateClient(client);
   }
 }

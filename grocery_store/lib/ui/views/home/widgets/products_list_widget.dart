@@ -17,9 +17,12 @@ class ProductsListWidget extends StatelessWidget {
     required this.onClose,
     this.moneyConversion,
     required this.onDeleteProduct,
+    this.canEdit = true,
   });
 
-  
+  /// Whether the user can edit (tap) and delete (long press) products.
+  final bool canEdit;
+
   final List<Product>? listProducts;
   final Function(int) onPressed;
   final Function() onClose;
@@ -48,7 +51,8 @@ class ProductsListWidget extends StatelessWidget {
             crossAxisCount = (availableWidth / 180).floor().clamp(2, 4);
             // Adjust aspect ratio based on available space
             final double itemWidth = availableWidth / crossAxisCount;
-            childAspectRatio = itemWidth / 340; // Height ~340px for product card
+            childAspectRatio =
+                itemWidth / 340; // Height ~340px for product card
 
             return GridView.builder(
               scrollDirection: Axis.vertical,
@@ -60,36 +64,42 @@ class ProductsListWidget extends StatelessWidget {
               ),
               itemCount: listProducts!.length,
               itemBuilder: (context, index) {
-                final  product = listProducts![index];
+                final product = listProducts![index];
                 final quantity = product.stockQuantity;
                 final price = product.price;
-                final priceBs = ((product.price) * (moneyConversion ?? 0)).toStringAsFixed(2);
-                final TextStyle textStyle = Theme.of(context).textTheme.bodySmall!;
+                final priceBs = ((product.price) * (moneyConversion ?? 0))
+                    .toStringAsFixed(2);
+                final TextStyle textStyle =
+                    Theme.of(context).textTheme.bodySmall!;
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddProductPage(
-                          product: listProducts![index],
-                        ),
-                      ),
-                    ).then((_) {
-                      onClose();
-                    });
-                  },
-                  onLongPress: () {
-                    HapticFeedback.mediumImpact();
-                    CustomDialgos.showAlertDialog(
-                      context: context,
-                      title: 'lbl_delete_product'.translate,
-                      onConfirm: () {
-                        onDeleteProduct(index);
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
+                  onTap: !canEdit
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddProductPage(
+                                product: listProducts![index],
+                              ),
+                            ),
+                          ).then((_) {
+                            onClose();
+                          });
+                        },
+                  onLongPress: !canEdit
+                      ? null
+                      : () {
+                          HapticFeedback.mediumImpact();
+                          CustomDialgos.showAlertDialog(
+                            context: context,
+                            title: 'lbl_delete_product'.translate,
+                            onConfirm: () {
+                              onDeleteProduct(index);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
                   child: //Products List
                       Container(
                     margin: const EdgeInsets.all(8),
@@ -110,30 +120,30 @@ class ProductsListWidget extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: listProducts![index].image.contains('http')
-                            ? Image.network(
-                              listProducts![index].image,
-                              // height: 100,
-                              // width: 100,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  AppImages.imageNotFound,
-                                  fit: BoxFit.cover,
-                                );
-                              },
-                            )
-                            : Image.file(
-                              File(listProducts![index].image),
-                              // height: 100,
-                              // width: 100,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  AppImages.imageNotFound,
-                                  fit: BoxFit.cover,
-                                );
-                              },
-                            ),
+                                ? Image.network(
+                                    listProducts![index].image,
+                                    // height: 100,
+                                    // width: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        AppImages.imageNotFound,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  )
+                                : Image.file(
+                                    File(listProducts![index].image),
+                                    // height: 100,
+                                    // width: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.asset(
+                                        AppImages.imageNotFound,
+                                        fit: BoxFit.cover,
+                                      );
+                                    },
+                                  ),
                           ),
                         ),
                         //const SizedBox(height: 10),
@@ -142,10 +152,8 @@ class ProductsListWidget extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                product.name,
-                                style: Theme.of(context).textTheme.bodyLarge
-                              ),
+                              Text(product.name,
+                                  style: Theme.of(context).textTheme.bodyLarge),
                               /* Padding(
                                   padding:
                                       const EdgeInsets.symmetric(horizontal: 8.0),
@@ -175,11 +183,12 @@ class ProductsListWidget extends StatelessWidget {
                                 "${'lbl_price'.translate}: ${price.toStringAsFixed(2)}\$",
                                 style: textStyle,
                               ),
-                              if(moneyConversion != null && moneyConversion != 0)
-                              Text(
-                                "${'lbl_price'.translate}: ${priceBs}bs",
-                                style: textStyle,
-                              ),
+                              if (moneyConversion != null &&
+                                  moneyConversion != 0)
+                                Text(
+                                  "${'lbl_price'.translate}: ${priceBs}bs",
+                                  style: textStyle,
+                                ),
                               const SizedBox(height: 10),
                               GestureDetector(
                                 onTap: () {

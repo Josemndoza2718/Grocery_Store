@@ -107,8 +107,9 @@ class CheckWidget extends StatelessWidget {
                     itemCount: cart?.products.length ?? 0,
                     itemBuilder: (context, index) {
                       final product = cart!.products[index];
-                      final price = product.price * moneyConversion!;
-                      final priceBs = product.price * moneyConversion!;
+                      // moneyConversion is null when the store has no rate.
+                      final price = product.price;
+                      final priceBs = product.price * (moneyConversion ?? 0);
 
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.start,

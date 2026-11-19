@@ -7,11 +7,7 @@ class NewGetProductsUseCases {
 
   const NewGetProductsUseCases(this._repository);
 
-  Future<Result<List<Product>>> call() async {
-    return await _repository.getLocalProducts();
-  }
+  Future<Result<List<Product>>> call() => _repository.getProducts();
 
-  Stream<List<Product>> callStream({String? userId}) {
-    return _repository.getAllProductsStream(userId: userId);
-  }
+  Stream<List<Product>> callStream() => _repository.getAllProductsStream();
 }

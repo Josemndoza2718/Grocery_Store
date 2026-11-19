@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
 
 class AddProductViewModel extends ChangeNotifier {
   final CreateProductsUseCases createProductsUseCases;
   final UpdateProductsUseCases updateProductsUseCases;
 
+  /// Firebase Auth UID of the session owner.
+  final String userId;
+
   AddProductViewModel({
+    required this.userId,
     required this.createProductsUseCases,
     required this.updateProductsUseCases,
   });
@@ -35,23 +37,24 @@ class AddProductViewModel extends ChangeNotifier {
 
   //SERVICES
   Future<void> createProduct(Product product) async {
-    final userId = Prefs.getString(PrefKeys.userId) ?? '';
     final productWithUser = product.copyWith(userId: userId);
-    
+
     final result = await createProductsUseCases.call(productWithUser);
-    
+
     result.fold(
       onSuccess: (_) {},
       onError: (failure) {
-         // In a real app, we might want to expose this failure to the UI
-          print('Error creating product: ${failure.message}');
+        // In a real app, we might want to expose this failure to the UI
+        print('Error creating product: ${failure.message}');
       },
     );
   }
 
   Future<void> updateProduct(Product product) async {
-    final result = await updateProductsUseCases.call(product);
-    
+    // Always stamp the owner so Firestore rules accept the write.
+    final result =
+        await updateProductsUseCases.call(product.copyWith(userId: userId));
+
     result.fold(
       onSuccess: (_) {},
       onError: (failure) {
@@ -60,7 +63,7 @@ class AddProductViewModel extends ChangeNotifier {
     );
   }
 
-  void clearData(){
+  void clearData() {
     galleryImage = null;
     notifyListeners();
   }

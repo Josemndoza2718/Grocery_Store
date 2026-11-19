@@ -45,7 +45,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         email: _emailController.text,
         password: _passwordController.text,
         phone: _phoneController.text,
-        isAdmin: provider.isAdmin,
       );
 
       if (userCredential != null && mounted) {
@@ -165,34 +164,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // 6. Toggle Buttons para Rol
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Seleccionar Rol:',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(width: 16),
-                      // El rol se maneja en el proveedor
-                      Switch.adaptive(
-                        value: loginProvider.isAdmin,
-                        onChanged: loginProvider.toggleRole,
-                        activeColor: Colors.blue,
-                      ),
-                      Text(
-                        loginProvider.isAdmin
-                            ? 'Administrador'
-                            : 'Usuario Normal',
-                        style: TextStyle(
-                            color: loginProvider.isAdmin
-                                ? Colors.blue
-                                : Colors.grey[700],
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 32),
 
                   // Mostrar mensaje de error si existe

@@ -310,14 +310,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  flutter_localization:
-    dependency: "direct main"
-    description:
-      name: flutter_localization
-      sha256: "578a73455a0deffc4169ef9372ba0562a3e2cff563e5c524ea87bc96daa519c0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.3"
   flutter_localizations:
     dependency: transitive
     description: flutter
@@ -685,14 +677,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  sembast:
-    dependency: "direct main"
-    description:
-      name: sembast
-      sha256: "9026ea34aa3a0f26a966529ef80b57b6fe40f810cadeadd1b208202d1bf153e7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.8.3"
   share_plus:
     dependency: "direct main"
     description:
@@ -882,14 +866,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  universal_io:
-    dependency: transitive
-    description:
-      name: universal_io
-      sha256: "1722b2dcc462b4b2f3ee7d188dad008b6eb4c40bbd03a3de451d82c78bba9aad"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.2"
   url_launcher_linux:
     dependency: transitive
     description:

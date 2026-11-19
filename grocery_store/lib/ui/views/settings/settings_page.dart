@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:grocery_store/data/repositories/local/prefs.dart';
 import 'package:grocery_store/core/resource/colors.dart';
-import 'package:grocery_store/core/resource/custom_dialgos.dart';
-import 'package:grocery_store/core/utils/prefs_keys.dart';
-import 'package:grocery_store/ui/widgets/general_textformfield.dart';
 import 'package:grocery_store/ui/view_model/providers/login_view_model.dart';
+import 'package:grocery_store/domain/entities/app_session.dart';
+import 'package:grocery_store/ui/view_model/session/session_controller.dart';
+import 'package:grocery_store/ui/views/employees/employees_page.dart';
+import 'package:grocery_store/ui/views/session/store_form_page.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatelessWidget {
-  SettingsPage({super.key});
-
-  final TextEditingController _ivaController = TextEditingController();
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
+        // TIENDA Section
+        ..._buildStoreSection(context),
+        const SizedBox(height: 24),
+
         // CUENTA Section
         _buildSectionHeader('CUENTA'),
         _buildSettingsTile(
@@ -69,43 +70,6 @@ class SettingsPage extends StatelessWidget {
               ); */
           },
         ),
-        _buildSettingsTile(
-          context,
-          icon: Icons.percent_outlined,
-          title: 'Definir Impuestos',
-          onTap: () {
-            CustomDialgos.showAlertDialog(
-              context: context,
-              title: 'Definir Impuestos',
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GeneralTextformfield(
-                    controller: _ivaController,
-                    hintText: 'IVA',
-                    keyboardType: const TextInputType.numberWithOptions(signed: false),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingresa un valor';
-                      }
-                      return null;
-                    },
-                  )
-                ],
-              ),
-              onConfirm: () {
-                Prefs.setString(PrefKeys.iva, _ivaController.text).then((value) {
-                  Navigator.pop(context);
-                  if (value) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Impuestos guardados')));
-                  }
-                });
-              },
-            );
-          },
-        ),
-
         const SizedBox(height: 24),
 
         // PRIVACIDAD Y SEGURIDAD Section
@@ -166,6 +130,92 @@ class SettingsPage extends StatelessWidget {
           fontWeight: FontWeight.w600,
           letterSpacing: 1,
         ),
+      ),
+    );
+  }
+
+  List<Widget> _buildStoreSection(BuildContext context) {
+    final session = context.watch<AppSession>();
+    final controller = context.watch<SessionController>();
+    final store = controller.currentStore;
+    final storeName = store?.name ?? '';
+
+    return [
+      _buildSectionHeader('TIENDA'),
+      if (session.isOwner) ...[
+        _buildSettingsTile(
+          context,
+          icon: Icons.store_outlined,
+          title: 'Configuración de la tienda ($storeName)',
+          onTap: () {
+            if (store == null) return;
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => StoreFormPage(store: store),
+            ));
+          },
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.groups_outlined,
+          title: 'Empleados',
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const EmployeesPage()),
+          ),
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.swap_horiz,
+          title: 'Cambiar de tienda',
+          onTap: controller.switchStore,
+        ),
+      ] else ...[
+        _buildSettingsTile(
+          context,
+          icon: Icons.store_outlined,
+          title: 'Trabajas en: $storeName',
+          onTap: () {},
+        ),
+        _buildSettingsTile(
+          context,
+          icon: Icons.exit_to_app,
+          title: 'Abandonar tienda',
+          onTap: () => _showLeaveStoreDialog(context, storeName),
+        ),
+      ],
+    ];
+  }
+
+  void _showLeaveStoreDialog(BuildContext context, String storeName) {
+    final controller = context.read<SessionController>();
+    final messenger = ScaffoldMessenger.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('¿Abandonar la tienda?'),
+        content: Text(
+          'Dejarás de tener acceso a "$storeName". Para volver necesitarás '
+          'una nueva invitación del dueño.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              final failure = await controller.leaveStore();
+              if (failure != null) {
+                messenger
+                    .showSnackBar(SnackBar(content: Text(failure.message)));
+              }
+            },
+            child: const Text(
+              'Abandonar',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
       ),
     );
   }

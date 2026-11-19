@@ -3,7 +3,6 @@ import 'package:grocery_store/core/errors/result.dart';
 import 'package:grocery_store/domain/entities/product.dart';
 import 'package:grocery_store/ui/view_model/providers/home_view_model.dart';
 import 'package:grocery_store/domain/use_cases/product/get_products_use_cases.dart';
-import 'package:grocery_store/domain/use_cases/product/send_product_firebase_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/create_product_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/delete_products_use_cases.dart';
 import 'package:grocery_store/domain/use_cases/product/update_products_use_cases.dart';
@@ -21,7 +20,7 @@ class FakeGetProductsUseCases implements NewGetProductsUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Stream<List<Product>> callStream({String? userId}) {
+  Stream<List<Product>> callStream() {
     return _controller.stream;
   }
 
@@ -32,11 +31,6 @@ class FakeGetProductsUseCases implements NewGetProductsUseCases {
   void dispose() {
     _controller.close();
   }
-}
-
-class FakeSendProductFirebaseUseCases implements SendProductFirebaseUseCases {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class FakeCreateProductsUseCases implements CreateProductsUseCases {
@@ -70,7 +64,7 @@ class FakeGetClientsUseCases implements GetClientsUseCases {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Future<List<Client>> call() async => [];
+  Stream<List<Client>> callStream() => const Stream.empty();
 }
 
 class FakeDeleteClientsUseCases implements DeleteClientsUseCases {
@@ -86,8 +80,8 @@ void main() {
     fakeGetProductsUseCases = FakeGetProductsUseCases();
 
     viewModel = HomeViewModel(
+      userId: 'test-user',
       getProductsUseCases: fakeGetProductsUseCases,
-      sendProductsToFirebaseUseCases: FakeSendProductFirebaseUseCases(),
       createProductsUseCases: FakeCreateProductsUseCases(),
       deleteProductsUseCases: FakeDeleteProductsUseCases(),
       updateProductsUseCases: FakeUpdateProductsUseCases(),

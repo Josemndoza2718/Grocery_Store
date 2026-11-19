@@ -33,7 +33,8 @@ class GeneralTextformfield extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        contentPadding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
         filled: true,
         fillColor: Theme.of(context).inputDecorationTheme.fillColor,
         border: OutlineInputBorder(

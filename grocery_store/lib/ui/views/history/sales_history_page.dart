@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_store/domain/entities/cart.dart';
+import 'package:grocery_store/domain/entities/store.dart';
 import 'package:grocery_store/core/resource/colors.dart';
 import 'package:grocery_store/core/utils/extension.dart';
 import 'package:grocery_store/ui/view_model/providers/sales_history_view_model.dart';
@@ -31,8 +31,14 @@ class SalesHistoryPage extends StatelessWidget {
           if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (provider.errorMessage != null) {
+            return Center(child: Text(provider.errorMessage!));
+          }
 
+          // Fallback rate for legacy sales that did not store their own.
+          final currentRate = context.watch<Store>().exchangeRate;
           final salesList = provider.filteredSales;
+          final sellers = provider.canSeeAllSales ? provider.sellers : const [];
 
           return Column(
             children: [
@@ -71,6 +77,33 @@ class SalesHistoryPage extends StatelessWidget {
                   ),
                 ),
               ),
+              // Seller filter (owner only)
+              if (sellers.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        ChoiceChip(
+                          label: const Text('Todos los vendedores'),
+                          selected: provider.sellerFilter == null,
+                          selectedColor: AppColors.green,
+                          onSelected: (_) => provider.setSellerFilter(null),
+                        ),
+                        for (final seller in sellers)
+                          ChoiceChip(
+                            label: Text(seller.name),
+                            selected: provider.sellerFilter == seller.uid,
+                            selectedColor: AppColors.green,
+                            onSelected: (_) =>
+                                provider.setSellerFilter(seller.uid),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               // Currency radio buttons and total
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -102,7 +135,7 @@ class SalesHistoryPage extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      "${"lbl_total".translate}: ${provider.filteredTotal.toStringAsFixed(2)} ${provider.currencySuffix}",
+                      "${"lbl_total".translate}: ${provider.filteredTotal(currentRate).toStringAsFixed(2)} ${provider.currencySuffix}",
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ],
@@ -148,8 +181,8 @@ class SalesHistoryPage extends StatelessWidget {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color:
-                                              AppColors.green.withOpacity(0.2),
+                                          color: AppColors.green
+                                              .withValues(alpha: 0.2),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                           border: Border.all(
@@ -171,6 +204,14 @@ class SalesHistoryPage extends StatelessWidget {
                                         .textTheme
                                         .headlineLarge,
                                   ),
+                                  if (provider.canSeeAllSales &&
+                                      cart.soldByName.isNotEmpty)
+                                    Text(
+                                      'Vendido por: ${cart.soldByName}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
                                   const Divider(),
                                   Row(
                                     mainAxisAlignment:
@@ -183,7 +224,7 @@ class SalesHistoryPage extends StatelessWidget {
                                             .bodyLarge,
                                       ),
                                       Text(
-                                        "${"lbl_total".translate}: ${_calculateTotal(cart, provider.moneyConversion).toStringAsFixed(2)}bs",
+                                        "${"lbl_total".translate}: ${provider.saleTotal(cart, currentRate).toStringAsFixed(2)} ${provider.currencySuffix}",
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyLarge,
@@ -202,19 +243,5 @@ class SalesHistoryPage extends StatelessWidget {
         },
       ),
     );
-  }
-
-  double _calculateTotal(Cart cart, double moneyConversion) {
-    double total = 0;
-    for (var product in cart.products) {
-      if (product.quantityToBuy > 0) {
-        total += (product.price * product.quantityToBuy);
-      }
-    }
-
-    if (moneyConversion == 0) {
-      return total;
-    }
-    return total * moneyConversion;
   }
 }

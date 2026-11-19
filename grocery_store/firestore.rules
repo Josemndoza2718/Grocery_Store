@@ -1,0 +1,164 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ──────────── HELPERS ────────────
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function storePath(storeId) {
+      return /databases/$(database)/documents/stores/$(storeId);
+    }
+    function employeePath(uid) {
+      return /databases/$(database)/documents/employees/$(uid);
+    }
+    function invitationPath(code) {
+      return /databases/$(database)/documents/invitations/$(code);
+    }
+    // ¿El usuario está vinculado como empleado a alguna tienda?
+    function isEmployeeAny() { return exists(employeePath(me())); }
+    function isOwner(storeId) {
+      return signedIn() && get(storePath(storeId)).data.ownerId == me();
+    }
+    function isEmployee(storeId) {
+      return signedIn() && isEmployeeAny()
+        && get(employeePath(me())).data.storeId == storeId;
+    }
+    function isMember(storeId) { return isOwner(storeId) || isEmployee(storeId); }
+    function onlyChanges(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+    function validStoreFields(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 80
+        && data.description is string && data.description.size() <= 200
+        && data.iva is number && data.iva >= 0
+        && data.exchangeRate is number && data.exchangeRate >= 0;
+    }
+
+    // ──────────── PERFIL DE USUARIO ────────────
+    match /users/{userId} {
+      // Solo el propio usuario puede leer/crear/editar su perfil
+      allow read, create, update: if signedIn() && me() == userId;
+      allow delete: if false;
+    }
+
+    // ──────────── TIENDAS ────────────
+    match /stores/{storeId} {
+      // Se evalúa con resource.data.ownerId para que la consulta
+      // "mis tiendas" (where ownerId == uid) sea válida.
+      allow read: if signedIn()
+        && (resource.data.ownerId == me() || isEmployee(storeId));
+
+      // Un empleado vinculado a una tienda no puede crear tiendas.
+      allow create: if signedIn()
+        && request.resource.data.ownerId == me()
+        && request.resource.data.archived == false
+        && validStoreFields(request.resource.data)
+        && !isEmployeeAny();
+
+      // Solo el dueño, y sin poder cambiar el dueño.
+      allow update: if signedIn()
+        && resource.data.ownerId == me()
+        && request.resource.data.ownerId == resource.data.ownerId
+        && validStoreFields(request.resource.data);
+
+      // Las tiendas no se borran: se archivan.
+      allow delete: if false;
+
+      // ── Productos: todos los miembros los ven; solo el dueño los gestiona.
+      match /products/{productId} {
+        allow read: if isMember(storeId);
+        allow create, delete: if isOwner(storeId);
+        // El empleado solo puede DESCONTAR stock (al cobrar); reponer es
+        // cosa del dueño.
+        allow update: if isOwner(storeId)
+          || (isEmployee(storeId)
+              && onlyChanges(['stockQuantity'])
+              && request.resource.data.stockQuantity is int
+              && request.resource.data.stockQuantity >= 0
+              && request.resource.data.stockQuantity < resource.data.stockQuantity);
+      }
+
+      // ── Clientes y carritos: compartidos por todos los miembros.
+      match /clients/{clientId} {
+        allow read, write: if isMember(storeId);
+      }
+      match /carts/{cartId} {
+        allow read, write: if isMember(storeId);
+      }
+
+      // ── Ventas: el dueño ve todas; el empleado solo las que él cobró.
+      match /sales/{saleId} {
+        allow read: if isOwner(storeId)
+          || (isEmployee(storeId) && resource.data.soldBy == me());
+        allow create: if isMember(storeId)
+          && request.resource.data.soldBy == me();
+        // Las ventas son inmutables.
+        allow update, delete: if false;
+      }
+    }
+
+    // ──────────── EMPLEADOS ────────────
+    // El id del documento es el UID → un empleado pertenece a una sola tienda.
+    match /employees/{employeeId} {
+      allow read: if signedIn()
+        && (me() == employeeId || isOwner(resource.data.storeId));
+
+      // Unirse con un código de invitación válido: se crea en el MISMO batch
+      // que marca la invitación como usada por este usuario.
+      allow create: if signedIn() && me() == employeeId
+        && request.resource.data.storeId is string
+        && request.resource.data.invitationCode is string
+        && invitationAcceptedBy(
+             request.resource.data.invitationCode,
+             request.resource.data.storeId);
+
+      // El vínculo no se edita (para cambiar de tienda: abandonar + nueva invitación).
+      allow update: if false;
+
+      // Desvincular (dueño de la tienda) o abandonar (el propio empleado).
+      allow delete: if signedIn()
+        && (me() == employeeId || isOwner(resource.data.storeId));
+    }
+
+    // La invitación era válida antes de esta escritura (de esa tienda, sin
+    // usar y vigente) y queda marcada como usada por el usuario actual.
+    function invitationAcceptedBy(code, storeId) {
+      let before = get(invitationPath(code)).data;
+      let after = getAfter(invitationPath(code)).data;
+      return before.storeId == storeId
+        && before.usedBy == null
+        && request.time < before.expiresAt
+        && after.usedBy == me();
+    }
+
+    // ──────────── INVITACIONES ────────────
+    // El id del documento es el código (8 caracteres, un solo uso, 48 h).
+    match /invitations/{code} {
+      // Cualquiera con sesión puede consultar UN código (para validarlo),
+      // pero no listar invitaciones ajenas.
+      allow get: if signedIn();
+      allow list: if signedIn() && resource.data.createdBy == me();
+
+      allow create: if signedIn()
+        && code.size() == 8
+        && request.resource.data.createdBy == me()
+        && isOwner(request.resource.data.storeId)
+        && request.resource.data.usedBy == null
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(49, 'h');
+
+      // Solo para marcarla como usada, junto con la creación del empleado.
+      allow update: if signedIn()
+        && resource.data.usedBy == null
+        && request.time < resource.data.expiresAt
+        && onlyChanges(['usedBy', 'usedAt'])
+        && request.resource.data.usedBy == me()
+        && existsAfter(employeePath(me()))
+        && getAfter(employeePath(me())).data.storeId == resource.data.storeId;
+
+      // El dueño puede revocarla.
+      allow delete: if signedIn() && isOwner(resource.data.storeId);
+    }
+  }
+}

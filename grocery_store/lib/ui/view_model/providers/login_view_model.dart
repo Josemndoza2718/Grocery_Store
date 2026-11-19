@@ -11,7 +11,6 @@ class LoginProvider with ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isLoggedIn = false; // <-- NUEVA VARIABLE DE ESTADO
-  bool _isAdmin = true;
   final _firestore = FirebaseFirestore.instance;
   bool _isResetLinkSent = false;
 
@@ -20,7 +19,6 @@ class LoginProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isLoggedIn => _isLoggedIn; // <-- NUEVO GETTER
-  bool get isAdmin => _isAdmin;
   bool get isResetLinkSent => _isResetLinkSent;
 
   void togglePasswordVisibility() {
@@ -31,12 +29,6 @@ class LoginProvider with ChangeNotifier {
   // Nuevo toggle para la confirmación de contraseña
   void togglePasswordConfirmVisibility() {
     _isPasswordConfirmVisible = !_isPasswordConfirmVisible;
-    notifyListeners();
-  }
-
-  // Toggle para seleccionar el rol
-  void toggleRole(bool value) {
-    _isAdmin = value;
     notifyListeners();
   }
 
@@ -99,7 +91,6 @@ class LoginProvider with ChangeNotifier {
     required String password,
     required String name,
     required String phone,
-    required bool isAdmin,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -123,7 +114,6 @@ class LoginProvider with ChangeNotifier {
           'name': name,
           'email': email,
           'phone': phone,
-          'isAdmin': isAdmin,
           'createdAt':
               FieldValue.serverTimestamp(), // Marca de tiempo del servidor
         });
